@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '#**+m)#z@l6^z+)ivz8u+36%=i41jd
 # DEBUG = True
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
-ALLOWED_HOSTS = ['young-falls-06895.herokuapp.com', '127.0.0.1','my-pct.me']
+ALLOWED_HOSTS = ['amd2-django.herokuapp.com', '127.0.0.1','my-pct.me']
 
 # Application definition
 

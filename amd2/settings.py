@@ -31,6 +31,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '#**+m)#z@l6^z+)ivz8u+36%=i41jd
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
 ALLOWED_HOSTS = ['amd2-django.herokuapp.com', '127.0.0.1','my-pct.me']
+CSRF_TRUSTED_ORIGINS = ['https://my-pct.me']
 
 # Application definition
 

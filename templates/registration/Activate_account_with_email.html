@@ -1,0 +1,11 @@
+{% autoescape off %}
+Hello {{ user.username }},
+
+Thank you for signing up to Pop Culture Tracker.
+You must verify your account to finalize registration.
+Please click the link below.
+
+http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+This message has been generated automatically. Please do not respond to it.
+{% endautoescape %}

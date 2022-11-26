@@ -1,0 +1,21 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    {% if serieswatchlist.series_status == 'want to watch'%}
+        <h1>Change status</h1>
+    {% else %}
+        <h1>Update progress or add to watched</h1>
+    {% endif %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <table>
+            {{ form.as_table }}
+        </table>
+        <input type="submit" value="Submit"/>
+    </form>
+    {% if serieswatchlist.series_status == 'watching'%}
+        <a href="{% url 'add-series-to-watched' serieswatchlist.series.pk serieswatchlist.profile.pk %}">
+            <button class="btn btn-success btn-sm">Add series to watched</button>
+        </a>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <ul>
+        {% for series in series_set.all %}
+            <li>
+                {{ series }}, episodes last update: {{ series.episodes_update_date}}
+                <a href="{% url 'episodes-scraping-in-progress' api_key=api_key how_many_series='one' pk=series.id %}">
+                    <button class="btn btn-success btn-sm">SCRAPE EPISODES</button>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}

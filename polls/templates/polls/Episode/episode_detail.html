@@ -1,0 +1,22 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1>{{ episode }}</h1>
+    <p>{{ episode.season.series }} Season {{ episode.season.season_number }} Episode {{ episode.episode_number }}</p>
+
+    <div class="col-md-2">
+        <img style='height: 100%; width: 100%' src="{{ episode.poster }}" class="card-img" alt="">
+    </div>
+
+    <div style="width: 500px;">
+        {{ episode.plot }}
+    </div>
+    <strong>Release date:</strong> {{ episode.release_date }}
+    <br>
+    <strong>Runtime:</strong> {{ episode.runtime }} minutes
+    <br>
+    <strong>IMDB rating:</strong> {{ episode.imdb_rating }}
+
+
+{% endblock %}

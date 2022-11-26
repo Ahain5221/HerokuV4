@@ -1,0 +1,8 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+    <h1>Scraping...</h1>
+    <img src="https://www.wykop.pl/cdn/c3201142/comment_1593637738SUqoH7pS7vqZ5o5iEII5QL.jpg" width=400px height=406px>
+    <meta http-equiv="refresh" content="0;url={% url 'omdb-api' url multi_search type_of_show api_key%}">
+
+{% endblock %}

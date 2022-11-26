@@ -1,0 +1,12 @@
+{% extends 'base_generic.html' %}
+{% block content %}
+    {% if user.is_superuser %}
+        <form method="post">{% csrf_token %}
+            <p>Are you sure you want to delete "{{ object }}"?</p>
+            <textarea id="delete_reason" name="delete_reason" placeholder="Enter any reason, if necessary" maxlength="200" rows="4" cols="30"></textarea>
+            <input type="submit" value="Confirm">
+            <a href="{{ object.get_absolute_url }}" class="btn btn-default">Cancel</a>
+        </form>
+    {% endif %}
+        <a class="d-inline-block"> </a>
+{% endblock %}

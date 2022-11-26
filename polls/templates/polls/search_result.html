@@ -1,0 +1,33 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    {% if searched_games or searched_movies or searched_series %}
+        <h1>Searched things: {{ searched }}</h1>
+        {% if searched_games %}
+            <h1>Games!:</h1>
+            {% for game in searched_games %}
+                <p>{{ game }}</p>
+            {% endfor %}
+        {% endif %}
+
+        {% if searched_movies %}
+            <p>Movies!:</p>
+            {% for movie in searched_movies %}
+                <p>{{ movie }}</p>
+            {% endfor %}
+        {% endif %}
+
+        {% if searched_series %}
+            <p>Series!:</p>
+            {% for serie in searched_series %}
+                <p>{{ serie }}</p>
+            {% endfor %}
+        {% endif %}
+
+
+    {% else %}
+        <h1>Nothing was given to search...</h1>
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1 style="padding-bottom: 1em">{{ profile.user }}'s series list</h1>
+    {% if profile.favorite_series.all %}
+        {% for series in profile.favorite_series.all%}
+            <a href="{{ series.get_absolute_url }}">{{ series }}</a>
+            <br>
+        {% endfor %}
+    {% else %}
+        <p>You don't have any favorite series</p>
+    {% endif %}
+
+{% endblock %}

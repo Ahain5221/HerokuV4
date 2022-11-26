@@ -1,0 +1,43 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+
+    {% if series_list %}
+        <h1 style="font-size: 250%; text-align: center;">Series list</h1>
+        <hr style="width:auto">
+        <div class="row" style="padding-top: 3em">
+            {% for series in series_list %}
+                {% if series.Verified %}
+                    <div class="col-md-2">
+                        <a href="{{ series.get_absolute_url }}">
+                            <div class="col">
+                                <div class="row" style="min-height: 275px">
+                                    <img style='max-width: 100%; height: auto;' src="{{ series.poster }}" class="card-img" alt="">
+                                </div>
+                                <div class="row" style="margin-top: auto">
+                                    <p>{{ series.title }}</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if user.is_superuser %}
+            <h1>Series to verify</h1>
+            <ul>
+                {% for series in series_list %}
+                    {% if not series.Verified %}
+                        <li>
+                            <a href="{{ series.get_absolute_url }}">{{ series.title }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+    {% else %}
+        <p>There are no series</p>
+    {% endif %}
+{% endblock %}

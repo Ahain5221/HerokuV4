@@ -1,0 +1,15 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1 style="padding-bottom: 1em">{{ profile.user }}'s games list</h1>
+    {% if profile.favorite_games.all %}
+        {% for game in profile.favorite_games.all%}
+            <a href="{{ game.get_absolute_url }}">{{ game }}</a>
+            <br>
+        {% endfor %}
+    {% else %}
+        <p>You don't have any favorite games</p>
+    {% endif %}
+
+{% endblock %}

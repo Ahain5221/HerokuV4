@@ -1,0 +1,115 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block content %}
+    <h1 style="padding-bottom: 1em"> {{ profile.user }}'s watchlist</h1>
+
+    <table class="center" style="border: 1px solid;">
+    <tr style="border: 1px solid; background-color: #262626">
+        <th style="color: white">Title</th>
+        <th style="color: white">Score</th>
+        <th style="color: white">Review</th>
+        <th style="color: white">Type</th>
+        <th style="color: white">Progress</th>
+        <th style="color: white">Action</th>
+    </tr>
+
+
+    {% for movie_watchlist, review in reviews_and_movies %}
+        <tr style="border: 1px solid; background-color: #d3d3d3">
+            <th> <a href="{{ movie_watchlist.movie.get_absolute_url }}" style="color: #4990F8FF">{{ movie_watchlist.movie }}</a></th>
+            {% if review %}
+                <th>{{ review.rate }}</th>
+                <th>
+                    <a href="{% url 'movie-review-detail' pk=review.pk%}">
+                        <button class="btn btn-success btn-sm">My review</button>
+                    </a>
+                </th>
+            {% else %}
+                <th>None</th>
+                {% if movie_watchlist.movie_status == 'want to watch' %}
+                    <th>Prohibited</th>
+                {% else %}
+                    <th>
+                        <a href="{% url 'create-movie-review' movie_pk=movie_watchlist.movie.pk%}">
+                            <button class="btn btn-success btn-sm">Write review</button>
+                        </a>
+                    </th>
+                {% endif %}
+            {% endif %}
+
+            <th>{{ movie_watchlist.movie.type_of_show }}</th>
+
+            {% if movie_watchlist.movie_status == 'watched' %}
+                <th> {{ movie_watchlist.movie_status }}</th>
+            {% else %}
+                <th>
+                    <a href="{% url 'movie-watched' movie_watchlist.movie.pk profile.pk %}">
+                        <button class="btn btn-success btn-sm">add to watched</button>
+                    </a>
+                </th>
+            {% endif %}
+
+            <th>
+                <a href="{% url 'remove-movie-from-watchlist' movie_watchlist.movie.pk profile.user_id %}">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                </a>
+            </th>
+        </tr>
+    {% endfor %}
+
+    {% for series_watchlist, review in reviews_and_series %}
+        <tr style="border: 1px solid; background-color: #d3d3d3">
+            <th><a href="{{ series_watchlist.series.get_absolute_url }}" style="color: #4990F8FF; ">{{ series_watchlist.series }}</a></th>
+            {% if review %}
+                <th>{{ review.rate }}</th>
+                <th>
+                    <a href="{% url 'series-review-detail' pk=review.pk%}">
+                        <button class="btn btn-success btn-sm">My review</button>
+                    </a>
+                </th>
+            {% else %}
+                <th>None</th>
+                {% if series_watchlist.series_status == 'want to watch' %}
+                    <th>Prohibited</th>
+                {% else %}
+                    <th>
+                        <a href="{% url 'create-series-review' series_pk=series_watchlist.series.pk%}">
+                            <button class="btn btn-success btn-sm">Write review</button>
+                        </a>
+                    </th>
+                {% endif %}
+            {% endif %}
+
+            <th>{{ series_watchlist.series.type_of_show }}</th>
+
+            {% if series_watchlist.series_status == 'watched' %}
+                <th> {{ series_watchlist.series_status }}</th>
+            {% else %}
+                {% if series_watchlist.series_status == 'watching' %}
+                    <th> {{ series_watchlist.progress }}</th>
+                {% else %}
+                    <th>
+                        <a href="{% url 'series-status-update' series_watchlist.pk %}">
+                            <button class="btn btn-success btn-sm">Change status</button>
+                        </a>
+                    </th>
+                {% endif %}
+            {% endif %}
+
+            <th>
+                <a href="{% url 'remove-series-from-watchlist' series_watchlist.series.pk profile.user_id %}">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                </a>
+                {% if series_watchlist.series_status == 'watching' %}
+                    <a href="{% url 'series-progress-update' series_watchlist.pk %}">
+                        <button class="btn btn-success btn-sm">Change progress</button>
+                    </a>
+                {% endif %}
+            </th>
+        </tr>
+    {% endfor %}
+
+    </table>
+
+{% endblock %}

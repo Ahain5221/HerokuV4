@@ -1,0 +1,29 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container-fluid" >
+        <ul class="list-inline" style="background-color: #04142c00">
+            {% if user.is_authenticated %}
+                <li><a class="btn btn-close-white" href="{% url 'game-create' %}">Create game </a></li>
+                <!--
+                <li><a class="btn" href="{% url 'developer-create' %}">Create developer </a></li>
+                -->
+                <hr style="width:100px">
+                <li><a class="btn btn-close-white" href="{% url 'movie-create' %}"> Create movie </a></li>
+                <li><a class="btn btn-close-white" href="{% url 'series-create' %}"> Create series </a></li>
+                <!--
+                <li><a class="btn" href="{% url 'actor-create' %}"> Create actor </a></li>
+                <li><a class="btn" href="{% url 'director-create' %}"> Create director </a></li>
+                -->
+                {% if user.is_superuser %}
+                    <hr style="width:100px">
+                    <li><a class="btn btn-close-white" href="{% url 'omdb-api-page' %}"> OMDB API page</a></li>
+                    <li><a class="btn btn-close-white" href="{% url 'scrape-games-redirect' %}"> Scrape 5 games </a></li>
+                    <li><a class="btn btn-close-white" href="{% url 'enter-api-key' %}"> Scrape episodes</a></li>
+                    <li><a class="btn btn-close-white" href="{% url 'stuff-verification' %}"> Stuff to verify </a></li>
+                    <li><a class="btn btn-close-white" href="{% url 'request-list' %}"> Permission requests </a></li>
+                {% endif %}
+            {% endif %}
+        </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1>DONE</h1>
+    It is {% now "jS F Y H:i:s" %}
+<br>It is {% now "SHORT_DATETIME_FORMAT" %}
+    </div>
+{% endblock %}

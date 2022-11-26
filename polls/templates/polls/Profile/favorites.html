@@ -1,0 +1,35 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1>{{ profile.user }}'s favorite games </h1>
+    {% if profile.favorite_games.all %}
+        {% for game in profile.favorite_games.all%}
+            <a href="{{ game.get_absolute_url }}">{{ game }}</a>
+            <br>
+        {% endfor %}
+    {% else %}
+        <p>You don't have any favorite games</p>
+    {% endif %}
+    <br>
+    <h1>{{ profile.user }}'s favorite movies </h1>
+    {% if profile.favorite_movies.all %}
+        {% for movie in profile.favorite_movies.all%}
+            <a href="{{ movie.get_absolute_url }}">{{ movie }}</a>
+            <br>
+        {% endfor %}
+    {% else %}
+        <p>You don't have any favorite movies</p>
+    {% endif %}
+    <br>
+    <h1>{{ profile.user }}'s favorite series </h1>
+    {% if profile.favorite_series.all %}
+        {% for series in profile.favorite_series.all%}
+            <a href="{{ series.get_absolute_url }}">{{ series }}</a>
+            <br>
+        {% endfor %}
+    {% else %}
+        <p>You don't have any favorite series</p>
+    {% endif %}
+
+{% endblock %}

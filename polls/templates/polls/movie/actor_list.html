@@ -1,0 +1,35 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+
+    {% if actor_list %}
+        <h1 style="padding-bottom: 1em">Actors list</h1>
+        <div class="row" style="padding-top: 3em">
+            {% for actor in actor_list %}
+                {% if actor.Verified %}
+                    <div class="col-md-4">
+                        <a href="{{ actor.get_absolute_url }}">
+                            <p style="display: inline-block; padding-right: 3em; font-size: x-large">{{ actor }}</p>
+                        </a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if user.is_superuser %}
+            <h1 style="padding-bottom: 1em">Actors to verify</h1>
+            <ul class="list-inline">
+                {% for actor in actor_list %}
+                    {% if not actor.Verified %}
+                        <li>
+                            <a href="{{ actor.get_absolute_url }}">{{ actor }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+    {% else %}
+        <p>There are no actors</p>
+    {% endif %}
+{% endblock %}

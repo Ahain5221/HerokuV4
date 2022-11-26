@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1 style="padding-bottom: 0.5em; font-size: xx-large"> Edit Profile </h1>
+    <div class="container-fluid">
+        {% if user.profile.profile_image_url %}
+             <img src="{{ user.profile.profile_image_url }}" style="height: 200px; width: 200px">
+        {% endif %}
+    </div>
+
+    <form method="post" style="margin-bottom: 15px">
+        {% csrf_token %}
+        {{ form }}
+        <br>
+        <button type="submit">Update profile</button>
+    </form>
+
+    <a href="{% url 'change-password' %}"><button class="btn btn-danger btn-sm">Change password</button></a>
+{% endblock %}

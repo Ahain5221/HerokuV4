@@ -1,0 +1,15 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1 style="padding-bottom: 1em">{{ profile.user }}'s movie list</h1>
+    {% if profile.favorite_movies.all %}
+        {% for movie in profile.favorite_movies.all%}
+            <a href="{{ movie.get_absolute_url }}">{{ movie }}</a>
+            <br>
+        {% endfor %}
+    {% else %}
+        <p>You don't have any favorite movies</p>
+    {% endif %}
+
+{% endblock %}

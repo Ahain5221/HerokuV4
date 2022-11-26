@@ -1,0 +1,9 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+    <h1>{{ series }} DONE</h1>
+    <h1>{{ time }} seconds</h1>
+    <h1>IN 3 SECONDS NEXT SERIES TO SCRAPE</h1>
+    <meta http-equiv="refresh" content="0;url={% url 'scrape-all-series' api_key %}">
+
+{% endblock %}

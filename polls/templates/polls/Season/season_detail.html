@@ -1,0 +1,37 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h3> {{ season }} </h3>
+    <ul class="list-inline" style="margin: 1em">
+        {% for episode in season.episode_set.all %}
+            <li>
+                <div class="row" style="margin-bottom: 1em">
+                    <div class="col">
+                        <strong>Episode {{ episode.episode_number }}:</strong>
+                        <a> {{ episode }} </a>
+                        <div class="col-md-2" style="margin-top: 0.5em">
+                            <img style="min-height: 150px; min-width: 100px" src="{{ episode.poster }}" class="card-img" alt="">
+                        </div>
+                    </div>
+                    <div class="col" style="margin-top: 2.5em">
+                        <div class="row" style="margin-bottom: 0.5em">
+                            <div class="col">
+                                <strong>Released:</strong> {{ episode.release_date }}
+                            </div>
+                            <div class="col" style="alignment: right">
+                                <strong>Runtime:</strong> {{ episode.runtime }} minutes
+                            </div>
+                        </div>
+                        <div style="width: 500px;">
+                            {{ episode.plot }}
+                        </div>
+
+                    </div>
+                </div>
+                <hr/>
+            </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}

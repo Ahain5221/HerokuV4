@@ -1,0 +1,32 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <div id="login">
+        <form class="form-horizontal" name="LoginForm"  method="post">
+        {% csrf_token %}
+        {% if next %}
+            <input type="hidden" name="next" value="{{ next }}" />
+        {% endif %}
+        <div class="control-group" style="padding-bottom: 1em">
+            <label class="control-label" for="username">Username</label>
+            <div class="controls">
+                <input type="text" id="username" name="username"  placeholder="Username">
+            </div>
+        </div>
+        <div class="control-group" style="padding-bottom: 1em">
+            <label class="control-label" for="password">Password</label>
+            <div class="controls">
+                <input type="password" name="password" id="password" placeholder="Password">
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <button type="submit" >Login</button>
+            </div>
+        </div>
+        </form>
+      <p><a href="{% url 'password_reset_polls' %}">Lost password?</a></p>
+      <p><a href="{% url 'signup' %}">Create account</a></p>
+    </div>
+{% endblock %}

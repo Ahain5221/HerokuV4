@@ -1,0 +1,39 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1 style="font-size: 250%; text-align: center;">Games list</h1>
+    <hr style="width:auto">
+    <div class="row" style="padding-top: 3em">
+        {% for game in game_list %}
+             {% if game.Verified %}
+                 <div class="col-md-3">
+                     <a href="{{ game.get_absolute_url }}">
+                        <div class="col">
+                            <div class="row">
+                                <img src="{{ game.game_image }}" class="card-img" alt="">
+                            </div>
+                            <div class="row" style="margin-top: auto">
+                                <p>{{ game.title }}</p>
+                            </div>
+                        </div>
+                     </a>
+                 </div>
+             {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if user.is_superuser %}
+        <h1>Games to verify</h1>
+        <ul>
+            {% for game in game_list %}
+                {% if not game.Verified %}
+                    <li>
+                        <a href="{{ game.get_absolute_url }}">{{ game.title }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+{% endblock %}

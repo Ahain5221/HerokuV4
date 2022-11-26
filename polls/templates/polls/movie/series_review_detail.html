@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1>{{ seriesreview.series }} - {{ seriesreview.author }}'s review</h1>
+    <div style="border: thin solid black">
+        <div style="border: thin solid black">{{ seriesreview.review_date }} </div>
+        <div style="border: thin solid black">My rate {{ seriesreview.rate }} </div>
+        <div style="border: thin solid black">{{ seriesreview.content }} </div>
+    </div>
+
+    <a href="{% url 'series-review-update' series_pk=seriesreview.series.pk pk=seriesreview.pk%}">
+        <button class="btn btn-success btn-sm">Update review</button>
+    </a>
+
+{% endblock %}

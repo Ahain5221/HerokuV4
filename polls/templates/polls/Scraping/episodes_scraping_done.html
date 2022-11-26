@@ -1,0 +1,18 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1>DONE</h1>
+
+    {% for url in urls %}
+        {{ url }}
+        <br>
+    {% endfor %}
+
+    {% for url in imdb_ids %}
+        {{ url }}
+        <br>
+    {% endfor %}
+    {{ time }}
+
+{% endblock %}

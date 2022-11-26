@@ -1,0 +1,82 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<p>THINGS TO VERIFY</p>
+    {% if games_to_verify or movies_to_verify or series_to_verify or actors_to_verify or directors_to_verify or developers_to_verify %}
+        {% if games_to_verify %}
+            <h1>Games!:</h1>
+
+            {% for game in games_to_verify %}
+                <li>
+        <form action="{% url 'add_verf' game.pk%}" method="POST">
+                        <a href="{{ game.get_absolute_url }}">{{ game }}</a>
+                      <select name="cars" id="cars" multiple>
+
+    <option value={{ game.id }}>{{ game }}</option>
+              </select>
+
+
+
+
+            {% csrf_token %}
+            {% if game.Verified %}
+                <button type="submit" value="{{ game.pk }}" class="btn btn-danger btn-sm"><s>unverify</s></button>
+            {% else %}
+                <button type="submit" value="{{ game.pk }}" class="btn btn-primary btn-sm">verify</button>
+            {% endif %}
+        </form>
+                </li>
+            {% endfor %}
+
+        {% endif %}
+
+        {% if movies_to_verify %}
+            <h1>Movies!:</h1>
+            {% for movie in movies_to_verify %}
+                <li>
+                <a href="{{ movie.get_absolute_url }}">{{ movie }}</a>
+                </li>
+            {% endfor %}
+        {% endif %}
+
+        {% if series_to_verify %}
+            <h1>Series!:</h1>
+            {% for serie in series_to_verify %}
+                <li>
+                <a href="{{ serie.get_absolute_url }}">{{ serie }}</a>
+                </li>
+            {% endfor %}
+        {% endif %}
+
+        {% if actors_to_verify %}
+            <h1>Actors!:</h1>
+            {% for actor in actors_to_verify %}
+                <li>
+                <a href="{{ actor.get_absolute_url }}">{{ actor }}</a>
+                </li>
+            {% endfor %}
+        {% endif %}
+
+        {% if directors_to_verify %}
+            <h1>Directors!:</h1>
+            {% for director in directors_to_verify %}
+                <li>
+                <a href="{{ director.get_absolute_url }}">{{ director }}</a>
+                </li>
+            {% endfor %}
+        {% endif %}
+
+        {% if developers_to_verify %}
+            <h1>Developers!:</h1>
+            {% for developer in developers_to_verify %}
+                <li>
+                <a href="{{ developer.get_absolute_url }}">{{ developer }}</a>
+                </li>
+            {% endfor %}
+        {% endif %}
+
+    {% else %}
+        <h1>Nothing was given to search...</h1>
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1>{{ moviereview.movie }} - {{ moviereview.author }}'s review</h1>
+    <div style="border: thin solid black">
+        <div style="border: thin solid black">{{ moviereview.review_date }} </div>
+        <div style="border: thin solid black">My rate {{ moviereview.rate }} </div>
+        <div style="border: thin solid black">{{ moviereview.content }} </div>
+    </div>
+
+    <a href="{% url 'movie-review-update' movie_pk=moviereview.movie.pk pk=moviereview.pk%}">
+        <button class="btn btn-success btn-sm">Update review</button>
+    </a>
+
+{% endblock %}

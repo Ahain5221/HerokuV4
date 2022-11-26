@@ -1,0 +1,62 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block content %}
+    <h1 style="padding-bottom: 1em"> {{ profile.user }}'s game list</h1>
+
+    <table class="center" style="border: 1px solid;">
+    <tr style="border: 1px solid; background-color: #262626">
+        <th style="color: white">Title</th>
+        <th style="color: white">Score</th>
+        <th style="color: white">Review</th>
+        <th style="color: white">Status</th>
+        <th style="color: white">Action</th>
+
+    </tr>
+
+    {% for game_list, review in reviews_and_games %}
+        <tr style="border: 1px solid; background-color: #d3d3d3">
+            <th> <a href="{{ game_list.game.get_absolute_url }}">{{ game_list.game }}</a></th>
+            {% if review %}
+                <th>{{ review.rate }}</th>
+                <th>
+                    <a href="{% url 'game-review-detail' pk=review.pk%}">
+                        <button class="btn btn-success btn-sm">My review</button>
+                    </a>
+                </th>
+            {% else %}
+                <th>None</th>
+                {% if game_list.game_status == 'want to play' %}
+                    <th>Prohibited</th>
+                {% else %}
+                    <th>
+                        <a href="{% url 'create-game-review' game_pk=game_list.game.pk%}">
+                            <button class="btn btn-success btn-sm">Write review</button>
+                        </a>
+                    </th>
+                {% endif %}
+            {% endif %}
+
+            <th> {{ game_list.game_status }}</th>
+
+            <th>
+                <a href="{% url 'remove-game-from-game-list' game_list.game.pk profile.user_id %}">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                </a>
+                {% if game_list.game_status == 'want to play' %}
+                    <a href="{% url 'change-game-status' game_list.game.pk profile.user_id 'playing'%}">
+                        <button class="btn btn-success btn-sm">Change to playing</button>
+                    </a>
+                {% endif %}
+                {% if game_list.game_status == 'playing' %}
+                    <a href="{% url 'change-game-status' game_list.game.pk profile.user_id 'played'%}">
+                        <button class="btn btn-success btn-sm">Change to played</button>
+                    </a>
+                {% endif %}
+            </th>
+        </tr>
+    {% endfor %}
+
+    </table>
+
+{% endblock %}

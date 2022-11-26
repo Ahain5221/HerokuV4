@@ -1,0 +1,33 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+
+    {% if director_list %}
+        <h1 style="padding-bottom: 1em">Directors list</h1>
+        <ul class="list-inline">
+            {% for director in director_list %}
+                {% if director.Verified %}
+                    {% if director.full_name != 'N/A' %}
+                    <li>
+                        <a href="{{ director.get_absolute_url }}">{{ director }}</a>
+                    </li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </ul>
+        {% if user.is_superuser %}
+            <h1 style="padding-bottom: 1em">Directors to verify</h1>
+            <ul class="list-inline">
+                {% for director in director_list %}
+                    {% if not director.Verified %}
+                        <li>
+                            <a href="{{ director.get_absolute_url }}">{{ director }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% else %}
+        <p>There are no directors</p>
+    {% endif %}
+{% endblock %}

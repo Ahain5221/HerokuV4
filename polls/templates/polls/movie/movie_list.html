@@ -1,0 +1,43 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+
+    {% if movie_list %}
+        <h1 style="font-size: 250%; text-align: center;">Movies list</h1>
+        <hr style="width:auto">
+        <div class="row" style="padding-top: 3em">
+            {% for movie in movie_list %}
+                {% if movie.Verified %}
+                    <div class="col-md-2">
+                        <a href="{{ movie.get_absolute_url }}">
+                            <div class="col">
+                                <div class="row" style="min-height: 275px">
+                                    <img style='max-width: 100%; height: auto;' src="{{ movie.poster }}" class="card-img" alt="">
+                                </div>
+                                <div class="row" style="margin-top: auto">
+                                    <p>{{ movie }}</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if user.is_superuser %}
+            <h1>Movies to verify</h1>
+            <ul>
+                {% for movie in movie_list %}
+                    {% if not movie.Verified %}
+                        <li>
+                            <a href="{{ movie.get_absolute_url }}">{{ movie.title }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+    {% else %}
+        <p>There are no movies</p>
+    {% endif %}
+{% endblock %}

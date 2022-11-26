@@ -1,0 +1,33 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1>Friend Request List</h1>
+
+    {% if friend_request_list %}
+        <ul>
+
+            {% for friend in friend_request_list %}
+                <li>
+                    <a href="{% url 'profile-page' friend.from_user.pk %}"> {{ friend.from_user }} </a>
+                    <form action="{% url 'accept-friend' friend.from_user.pk %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-info btn-sm">Accept as friend</button>
+                </form>
+                    <form action="{% url 'reject-friend' friend.from_user.pk %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Reject as friend</button>
+                </form>
+
+
+                </li>
+            {% endfor %}
+
+        </ul>
+    {% else %}
+        <p>There are no friends available.</p>
+    {% endif %}
+
+
+
+{% endblock %}

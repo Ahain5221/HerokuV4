@@ -1,0 +1,151 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <div class="container-fluid">
+    <h1 style="font-size: xxx-large; margin-bottom: 1.5rem"> {{ movie.title }} </h1>
+    <a class="page-link" style="font-size: larger; display: inline; margin-right: 6px">
+        {% if movie.type_of_show == "movie" %}
+            Movie
+        {% endif %}
+        &nbsp;&nbsp;&nbsp;
+        {{ movie.date_of_release }}
+        &nbsp;&nbsp;&nbsp;
+        IMDB rating: {{ movie.imdb_rating }}
+        &nbsp;&nbsp;&nbsp;
+        {{ movie.running_time}}m
+        <div style="margin-left: 8.5em">
+            <form action="{% url 'add-favorite-movie' movie.pk%}" method="POST">
+                {% csrf_token %}
+                {% if movie in user.profile.favorite_movies.all %}
+                    <button type="submit" name="movie_id" value="{{ movie.pk }}" class="btn btn-secondary btn-sm"><a class="icon solid fa-heart" style="color: #dad0c0"></a>Unfavorite</button>
+                {% else %}
+                    <button type="submit" name="movie_id" value="{{ movie.pk }}" class="btn btn-danger btn-sm"><a class="icon solid fa-heart" style="color: #710000"></a>Favorite</button>
+                {% endif %}
+            </form>
+        </div>
+    </a>
+
+    <div class="row">
+        <div class="col" style="margin-top: 1em">
+            <img style='height: initial; width: initial; padding-left: inherit' src="{{ movie.poster }}" class="card-img" alt="">
+            <ul>
+                {% for genre in movie.genre.all %}
+                    <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col" style="padding-top: 25px">
+
+            <h3> Summary: </h3>
+            <article style="display: inline-block; font-size: initial; margin-bottom: 0.25em"> {{ movie.summary }} </article>
+            <ul class="list-inline">
+                {% for director in movie.director.all|slice:":1" %}
+                    {% if director.full_name != 'N/A' %}
+                        <h3> Directors: </h3>
+                    {% endif %}
+                {% endfor %}
+                <li>
+                        {% for director in movie.director.all %}
+                            {% if director.full_name != 'N/A' %}
+                                <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial" href="{{ director.get_absolute_url }}"> {{ director }} </a>
+                            {% endif %}
+                        {% endfor %}
+                </li>
+                {% for actor in movie.actors.all|slice:":1" %}
+                    {% if actor.full_name != 'N/A' %}
+                        <h3 style="padding-top: 5px"> Actors: </h3>
+                    {% endif %}
+                {% endfor %}
+                <li>
+                        {% for actor in movie.actors.all %}
+                            {% if actor.full_name != 'N/A' %}
+                                <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial" href="{{ actor.get_absolute_url }}"> {{ actor }} </a>
+                            {% endif %}
+                        {% endfor %}
+                </li>
+                {% for language in movie.language.all|slice:":1" %}
+                    {% if language.id != 2 %}
+                        <h3 style="padding-top: 5px"> Language: </h3>
+                    {% endif %}
+                {% endfor %}
+                <li>
+                        {% for language in movie.language.all %}
+                            {% if language.id != 2 %}
+                                <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial"> {{ language }} </a>
+                            {% endif %}
+                        {% endfor %}
+                </li>
+                <!--
+                {% if movie.Verified %}
+                    <li>Status: verified</li>
+                {% else %}
+                    <li>Status: not verified</li>
+                {% endif %}
+                -->
+                {% if  movie.added_by%}
+                    <li>Added by <a href="{% url 'profile-page' pk=movie.added_by.id %}">{{ series.added_by }}</a></li>
+                {% else %}
+                    <li>Added by API</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    </div>
+    <ul class="list-inline">
+        <li>
+            <a href="{% url 'movie-update' pk=movie.id %}">
+                <button class="btn btn-success btn-sm">UPDATE</button>
+            </a>
+        </li>
+
+        <li>
+            {% if user.is_superuser %}
+                <a href="{% url 'movie-delete' pk=movie.id %}">
+                    <button class="btn btn-danger btn-sm">DELETE SERIES</button>
+                </a>
+                <form action="{% url 'movie-verification' movie.pk %}">
+                    {% csrf_token %}
+                    {% if movie.Verified %}
+                        <button type="submit" value="{{ movie.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+                    {% else %}
+                        <button type="submit" value="{{ movie.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+                    {% endif %}
+                </form>
+            {% endif %}
+        </li>
+    </ul>
+
+    <br><br>
+    {% if user.is_authenticated%}
+        {% if movie_in_user_watchlist %}
+            <a href="{% url 'remove-movie-from-watchlist' movie.pk user.pk %}"><button class="btn btn-primary btn-sm">REMOVE FROM WATCHLIST</button></a>
+        {% else %}
+            <strong>ADD TO YOUR WATCHLIST</strong>
+            <a href="{% url 'add-movie-to-watchlist' movie.pk user.pk 'watched'%}"><button class="btn btn-primary btn-sm">Watched</button></a>
+            <a href="{% url 'add-movie-to-watchlist' movie.pk user.pk 'want to watch'%}"><button class="btn btn-primary btn-sm">Want to watch</button></a>
+        {% endif %}
+
+        <a href="{% url 'profile-watchlist' user.pk %}"><button class="btn btn-primary btn-sm">My watchlist</button></a>
+
+        {% if movie_watched %}
+            {% if  movie_has_user_review%}
+                <strong>You already wrote review</strong>
+                <a href="{% url 'movie-review-update' movie_pk=movie.pk pk=user_review.pk%}">
+                    <button class="btn btn-success btn-sm">Update review</button>
+                </a>
+            {% else %}
+                <a href="{% url 'create-movie-review' movie_pk=movie.pk%}">
+                    <button class="btn btn-success btn-sm">Write review</button>
+                </a>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    {% for review in movie_reviews %}
+        <div style="border: thin solid black">
+            <div style="border: thin solid black"> <strong>{{ review.author }}</strong> {{ review.review_date }}</div>
+            <div style="border: thin solid black"> {{ review.author }}'s rate {{ review.rate }} </div>
+            <div style="border: thin solid black">{{ review.content }} </div>
+        </div>
+    {% endfor %}
+{% endblock %}

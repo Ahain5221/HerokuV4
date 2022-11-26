@@ -1,0 +1,32 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+
+    {% if series.all %}
+        <h1 style="padding-bottom: 1em">{{ genre }} Series</h1>
+        <ul class="list-inline">
+            {% for series in series.all %}
+                <li><a href="{{ series.get_absolute_url }}">{{ series.title }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if movies.all%}
+        <h1 style="padding-bottom: 1em">{{ genre }} Movies</h1>
+        <ul class="list-inline">
+            {% for movie in movies.all %}
+                <li><a href="{{ movie.get_absolute_url }}">{{ movie.title }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if games.all %}
+        <h1 style="padding-bottom: 1em">{{ genre }} Games</h1>
+        <ul class="list-inline">
+            {% for game in games.all %}
+                <li><a href="{{ game.get_absolute_url }}">{{ game.title }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+{% endblock %}

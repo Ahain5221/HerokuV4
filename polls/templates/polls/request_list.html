@@ -1,0 +1,28 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1>Request List</h1>
+    {% for test in requestpermission_list %}
+        {% if test.status == "Sent" %}
+    From user: {{ test.FromUser }} Request<br> reason:{{ test.Request_Reason }}
+        Status: {{ test.status }}
+
+
+        <form action="{% url 'get-autocomplete-permission' test.FromUser.pk %}" method="POST">
+        {% csrf_token %}
+            <button type="submit" class="btn btn-info btn-sm">Give perm</button>
+                </form>
+
+        <form action="{% url 'reject-autocomplete-permission' test.FromUser.pk %}" method="POST">
+        {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Reject perm</button>
+                </form>
+    <hr style="height:2px;border-width:0;color:purple;background-color:purple">
+        {% endif %}
+    {% endfor %}
+
+
+
+
+{% endblock %}

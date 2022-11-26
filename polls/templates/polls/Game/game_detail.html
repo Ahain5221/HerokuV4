@@ -1,0 +1,131 @@
+{% extends "base_generic.html" %}
+{% block content %}
+
+    <div class="container-fluid">
+        <h1 style="font-size: xxx-large; margin-bottom: 1.5rem"> {{ game.title }} </h1>
+        <a class="page-link" style="font-size: larger; display: inline; margin-right: 6px">
+            Release date: {{ game.date_of_release }}
+            {% if user.is_authenticated %}
+                <div style="margin-left: 10em">
+                    <form action="{% url 'add-favorite-game' game.pk%}" method="POST">
+                        {% csrf_token %}
+                        {% if game in user.profile.favorite_games.all %}
+                            <button type="submit" name="game_id" value="{{ game.pk }}" class="btn btn-secondary btn-sm"><a class="icon solid fa-heart" style="color: #dad0c0"></a>Unfavorite</button>
+                        {% else %}
+                            <button type="submit" name="game_id" value="{{ game.pk }}" class="btn btn-danger btn-sm"><a class="icon solid fa-heart" style="color: #710000"></a>Favorite</button>
+                        {% endif %}
+                    </form>
+                </div>
+            {% endif %}
+        </a>
+        <div class="row">
+            <div class="col" style="margin-top: 1em">
+                <img style='height: initial; width: initial' src="{{ game.game_image }}" class="card-img" alt="">
+                <ul>
+                    {% for genre in game.genre.all %}
+                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col" style="padding: 0">
+                <h3> Summary: </h3>
+                <article style="display: inline-block; font-size: initial; margin-bottom: 0.25em"> {{ game.summary }} </article>
+                <ul class="list-inline" style="margin-top: 0.5em">
+                    {% for developer in game.developer.all|slice:":1" %}
+                        {% if developer != 'N/A' %}
+                            <h3> Developers: </h3>
+                        {% endif %}
+                    {% endfor %}
+                    <li>
+                            {% for developer in game.developer.all %}
+                                {% if developer != 'N/A' %}
+                                    <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial" href="{{ developer.get_absolute_url }}"> {{ developer }} </a>
+                                {% endif %}
+                            {% endfor %}
+                    </li>
+                        {% for mode in game.mode.all|slice:":1" %}
+                            <h3 style="padding-top: 5px"> Tags: </h3>
+                        {% endfor %}
+                    <li>
+                        {% for mode in game.mode.all %}
+                            <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial"> {{ mode }} </a>
+                        {% endfor %}
+                    </li>
+                    <!--
+                    {% if game.Verified %}
+                        <li>Status: verified</li>
+                    {% else %}
+                        <li>Status: not verified</li>
+                    {% endif %}
+                    -->
+                    {% if  game.added_by%}
+                        <li>Added by <a href="{% url 'profile-page' pk=game.added_by.id %}">{{ game.added_by }}</a></li>
+                    {% else %}
+                        <li>Added by API</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <ul class="list-inline">
+        <li>
+            <a href="{% url 'game-update' pk=game.id %}">
+                <button class="btn btn-success btn-sm">UPDATE</button>
+            </a>
+        </li>
+
+        <li>
+            {% if user.is_superuser %}
+                <a href="{% url 'game-delete' pk=game.id %}">
+                    <button class="btn btn-danger btn-sm">DELETE SERIES</button>
+                </a>
+                <form action="{% url 'game-verify' game.pk %}">
+                    {% csrf_token %}
+                    {% if game.Verified %}
+                        <button type="submit" value="{{ game.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+                    {% else %}
+                        <button type="submit" value="{{ game.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+                    {% endif %}
+                </form>
+            {% endif %}
+        </li>
+    </ul>
+
+    <br><br>
+    {% if user.is_authenticated%}
+        {% if game_in_user_game_list %}
+            <a href="{% url 'remove-game-from-game-list' game.pk user.pk %}"><button class="btn btn-primary btn-sm">REMOVE FROM GAME LIST </button></a>
+        {% else %}
+            <strong>ADD TO YOUR GAME LIST</strong>
+            <a href="{% url 'add-game-to-game-list' game.pk user.pk 'played'%}"><button class="btn btn-primary btn-sm">Played</button></a>
+            <a href="{% url 'add-game-to-game-list' game.pk user.pk 'playing'%}"><button class="btn btn-primary btn-sm">Playing</button></a>
+            <a href="{% url 'add-game-to-game-list' game.pk user.pk 'want to play'%}"><button class="btn btn-primary btn-sm">Want to play</button></a>
+        {% endif %}
+
+        <a href="{% url 'profile-game-list' user.pk %}"><button class="btn btn-primary btn-sm">My game list</button></a>
+
+        {% if game_played_playing %}
+            {% if  game_has_user_review%}
+                <strong>You already wrote review</strong>
+                <a href="{% url 'game-review-update' game_pk=game.pk pk=user_review.pk%}">
+                    <button class="btn btn-success btn-sm">Update review</button>
+                </a>
+            {% else %}
+                <a href="{% url 'create-game-review' game_pk=game.pk%}">
+                    <button class="btn btn-success btn-sm">Write review</button>
+                </a>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    {% for review in game_reviews %}
+        <div style="border: thin solid black">
+            <div style="border: thin solid black"> <strong>{{ review.author }}</strong> {{ review.review_date }}</div>
+            <div style="border: thin solid black"> {{ review.author }}'s rate {{ review.rate }} </div>
+            <div style="border: thin solid black">{{ review.content }} </div>
+        </div>
+    {% endfor %}
+
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <!--
+    <h1>Pop Culture Tracker</h1>
+    <p>Welcome to Pop Culture Tracker, a website developed by <em>A(MD)^2 Team</em>!</p>
+    -->
+    <h2 style="text-align: center">Dynamic content</h2>
+    <p>The website has the following record counts:</p>
+    <ul style="margin-left: 30em">
+        <li><strong>Books:</strong> {{ num_books }}</li>
+        <!--
+        <li><strong>Copies:</strong> {{ num_instances }}</li>
+        <li><strong>Copies available:</strong> {{ num_instances_available }}</li>
+        -->
+        <li><strong>Authors:</strong> {{ num_authors }}</li>
+    </ul>
+    <p>You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.</p>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <h1>Delete Game</h1>
+
+        <p>Are you sure you want to delete the game: {{ game }}?</p>
+
+        <form action="" method="POST">
+
+            {% csrf_token %}
+            <textarea id="delete_reason" name="delete_reason" placeholder="Enter any reason, if necessary" maxlength="200" rows="4" cols="30"></textarea>
+            <input type="submit" value="Yes, delete."/>
+            <a href="{{ object.get_absolute_url }}" class="btn btn-default">Cancel</a>
+
+        </form>
+    {% else %}
+        <p>You are not supposted to be here</p>
+    {% endif %}
+    <a class="d-inline-block"> </a>
+{% endblock %}
+
+

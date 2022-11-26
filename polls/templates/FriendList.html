@@ -1,0 +1,23 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <h1>Friend List</h1>
+    {% if friend_list %}
+        <ul>
+
+            {% for friend in friend_list %}
+                <li>
+                    <a href="{% url 'profile-page' friend.pk %}"> {{ friend }} </a>
+
+                </li>
+            {% endfor %}
+
+        </ul>
+    {% else %}
+        <p>There are no friends available.</p>
+    {% endif %}
+
+
+
+{% endblock %}

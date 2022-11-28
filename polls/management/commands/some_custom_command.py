@@ -4,7 +4,7 @@ from polls.views import scrape_games, check_app_id, games_genres_api, games_mode
 from polls.models import Game
 from django.contrib.auth.models import User
 import requests
-
+import os
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # times = []
@@ -92,6 +92,7 @@ class Command(BaseCommand):
                     game_object.genre.set(game_genre_pk)
 
                     print("Dodano gre i dane dla: ", game_name, added_games)
+                    print(os.environ.get('EMAIL_PASSWORD')
                     added_games += 1
 
         # Put here some script to get the data from api service and store it into your models.

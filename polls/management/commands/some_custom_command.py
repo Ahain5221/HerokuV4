@@ -92,7 +92,7 @@ class Command(BaseCommand):
                     game_object.genre.set(game_genre_pk)
 
                     print("Dodano gre i dane dla: ", game_name, added_games)
-                    print(os.environ.get('EMAIL_PASSWORD')
+                    print(os.environ.get('EMAIL_PASSWORD'))
                     added_games += 1
 
         # Put here some script to get the data from api service and store it into your models.

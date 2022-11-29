@@ -321,7 +321,6 @@ class OmdbApiForm(forms.Form):
     CHOICES = ((False, 'NO'),
                (True, 'YES'))
 
-    api_key = forms.CharField(widget=forms.TextInput(), help_text="Enter API key")
     type_of_show = forms.ChoiceField(choices=type_CHOICES)
     VOD = forms.MultipleChoiceField(required=False, choices=VOD_CHOICES, widget=forms.CheckboxSelectMultiple())
     critics = forms.MultipleChoiceField(required=False, choices=critics_CHOICES, widget=forms.CheckboxSelectMultiple())

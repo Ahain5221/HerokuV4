@@ -1,0 +1,87 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block content %}
+
+
+
+
+    <center><h2 style="padding-bottom: 1em; padding-left: 1em"> <a href="{% url 'profile-page' object.pk %}">{{ object }}'s</a> Management Page</h2></center>
+
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2">
+                {% if object.profile_image_url %}
+                    <img src="{{ object.profile_image_url }} " class="card-img">
+                {% endif %}
+
+
+            </div>
+            <div class="col">
+                <div class="row" style="padding-bottom: 15px">
+                    {% if user.is_authenticated %}
+                    <div class="col">
+
+
+
+                    </div>
+                    {% endif %}
+
+
+
+
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p class="small text-muted">
+    <a href="{% url 'delete-unverified-games' object.pk %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Delete - Unverified - Games</button></a>
+    <a href="{% url 'delete-unverified-movies' object.pk %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Delete - Unverified - Movies</button></a>
+    <a href="{% url 'delete-unverified-series' object.pk %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Delete - Unverified - Series</button></a>
+    <a href="{% url 'delete-unverified-everything' object.pk %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Delete - Unverified - Everything</button></a>
+    <a href="{% url 'delete-user' object.pk %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Delete - User</button></a>
+
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-10">
+
+        <h5 class="card-title">
+             Joined: {{ object.user.date_joined.date }} | Last seen: {{ object.user.last_login.date }} | Gender: {{ object.gender }}
+        </h5>
+
+        <p class="small text-muted">
+            {% if object.date_of_birth %}
+                Birth date {{ object.date_of_birth }}
+            {% endif %}
+        </p>
+    </div>
+
+    <h3 style="font-size: xx-large">Statistics</h3>
+    <div class="row">
+        <div class="col">
+            <ul class="list-inline" style="font-size: x-large; color: #f7f7f7">Movie statistics
+            <li style="font-size: large; margin: 0">Movies watched: {{ profile.number_of_watched_movies }}</li>
+            <li style="font-size: large; margin: 0">Movies to watch: {{ profile.number_of_want_to_watch_movies }}</li>
+            </ul>
+        </div>
+        <div class="col">
+            <ul class="list-inline" style="font-size: x-large; color: #f7f7f7">Series statistics
+            <li style="font-size: large; margin: 0"> Series watched: {{ profile.number_of_watched_series }}</li>
+            <li style="font-size: large; margin: 0"> Series to watch: {{ profile.number_of_want_to_watch_series }}</li>
+            <li style="font-size: large; margin: 0"> Series watching: {{ profile.number_of_watching_series }}</li>
+            </ul>
+        </div>
+        <div class="col">
+            <ul class="list-inline" style="font-size: x-large; color: #f7f7f7">Games statistics
+            <li style="font-size: large; margin: 0"> Games played: {{ profile.number_of_played_games }}</li>
+            <li style="font-size: large; margin: 0"> Games to play: {{ profile.number_of_want_to_play_games }}</li>
+            <li style="font-size: large; margin: 0"> Games playing: {{ profile.number_of_playing_games }}</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}

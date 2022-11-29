@@ -1,7 +1,9 @@
+import os
 import random
 from datetime import datetime
 from time import time, sleep
-
+from django.contrib.admin.views.decorators import staff_member_required
+from .models import RequestPermission
 import omdb
 # third-party imports
 import requests
@@ -48,6 +50,7 @@ from django.views import View
 # from .models import *
 from friendship.models import Friend, Follow, Block, FriendshipRequest
 
+import random
 
 class cbv_view(generic.ListView):
     model = Developer
@@ -150,7 +153,7 @@ class ActorAutocomplete(autocomplete.Select2QuerySetView):
         return self.get_queryset().get_or_create(added_by=self.request.user,
                                                  full_name=create_field_from_url)[0]
 
-import os
+
 class DirectorAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
@@ -178,33 +181,39 @@ def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
+            try:
+                to_email = form.cleaned_data.get('email')
+                check_username = form.cleaned_data.get('username')
+                name_test = User.objects.filter(username__iexact=str(check_username)).exists()
+                email_test = User.objects.filter(email__iexact=str(to_email)).exists()
+                if name_test or email_test:
+                    messages.error(request, 'Your username or email is already taken.')
+                    return redirect('form')
+                user = form.save(commit=False)
+                user.is_active = False
+                user.save()
 
-            # save form in the memory not in database
-            to_email = form.cleaned_data.get('email')
-            check_username = form.cleaned_data.get('username')
-            name_test = User.objects.filter(username__iexact=str(check_username)).exists()
-            email_test = User.objects.filter(email__iexact=str(to_email)).exists()
-            if name_test or email_test:
-                messages.error(request, 'Your username or email is already taken.')
+
+                # to get the domain of the current site
+                current_site = get_current_site(request)
+                mail_subject = 'Pop Culture Tracker - Activation link'
+                message = render_to_string('registration/Activate_account_with_email.html', {
+                    'user': user,
+                    'domain': current_site.domain,
+                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                    'token': account_activation_token.make_token(user),
+                })
+                email = EmailMessage(
+                    mail_subject, message, 'pct-team@outlook.com', to=[to_email]
+                )
+                email.send()
+            except:
+                messages.error(request, 'Something went wrong, try again')
+                user.delete()
                 return redirect('form')
 
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
-            # to get the domain of the current site
-            current_site = get_current_site(request)
-            mail_subject = 'Pop Culture Tracker - Activation link'
-            message = render_to_string('registration/Activate_account_with_email.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': account_activation_token.make_token(user),
-            })
-            email = EmailMessage(
-                mail_subject, message, 'pct-team@outlook.com', to=[to_email]
-            )
-            email.send()
             messages.success(request, 'Please confirm your email address to complete the registration!')
+
             return redirect('index')
             # return HttpResponse('Please confirm your email address to complete the registration')
     else:
@@ -674,10 +683,24 @@ class GameCreate(CreateView):
         return super(GameCreate, self).form_valid(form)
 
 
-class GameDetailView(generic.DetailView):
+class GameDetailView(UserPassesTestMixin,generic.DetailView):
     """Generic class-based detail view for a game."""
     model = Game
     template_name = 'polls/Game/game_detail.html'
+
+
+    def test_func(self):
+        get_game_model = Game.objects.get(pk=self.kwargs['pk'])
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            return True
+        elif get_game_model.Verified == False and self.request.user == get_game_model.added_by:
+            return True
+        elif self.request.user.is_authenticated and get_game_model.Verified== True:
+            return True
+        return False
+
+    def handle_no_permission(self):
+        return redirect('games')
 
     def get_context_data(self, *args, **kwargs):
         context = super(GameDetailView, self).get_context_data(*args, **kwargs)
@@ -728,6 +751,7 @@ class CreateGameReview(UserPassesTestMixin, CreateView):
     def get_success_url(self):
         return reverse('game-detail', kwargs={'pk': self.kwargs['game_pk']})
 
+
 class UpdateGameReview(UserPassesTestMixin, UpdateView):
     model = GameReview
     template_name = "polls/movie/review_create.html"
@@ -746,8 +770,6 @@ class UpdateGameReview(UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('game-detail', kwargs={'pk': self.kwargs['game_pk']})
-
-
 
 
 def add_game_to_game_list(request, game_pk, user_pk, game_status):
@@ -1315,13 +1337,14 @@ class ProfileWatchlist(generic.DetailView):
         movie_watchlist_movies = MovieWatchlist.objects.filter(profile=self.object).values_list('movie', flat=True)
 
         movie_reviews_all = []
-        movie_reviews_movies = MovieReview.objects.filter(author=self.request.user).values_list('movie', flat=True)
+        movie_reviews_movies = MovieReview.objects.filter(author=self.object.user).values_list('movie', flat=True)
+        print(self.request.user, self.object.user)
 
         series_watchlist_all = SeriesWatchlist.objects.filter(profile=self.object)
         series_watchlist_series = SeriesWatchlist.objects.filter(profile=self.object).values_list('series', flat=True)
 
         series_reviews_all = []
-        series_reviews_series = SeriesReview.objects.filter(author=self.request.user).values_list('series', flat=True)
+        series_reviews_series = SeriesReview.objects.filter(author=self.object.user).values_list('series', flat=True)
 
         for movie in movie_watchlist_movies:
             if movie in movie_reviews_movies:
@@ -1383,6 +1406,8 @@ class CreateMovieReview(UserPassesTestMixin, CreateView):
         return redirect('login')
 
     def form_valid(self, form):
+        if MovieReview.objects.filter(author_id=self.request.user, movie_id=self.kwargs['movie_pk']).exists():
+            return redirect('index')
         form.instance.author = self.request.user
         form.instance.movie_id = self.kwargs['movie_pk']
         return super().form_valid(form)
@@ -1425,7 +1450,6 @@ class MovieWatchlistView(generic.ListView):
     template_name = "polls/Profile/movie_watchlist.html"
     model = MovieWatchlist.objects.filter()
     paginate_by = 18
-
 
 
 class SeriesListView(generic.ListView):
@@ -2048,27 +2072,39 @@ def get_imdb_id(shows, multi_search, type_of_show, api):
     return imdb_ids
 
 
-@login_required
-@permission_required('catalog.can_mark_returned', raise_exception=True)
-def omdb_api(request, url, multi_search, type_of_show, api_key):
-    # omdb.set_default('apikey', apikey)
+def compare_actors(api_actors, api_directors, imdb_id, type_of_show):
+    new_directors = api_directors.copy()
+    new_actors = api_actors.copy()
 
-    api = omdb.OMDBClient(apikey=api_key)
-
-    if multi_search == 'True':
-        multi_search = True
+    if type_of_show == 'movie':
+        show = Movie.objects.filter(imdb_id=imdb_id).first()
     else:
-        multi_search = False
+        show = Series.objects.filter(imdb_id=imdb_id).first()
 
-    url = url.replace("\\", "/")
-    scraping_time = time()
-    times1 = []
-    times2 = []
-    months = {"Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06", "Jul": "07",
-              "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"}
-    created_shows = []
-    updated_shows = []
+    current_actors = show.actors.all()
+    current_directors = show.director.all()
+
+    for actor in current_actors:
+        name = actor.full_name
+        if name not in api_actors:
+            new_actors.append(name)
+
+    for director in current_directors:
+        name = director.full_name
+        if name not in api_directors:
+            new_directors.append(name)
+
+    if len(new_directors) == 1 and 'N/A' in new_directors:
+        return new_directors, new_actors
+    else:
+        return [director for director in new_directors if director != 'N/A'], new_actors
+
+
+def scrape_show(url, multi_search, type_of_show, api, update, months, start):
+    created = 0
+    updated = 0
     titles = []
+    print(url)
     response = requests.get(url)
     only_item_cells = SoupStrainer("div", attrs={'class': 'discovery-tiles__wrap'})
     table = BeautifulSoup(response.content, 'lxml', parse_only=only_item_cells)
@@ -2078,23 +2114,13 @@ def omdb_api(request, url, multi_search, type_of_show, api_key):
         title = str(movie.text.strip())
         titles.append(title)
 
-    test = time()
     if multi_search:
         shows = get_imdb_id(titles, multi_search, type_of_show, api)
     else:
         shows = titles
-    end = time()
-    test = end - test
-    # api = omdb.OMDBClient(apikey=apikey)
 
     for show in shows:
-        start = time()
-        actors_pk_list = []
-        directors_pk_list = []
-        genres_pk_list = []
-        languages_pk_list = []
-        # api = GetMovie(api_key=apikey)
-        # data = api.get_movie(title=movie)
+        print(time() - start)
         if multi_search:
             data = api.imdbid(show)
         else:
@@ -2104,6 +2130,22 @@ def omdb_api(request, url, multi_search, type_of_show, api_key):
             continue
 
         imdb_id = data['imdb_id']
+
+        movie_exists = Movie.objects.filter(imdb_id=imdb_id).exists()
+        series_exists = Series.objects.filter(imdb_id=imdb_id).exists()
+
+        if movie_exists or series_exists:
+            if not update:
+                continue
+            show_exists = True
+        else:
+            show_exists = False
+
+        actors_pk_list = []
+        directors_pk_list = []
+        genres_pk_list = []
+        languages_pk_list = []
+
         released = data['released']
         poster = data['poster']
         imdb_rating = data['imdb_rating']
@@ -2112,11 +2154,15 @@ def omdb_api(request, url, multi_search, type_of_show, api_key):
         if not data or released == 'N/A' or poster == 'N/A' or imdb_rating == 'N/A':
             continue
 
-        # imdb_id = data['imdbid']
         imdb_rating = float(imdb_rating)
         title = data['title']
 
         actors = data['actors'].split(', ')
+        directors = data['director'].split(', ')
+
+        if show_exists:
+            directors, actors = compare_actors(actors, directors, imdb_id, type_of_show)
+
         for actor in actors:
             exists_in_db = Actor.objects.filter(full_name=actor).first()
             if exists_in_db:
@@ -2133,7 +2179,6 @@ def omdb_api(request, url, multi_search, type_of_show, api_key):
 
         summary = data['plot']
 
-        directors = data['director'].split(', ')
         for director in directors:
             exists_in_db = Director.objects.filter(full_name=director).first()
             if exists_in_db:
@@ -2172,39 +2217,45 @@ def omdb_api(request, url, multi_search, type_of_show, api_key):
                 runtime = int(data['runtime'].split(' ')[0])
             except ValueError:
                 runtime = 0
-            movie_object, created = Movie.objects.update_or_create(
-                imdb_id=imdb_id,
-                defaults={
-                    'title': title,
-                    'date_of_release': release_date,
-                    'running_time': int(runtime),
-                    'summary': summary,
-                    # 'type_of_show': type_of_show,
-                    'poster': poster,
-                    'Verified': True,
-                    # 'added_by': User.objects.get(pk=1),
-                    'imdb_rating': imdb_rating,
-                    'imdb_id': imdb_id}
-            )
-            movie_object.director.set(directors_pk_list)
-            movie_object.language.set(languages_pk_list)
-            movie_object.genre.set(genres_pk_list)
-            movie_object.actors.set(actors_pk_list)
 
-            if created:
-                created_shows.append(title)
-                end = time()
-                start = end - start
-                times1.append(start)
+            if show_exists:
+                movie_object = Movie.objects.get(imdb_id=imdb_id)
+                movie_object.title = title
+                movie_object.date_of_release = release_date
+                movie_object.running_time = int(runtime)
+                movie_object.summary = summary
+                movie_object.type_of_show = type_of_show
+                movie_object.imdb_rating = imdb_rating
+                movie_object.Verified = True
+                movie_object.director.set(directors_pk_list)
+                movie_object.language.set(languages_pk_list)
+                movie_object.genre.set(genres_pk_list)
+                movie_object.actors.set(actors_pk_list)
+                movie_object.save()
+                updated += 1
+                print(title)
+
             else:
-                updated_shows.append(title)
-                end = time()
-                start = end - start
-                times2.append(start)
+                movie_object = Movie.objects.create(
+                    imdb_id=imdb_id,
+                    title=title,
+                    date_of_release=release_date,
+                    running_time=int(runtime),
+                    summary=summary,
+                    type_of_show=type_of_show,
+                    poster=poster,
+                    Verified=True,
+                    # 'added_by': User.objects.get(pk=1),
+                    imdb_rating=imdb_rating,
+                )
+                movie_object.director.set(directors_pk_list)
+                movie_object.language.set(languages_pk_list)
+                movie_object.genre.set(genres_pk_list)
+                movie_object.actors.set(actors_pk_list)
+                created += 1
+                print(title)
 
         elif type_of_show == 'series':
-            seasons = data['total_seasons']
-
             in_production = data['year'].split('–')
 
             if len(in_production) == 1:
@@ -2215,51 +2266,118 @@ def omdb_api(request, url, multi_search, type_of_show, api_key):
                 else:
                     in_production = False
 
+            seasons = data['total_seasons']
+
             if seasons == 'N/A':
                 seasons = None
 
-            series_object, created = Series.objects.update_or_create(
-                imdb_id=imdb_id,
-                defaults={
-                    'title': title,
-                    'date_of_release': release_date,
-                    'number_of_seasons': seasons,
-                    'summary': summary,
-                    # 'type_of_show': type_of_show,
-                    'poster': poster,
-                    'Verified': True,
-                    # 'added_by': User.objects.get(pk=1),
-                    'imdb_rating': imdb_rating,
-                    'imdb_id': imdb_id,
-                    'in_production': in_production}
-            )
-            series_object.director.set(directors_pk_list)
-            series_object.language.set(languages_pk_list)
-            series_object.genre.set(genres_pk_list)
-            series_object.actors.set(actors_pk_list)
+            if show_exists:
+                show = Series.objects.filter(imdb_id=imdb_id).first()
+                current_seasons = show.number_of_seasons
 
-            if created:
-                created_shows.append(title)
-                end = time()
-                start = end - start
-                times1.append(start)
+                if seasons != 'N/A' and current_seasons:
+                    if int(seasons) < int(current_seasons):
+                        seasons = current_seasons
+                elif seasons == 'N/A' and current_seasons:
+                    seasons = current_seasons
+
+            if show_exists:
+                series_object = Series.objects.get(imdb_id=imdb_id)
+                series_object.in_production = in_production
+                series_object.number_of_seasons = seasons
+                series_object.title = title
+                series_object.date_of_release = release_date
+                series_object.summary = summary
+                series_object.type_of_show = type_of_show
+                series_object.imdb_rating = imdb_rating
+                series_object.Verified = True
+                series_object.director.set(directors_pk_list)
+                series_object.language.set(languages_pk_list)
+                series_object.genre.set(genres_pk_list)
+                series_object.actors.set(actors_pk_list)
+                series_object.save()
+                updated += 1
+                print(title)
+
             else:
-                updated_shows.append(title)
-                end = time()
-                start = end - start
-                times2.append(start)
+                series_object = Series.objects.create(
+                    imdb_id=imdb_id,
+                    number_of_seasons=seasons,
+                    in_production=in_production,
+                    title=title,
+                    date_of_release=release_date,
+                    summary=summary,
+                    type_of_show=type_of_show,
+                    poster=poster,
+                    Verified=True,
+                    # 'added_by': User.objects.get(pk=1),
+                    imdb_rating=imdb_rating,
+                )
+                series_object.director.set(directors_pk_list)
+                series_object.language.set(languages_pk_list)
+                series_object.genre.set(genres_pk_list)
+                series_object.actors.set(actors_pk_list)
+                created += 1
+                print(title)
 
-    end = time()
-    scraping_time = end - scraping_time
-    created_shows = zip(created_shows, times1)
-    updated_shows = zip(updated_shows, times2)
+        if time() - start > 25:
+            print("Created:", created)
+            print("Updated:", updated)
+            return time() - start, True
+    print("Created:", created)
+    print("Updated:", updated)
+    return time() - start, False
+
+
+@login_required
+@permission_required('catalog.can_mark_returned', raise_exception=True)
+def scraping_shows_script(request, type_of_show, update):
+    start = time()
+    months = {"Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06", "Jul": "07",
+              "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"}
+    api_key = os.environ.get('API_KEY')
+    api = omdb.OMDBClient(apikey=api_key)
+    genres = ['action', 'adventure', 'comedy', 'crime', 'drama', 'fantasy', 'horror', 'sci_fi', 'romance', 'war']
+    services = ['netflix', 'amc_plus', 'amazon_prime', 'disney_plus', 'hbo_max']
+    random.shuffle(genres)
+    random.shuffle(services)
+
+    if update == '1':
+        update = True
+    else:
+        update = False
+
+    for service in services:
+        for genre in genres:
+            url = 'https://www.rottentomatoes.com/browse/' + type_of_show + '/affiliates:' + service + '~genres:' \
+                  + genre + '?page=1'
+            final_time, end_scraping = scrape_show(url, False, type_of_show, api, update, months, start)
+            if end_scraping:
+                return render(request, 'index.html')
+    return render(request, 'index.html')
+
+
+@login_required
+@permission_required('catalog.can_mark_returned', raise_exception=True)
+def omdb_api(request, url, multi_search, type_of_show):
+    api_key = os.environ.get('API_KEY')
+    final_time = time()
+    api = omdb.OMDBClient(apikey=api_key)
+    months = {"Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06", "Jul": "07",
+              "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"}
+
+    if multi_search == 'True':
+        multi_search = True
+    else:
+        multi_search = False
+
+    url = url.replace("\\", "/")
+
+    final_time, end = scrape_show(url, multi_search, type_of_show, api, True, months, final_time)
 
     context = {
-        'scraping_time': scraping_time,
-        'created_shows': created_shows,
-        'updated_shows': updated_shows,
+        'scraping_time': final_time,
         'url': url,
-        'test': test
     }
 
     return render(request, "polls/Scraping/scrape_movies.html", context=context)
@@ -2271,7 +2389,6 @@ def omdb_api_page(request):
     if request.method == 'POST':
         form = OmdbApiForm(request.POST)
         if form.is_valid():
-            api_key = form.cleaned_data.get('api_key')
             multi_search = form.cleaned_data.get('multi_search')
             type_of_show = form.cleaned_data.get('type_of_show')
             vods = form.cleaned_data.get('VOD')
@@ -2307,8 +2424,7 @@ def omdb_api_page(request):
 
             url = url.replace("/", "\\")
             return render(request, 'polls/Scraping/omdb_api_redirect.html', {'url': url, 'multi_search': multi_search,
-                                                                             'type_of_show': type_of_show,
-                                                                             'api_key': api_key})
+                                                                             'type_of_show': type_of_show})
     else:
         form = OmdbApiForm
 
@@ -2341,6 +2457,8 @@ def games_series_movies_by_genre(request, model_name, pk):
 
 
 def create_episodes(series, series_imdb_id, start_seasons_number, end_seasons_number, api, months):
+    episodes_to_create = []
+    episodes_to_update = []
     for season in range(start_seasons_number, end_seasons_number + 1):
         url = "https://www.imdb.com/title/" + series_imdb_id + "/episodes?season=" + str(season)
 
@@ -2364,12 +2482,20 @@ def create_episodes(series, series_imdb_id, start_seasons_number, end_seasons_nu
             link = episode.a['href']
             episode_imdb_id = link.split("/")[2]
             if Episode.objects.filter(imdb_id=episode_imdb_id).exists():
-                episode_scraping(episode_imdb_id, season_object, months, api, 'update')
+                episodes_to_update = episode_scraping(episode_imdb_id, season_object, months, api, 'update', episodes_to_update)
             else:
-                episode_scraping(episode_imdb_id, season_object, months, api, 'create')
+                episodes_to_create = episode_scraping(episode_imdb_id, season_object, months, api, 'create', episodes_to_create)
+    if episodes_to_create:
+        print('CREATE')
+        Episode.objects.bulk_create(episodes_to_create)
+    if episodes_to_update:
+        print('UPDATE')
+        Episode.objects.bulk_update(episodes_to_update, ['title', 'release_date', 'episode_number', 'runtime',
+                                                         'plot', 'imdb_rating', 'poster', 'imdb_id', 'season'])
 
 
 def update_episodes(series, seasons_number, api, months, series_in_production):
+    episodes_list = []
     if series_in_production:
         seasons = Season.objects.filter(series=series.pk).exclude(season_number=seasons_number)
     else:
@@ -2377,7 +2503,11 @@ def update_episodes(series, seasons_number, api, months, series_in_production):
     for season in seasons:
         episodes = Episode.objects.filter(season=season.pk)
         for episode in episodes:
-            episode_scraping(episode.imdb_id, season, months, api, 'update')
+            episodes_list = episode_scraping(episode.imdb_id, season, months, api, 'update', episodes_list)
+    if episodes_list:
+        print('UPDATE')
+        Episode.objects.bulk_update(episodes_list, ['title', 'release_date', 'episode_number', 'runtime',
+                                                    'plot', 'imdb_rating', 'poster', 'imdb_id', 'season'])
 
 
 def scrape_seasons_number(series_imdb_id):
@@ -2391,7 +2521,8 @@ def scrape_seasons_number(series_imdb_id):
 
 @login_required
 @permission_required('catalog.can_mark_returned', raise_exception=True)
-def episode_ids_scraping(request, api_key, how_many_series, pk):
+def episode_ids_scraping(request, how_many_series, pk):
+    api_key = os.environ.get('API_KEY')
     start = time()
     api = omdb.OMDBClient(apikey=api_key)
     series = get_object_or_404(Series, id=pk)
@@ -2437,7 +2568,7 @@ def episode_ids_scraping(request, api_key, how_many_series, pk):
         return render(request, "polls/Scraping/episodes_scraping_redirect.html", context=context)
 
 
-def episode_scraping(episode_imdb_id, season_object, months, api, action):
+def episode_scraping(episode_imdb_id, season_object, months, api, action, episodes):
     # omdb.set_default('apikey', api_key)
     episode = api.imdbid(episode_imdb_id)
     if episode:
@@ -2466,7 +2597,10 @@ def episode_scraping(episode_imdb_id, season_object, months, api, action):
         poster = episode['poster']
         imdb_id = episode['imdb_id']
 
+        episode = Episode.objects.filter(imdb_id=imdb_id).first()
+
         if action == 'update':
+            """
             Episode.objects.update_or_create(
                 imdb_id=imdb_id,
                 defaults={
@@ -2481,7 +2615,21 @@ def episode_scraping(episode_imdb_id, season_object, months, api, action):
                     'season': season_object
                 }
             )
+            """
+            episode.title = title
+            episode.release_date = release_date
+            episode.episode_number = int(episode_number)
+            episode.runtime = int(runtime)
+            episode.plot = plot
+            episode.imdb_rating = imdb_rating
+            episode.poster = poster
+            episode.imdb_id = imdb_id
+            episode.season = season_object
+
+            episodes.append(episode)
+
         elif action == 'create':
+            """
             Episode.objects.create(
                 imdb_id=imdb_id,
                 title=title,
@@ -2493,9 +2641,24 @@ def episode_scraping(episode_imdb_id, season_object, months, api, action):
                 poster=poster,
                 season=season_object
             )
-        # episode_object.series.set(id=season_object.pk)
+            """
+            episode = Episode(
+                                imdb_id=imdb_id,
+                                title=title,
+                                release_date=release_date,
+                                episode_number=int(episode_number),
+                                runtime=int(runtime),
+                                plot=plot,
+                                imdb_rating=imdb_rating,
+                                poster=poster,
+                                season=season_object
+                                )
+            episodes.append(episode)
+    return episodes
 
 
+@login_required
+@permission_required('catalog.can_mark_returned', raise_exception=True)
 def enter_api_key(request):
     if request.method == 'POST':
         form = EnterApiKey(request.POST)
@@ -2508,22 +2671,24 @@ def enter_api_key(request):
     return render(request, 'polls/Scraping/enter_api_key.html', {'form': form})
 
 
-def series_to_scrape(request, api_key):
-    series_set = Series.objects.all().order_by('episodes_update_date')
+@login_required
+@permission_required('catalog.can_mark_returned', raise_exception=True)
+def series_to_scrape(request):
+    series_set = Series.objects.order_by('episodes_update_date', 'title')
 
     context = {
         'series_set': series_set,
-        'api_key': api_key
     }
 
     return render(request, 'polls/Scraping/series_to_scrape.html', context=context)
 
 
-def episode_scraping_in_progress(request, api_key, how_many_series, pk):
+@login_required
+@permission_required('catalog.can_mark_returned', raise_exception=True)
+def episode_scraping_in_progress(request, how_many_series, pk):
     series = get_object_or_404(Series, id=pk)
 
     context = {
-        'api_key': api_key,
         'how_many_series': how_many_series,
         'pk': pk,
         'series': series
@@ -2534,8 +2699,6 @@ def episode_scraping_in_progress(request, api_key, how_many_series, pk):
 def create_record(request):
     context = {}
     return render(request, 'create_records.html', context=context)
-
-from .models import RequestPermission
 
 
 class RequestPermissionCreate(UserPassesTestMixin, CreateView):
@@ -2573,3 +2736,172 @@ class RequestPermissionList(UserPassesTestMixin, generic.ListView):
 
     def handle_no_permission(self):
         return redirect('index')
+
+
+def UserCarnage(request):
+    get_all_users = User.objects.all()
+
+    for userI in get_all_users:
+        testX = userI
+        testY = testX.date_joined
+        czas = datetime.datetime.now(datetime.timezone.utc)
+        testZ = datetime.datetime.now(datetime.timezone.utc) - testY
+        deadline = datetime.timedelta(days=7)
+        if testZ > deadline:
+            print("Usuwam go")
+        else:
+            print("Zostaje")
+
+
+class UserPageManagement(UserPassesTestMixin, generic.DetailView):
+    model = Profile
+    template_name = "polls/Profile/user-management.html"
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
+
+    def handle_no_permission(self):
+        return redirect('index')
+
+
+@staff_member_required
+def DeleteUnverifiedGames(request,pk):
+    games = Game.objects.filter(added_by=pk, Verified=False)
+    for game in games:
+        testFilter = Game.objects.filter(added_by=pk, Verified=False)
+        game.delete()
+    return redirect('user-page-management', pk)
+
+
+@staff_member_required
+def DeleteUnverifiedMovies(request,pk):
+    movies = Movie.objects.filter(added_by=pk, Verified=False)
+    for movie in movies:
+        movie.delete()
+    return redirect('user-page-management', pk)
+
+
+@staff_member_required
+def DeleteUnverifiedSeries(request,pk):
+    series = Series.objects.filter(added_by=pk, Verified=False)
+    for serie in series:
+        serie.delete()
+    return redirect('user-page-management', pk)
+
+
+@staff_member_required
+def DeleteUser(request,pk):
+    try:
+        u = User.objects.get(id = pk)
+        u.delete()
+        messages.success(request, "The user is deleted")
+
+    except User.DoesNotExist:
+        messages.error(request, "User doesnot exist")
+        return redirect('index')
+
+    return redirect('index')
+
+
+@staff_member_required
+def DeleteUnverifiedAll(request,pk):
+    games = Game.objects.filter(added_by=pk, Verified=False)
+    movies = Movie.objects.filter(added_by=pk, Verified=False)
+    series = Series.objects.filter(added_by=pk, Verified=False)
+
+    for game in games:
+        game.delete()
+
+    for movie in movies:
+        movie.delete()
+
+    for serie in series:
+        serie.delete()
+    print("TEST")
+    games = Game.objects.filter(added_by=pk, Verified=False)
+    movies = Movie.objects.filter(added_by=pk, Verified=False)
+    series = Series.objects.filter(added_by=pk, Verified=False)
+
+    return redirect('user-page-management', pk)
+
+
+# TESTING STUF
+def test(request):
+    authors = []
+    start = time()
+    update_or_create = []
+    bulk_update = []
+    for j in range(30):
+        for i in range(1, 10):
+            author = Author.objects.filter(id=i).first()
+            author.first_name = 'firstnamev3'+str(i)
+            author.last_name = 'lastnamev3' + str(i)
+            authors.append(author)
+        Author.objects.bulk_update(authors, ['first_name', 'last_name'])
+        bulk_update.append(time()-start)
+
+        start = time()
+        for i in range(1, 10):
+            Author.objects.update_or_create(
+                id=i,
+                defaults={
+                    'first_name': 'firstnamev2'+str(i),
+                    'last_name': 'lastnamev2' + str(i)
+                }
+            )
+        update_or_create.append(time()-start)
+    print('update or create', sum(update_or_create)/len(update_or_create))
+    print(update_or_create)
+    print('bulk update', sum(bulk_update) / len(bulk_update))
+    print(bulk_update)
+    return render(request, 'index.html')
+
+
+# TESTING STUF
+def test1(request):
+    pk_list = [1]
+    movies = []
+    for i in range(1, 10):
+        movie = Movie(title='title'+str(i), date_of_release='2022-11-21', summary=str(i),
+                      poster=str(i), type_of_show='movie', running_time=i)
+        movie.actors.through()
+        movie.director.set(pk_list)
+        movie.language.set(pk_list)
+        movie.genre.set(pk_list)
+        movies.append(movie)
+
+    Author.objects.bulk_create(movies)
+
+    return render(request, 'index.html')
+
+
+# TESTING STUF
+def bulk_create(request):
+    authors = []
+    update_or_create = []
+    bulk_update = []
+
+    start = time()
+    for i in range(1, 100):
+        Author.objects.create(
+
+                first_name= 'firstnamev2'+str(i)+str(random.randint(0,100000)),
+                last_name='lastnamev2' + str(i)+str(random.randint(0,100000))
+
+        )
+    update_or_create.append(time()-start)
+
+    start = time()
+    for i in range(1, 100):
+        author = Author(first_name = 'firstnamev3'+str(i)+str(random.randint(0,100000)),
+                        last_name = 'firstnamev3'+str(i)+str(random.randint(0,100000)))
+        authors.append(author)
+    Author.objects.bulk_create(authors)
+    bulk_update.append(time()-start)
+
+    print('normal create', sum(update_or_create)/len(update_or_create))
+    print(update_or_create)
+    print('bulk create', sum(bulk_update) / len(bulk_update))
+    print(bulk_update)
+    return render(request, 'index.html')
+

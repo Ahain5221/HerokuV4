@@ -90,8 +90,8 @@
                                         <li style="padding-left: 0"><hr class="dropdown-divider"></li>
                                         <li style="padding-left: 0"><a class="dropdown-item" style="--bs-dropdown-link-color: white" href="{% url 'logout' %}">Log Out</a></li>
                                     {% else %}
-                                    <li><a class="btn" style="width: 9em" href="{% url 'login2' %}"> Login </a></li>
-                                    <li><a class="btn" style="width: 9em" href="{% url 'signup' %}"> Register </a></li>
+                                    <li style="padding-left: 0"><a class="dropdown-item" style="font-size: medium; --bs-dropdown-link-color: white" href="{% url 'login2' %}"> Login </a></li>
+                                    <li style="padding-left: 0"><a class="dropdown-item" style="font-size: medium; --bs-dropdown-link-color: white" href="{% url 'signup' %}"> Register </a></li>
                                     {% endif %}
                                 </ul>
                             </li>

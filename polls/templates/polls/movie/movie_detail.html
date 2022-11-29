@@ -92,11 +92,13 @@
     </div>
     </div>
     <ul class="list-inline">
-        <li>
-            <a href="{% url 'movie-update' pk=movie.id %}">
-                <button class="btn btn-success btn-sm">UPDATE</button>
-            </a>
-        </li>
+        {% if movie.added_by == user and not movie.verified or user.is_superuser %}
+            <li>
+                <a href="{% url 'movie-update' pk=movie.id %}">
+                    <button class="btn btn-success btn-sm">UPDATE</button>
+                </a>
+            </li>
+        {% endif %}
 
         <li>
             {% if user.is_superuser %}

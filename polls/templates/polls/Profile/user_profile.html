@@ -2,6 +2,12 @@
 {% load static %}
 
 {% block content %}
+
+                {% if user.is_superuser or user.is_staff %}
+                    <a href="{% url 'user-page-management' profile.pk %}"><button>User Management Admin</button></a>
+
+                {% endif %}
+
                 {% if page_user.user == user %}
                     <a href="{% url 'friend-list' profile.pk %}"><button>Friend list</button></a>
                     <a href="{% url 'friend-request-list' profile.pk %}"><button>Pending friends requests [{{ amount_of_pending_friend_request }}]</button></a>

@@ -18,6 +18,10 @@
             <label class="control-label" for="password">Password</label>
             <div class="controls">
                 <input type="password" name="password" id="password" placeholder="Password">
+                <input type="checkbox" id="box" onclick="reveal()">
+                <label for="box">Show/Hide password</label>
+                <i class="fa-duotone fa-eye"></i>
+
             </div>
         </div>
         <div class="control-group">
@@ -29,4 +33,14 @@
       <p><a href="{% url 'password_reset_polls' %}">Lost password?</a></p>
       <p><a href="{% url 'signup' %}">Create account</a></p>
     </div>
+    <script type="text/javascript">
+function reveal()
+{
+if(document.getElementById('box').checked)
+   {document.getElementById("password").type='text';}
+else
+document.getElementById("password").type='password';
+}
+</script>
+
 {% endblock %}

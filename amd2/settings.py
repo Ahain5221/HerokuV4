@@ -30,8 +30,9 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '#**+m)#z@l6^z+)ivz8u+36%=i41jd
 # DEBUG = True
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
-ALLOWED_HOSTS = ['young-falls-06895.herokuapp.com', '127.0.0.1']
-
+#Potem można niepotrzebne wywalić, dla mojej wygody dodaje teraz
+ALLOWED_HOSTS = ['young-falls-06895.herokuapp.com', 'amd2-django.herokuapp.com','127.0.0.1','my-pct.me']
+CSRF_TRUSTED_ORIGINS = ['https://my-pct.me']
 # Application definition
 
 INSTALLED_APPS = [
@@ -138,7 +139,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp-mail.outlook.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'pct-team@outlook.com'
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 
 EMAIL_USE_TLS = True

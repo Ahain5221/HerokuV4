@@ -170,17 +170,18 @@ urlpatterns = [
     path('episode/<int:pk>', views.EpisodeDetailView.as_view(), name='episode-detail'),
 
     # SCRAPING Movies and Series
-    path('omdb_api/<url>/<multi_search>/<type_of_show>/<api_key>', views.omdb_api, name='omdb-api'),
+    path('omdb_api/<url>/<multi_search>/<type_of_show>', views.omdb_api, name='omdb-api'),
     path('omdb_api_page', views.omdb_api_page, name='omdb-api-page'),
 
     # SCRAPING EPISODES
-    path('scrape_episodes_of_one_series/<api_key>/<how_many_series>/<int:pk>', views.episode_ids_scraping,
+    path('scrape_episodes_of_one_series/<how_many_series>/<int:pk>', views.episode_ids_scraping,
          name='scrape-episodes'),
-    path('episodes_scarping_in_progress/<api_key>/<how_many_series>/<int:pk>', views.episode_scraping_in_progress,
+    path('episodes_scarping_in_progress/<how_many_series>/<int:pk>', views.episode_scraping_in_progress,
          name='episodes-scraping-in-progress'),
     # path('scrape_episodes_of_all_series/<api_key>', views.enter_api_key, name='scrape-all-series'),
-    path('seriesList/<api_key>', views.series_to_scrape, name='series-to-scrape'),
-    path('scrapeEpisodes', views.enter_api_key, name='enter-api-key'),
+    path('seriesList', views.series_to_scrape, name='series-to-scrape'),
+    # path('scrapeEpisodes', views.enter_api_key, name='enter-api-key'),
+    path('scrape_movies/<type_of_show>/<update>', views.scraping_shows_script, name='scrape-shows-script'),
 
     # ACTOR
     path('actor/', views.ActorListView.as_view(), name='actors'),
@@ -219,5 +220,16 @@ urlpatterns = [
     path("profile/friendship/delete<int:pk>", DeleteFriendship, name="delete-friend"),
     path("profile/friendship/my_friends<int:pk>", FriendList, name="friend-list"),
     path("profile/friendship/friend_requests<int:pk>", FriendRequestList, name="friend-request-list"),
+
+    path("profile/root/management/<int:pk>", UserPageManagement.as_view(), name="user-page-management"),
+    path("profile/root/management/delete_games/<int:pk>", DeleteUnverifiedGames, name="delete-unverified-games"),
+    path("profile/root/management/delete_movies/<int:pk>", DeleteUnverifiedMovies, name="delete-unverified-movies"),
+    path("profile/root/management/delete_series/<int:pk>", DeleteUnverifiedSeries, name="delete-unverified-series"),
+
+    path("profile/root/management/delete_all/<int:pk>", DeleteUnverifiedAll, name="delete-unverified-everything"),
+    path("profile/root/management/delete_user/<int:pk>", DeleteUser, name="delete-user"),
+
+    path('test/', views.test, name='test'),
+    path('test1/', views.bulk_create, name='test1')
 
 ]

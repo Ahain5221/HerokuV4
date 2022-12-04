@@ -86,7 +86,7 @@ urlpatterns = [
     path("add_favorite_movie/<int:pk>", add_favorite_movie, name="add-favorite-movie"),
 
     path("add_favorite_series/<int:pk>", add_favorite_series, name="add-favorite-series"),
-    path("profile/perm<int:pk>", get_autocomplete_permission, name="get-autocomplete-permission"),
+    path("profile/perm/<int:pk>", get_autocomplete_permission, name="get-autocomplete-permission"),
 
     path("addverf/<int:pk>", game_verification, name="add_verf"),
 
@@ -206,7 +206,7 @@ urlpatterns = [
     path('create_records', views.create_record, name='create_record'),
     path('request/create', views.RequestPermissionCreate.as_view(), name='request-create'),
     path('request/list', views.RequestPermissionList.as_view(), name='request-list'),
-    path("profile/perm-rejected<int:pk>", reject_autocomplete_permission, name="reject-autocomplete-permission"),
+    path("profile/perm-rejected/<int:pk>", reject_autocomplete_permission, name="reject-autocomplete-permission"),
     path("profile/friendship/add<int:pk>", send_friendship_request, name="add-friend"),
     path("profile/friendship/accept<int:pk>", accept_friendship_request, name="accept-friend"),
     path("profile/friendship/reject<int:pk>", reject_friendship_request, name="reject-friend"),

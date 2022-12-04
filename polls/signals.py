@@ -30,7 +30,6 @@ def logout_notifier(sender, request, user, **kwargs):
 
 # Czasowy signal, byście nie musieli od razu resetować bazy
 def login_set_name(sender, request, user, **kwargs):
-    messages.success(request, 'You successfully logged out!')
 
     get_profile = Profile.objects.get(user_id=user.pk)
     get_profile.name = user.username

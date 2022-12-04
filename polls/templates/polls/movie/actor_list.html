@@ -16,19 +16,6 @@
             {% endfor %}
         </div>
 
-        {% if user.is_superuser %}
-            <h1 style="padding-bottom: 1em">Actors to verify</h1>
-            <ul class="list-inline">
-                {% for actor in actor_list %}
-                    {% if not actor.Verified %}
-                        <li>
-                            <a href="{{ actor.get_absolute_url }}">{{ actor }}</a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        {% endif %}
-
     {% else %}
         <p>There are no actors</p>
     {% endif %}

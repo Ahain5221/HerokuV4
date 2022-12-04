@@ -49,19 +49,15 @@ from .token import account_activation_token
 from django.views import View
 # from .models import *
 from friendship.models import Friend, Follow, Block, FriendshipRequest
-
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 import random
+
 
 class cbv_view(generic.ListView):
     model = Developer
     template_name = 'index.html'
 
-
-
-# import time
-
-from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
 
 def handler(request, exception):
     context = {'domain': get_current_site(request)}
@@ -81,10 +77,10 @@ def get_autocomplete_permission(request, pk):
         checkP = RequestPermission.objects.get(FromUser=pk)
         checkP.status = "Accepted"
         checkP.save(update_fields=['status'])
-    except:
-        return redirect('profile-page',pk)
+    except (Exception,):
+        return redirect('profile-page', pk)
     return redirect('request-list')
-    #return redirect('profile-page',pk)
+    # return redirect('profile-page',pk)
 
 
 def reject_autocomplete_permission(request, pk):
@@ -92,29 +88,11 @@ def reject_autocomplete_permission(request, pk):
     request_object.status = "Rejected"
     request_object.save(update_fields=['status'])
     return redirect('request-list')
-    #return redirect('profile-page',pk)
+    # return redirect('profile-page',pk)
 
 
 class DeveloperAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        print("ELO")
-        #permission_developer = Permission.objects.get(name='Can add developer')
-        #permission_actor = Permission.objects.get(name='Can add actor')
-        #permission_director = Permission.objects.get(name='Can add director')
-
-       # self.request.user.user_permissions.add(permission)
-        #test = self.request.user.has_perm('polls.add_developerr')
-       # print(test)
-
-        #new_group, created = Group.objects.get_or_create(name='new_group')
-        #if created:
-        #    permission_developer = Permission.objects.get(name='Can add developer')
-        #    permission_actor = Permission.objects.get(name='Can add actor')
-        #    permission_director = Permission.objects.get(name='Can add director')
-
-       # new_group.permissions.add(permission_developer,permission_actor,permission_director)
-      # new_group.user_set.add(self.request.user)
-        # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated:
             return Developer.objects.none()
 
@@ -193,7 +171,6 @@ def signup(request):
                 user.is_active = False
                 user.save()
 
-
                 # to get the domain of the current site
                 current_site = get_current_site(request)
                 mail_subject = 'Pop Culture Tracker - Activation link'
@@ -207,7 +184,7 @@ def signup(request):
                     mail_subject, message, 'pct-team@outlook.com', to=[to_email]
                 )
                 email.send()
-            except:
+            except (Exception,):
                 messages.error(request, 'Something went wrong, try again')
                 user.delete()
                 return redirect('form')
@@ -254,14 +231,17 @@ def password_reset_request(request):
 
 
 def activate(request, uidb64, token):
-    User = get_user_model()
+    user_model = get_user_model()
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = user_model.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, user_model.DoesNotExist):
         user = None
     if user is not None and account_activation_token.check_token(user, token):
         user.is_active = True
+        user_profile = user.profile
+        user_profile.registration_completed = True
+        user_profile.save()
         user.save()
         messages.success(request, 'Thank you for your email confirmation. Now you can login into your account!')
         return redirect('index')
@@ -322,6 +302,8 @@ class BookDetailView(generic.DetailView):
 class MyFavorites(generic.DetailView):
     model = Profile
     template_name = "polls/Profile/favorites.html"
+    slug_field = 'name'
+    slug_url_kwarg = 'name'
 
 
 # @method_decorator(login_required, name='dispatch')
@@ -369,7 +351,6 @@ def search(request):
     if request.method == 'POST':
         form = SearchForm(request.POST)
         if form.is_valid():
-
             return HttpResponseRedirect('/thanks/')
     else:
         form = SearchForm()
@@ -380,7 +361,6 @@ def search_movie(request):
     if request.method == 'POST':
         form = SearchForm_Movie(request.POST)
         if form.is_valid():
-
             return HttpResponseRedirect('/thanks/')
     else:
         form = SearchForm_Movie()
@@ -391,25 +371,21 @@ def search_series(request):
     if request.method == 'POST':
         form = SearchForm_Series(request.POST)
         if form.is_valid():
-
             return HttpResponseRedirect('/thanks/')
     else:
         form = SearchForm_Series()
     return render(request, 'polls/search_form_series.html', {'form': form})
 
 
-def filter_by_mode(Queryset_to_fill,list_of_things, modes2):
-
+def filter_by_mode(queryset_to_fill, list_of_things, modes2):
     for game in list_of_things:
         qs = game.mode.values("id")
-        test = game.date_of_release.year
-        # print(qs)
         for queryset_with_id in qs:
 
             if str(queryset_with_id['id']) in modes2:
                 query_to_add = Game.objects.filter(id=game.id)
-                Queryset_to_fill = Queryset_to_fill | query_to_add
-    return Queryset_to_fill
+                queryset_to_fill = queryset_to_fill | query_to_add
+    return queryset_to_fill
 
 
 def filter_by_genre(model, list_of_things, genres):
@@ -424,26 +400,26 @@ def filter_by_genre(model, list_of_things, genres):
     return queryset_to_fill
 
 
-def filter_by_year(model, list_of_things, YearMin, YearMax):
+def filter_by_year(model, list_of_things, year_min, year_max):
     queryset_to_fill = model.objects.none()
     for object_model in list_of_things:
 
-        if YearMin and YearMax:
-            if int(YearMin) <= object_model.date_of_release.year <= int(YearMax):
+        if year_min and year_max:
+            if int(year_min) <= object_model.date_of_release.year <= int(year_max):
                 query_to_add = model.objects.filter(id=object_model.id)
                 queryset_to_fill = queryset_to_fill | query_to_add
                 continue
             continue
 
-        if YearMin:
-            if object_model.date_of_release.year >= int(YearMin):
+        if year_min:
+            if object_model.date_of_release.year >= int(year_min):
                 query_to_add = model.objects.filter(id=object_model.id)
                 queryset_to_fill = queryset_to_fill | query_to_add
                 continue
             continue
 
-        if YearMax:
-            if object_model.date_of_release.year <= int(YearMax):
+        if year_max:
+            if object_model.date_of_release.year <= int(year_max):
                 query_to_add = Game.objects.filter(id=object_model.id)
                 queryset_to_fill = queryset_to_fill | query_to_add
                 continue
@@ -488,7 +464,6 @@ def filter_by_running_time_movie(list_of_things, running_time):
     return queryset_to_fill
 
 
-
 def search_result_movie(request):
     if request.method == "POST":
         model_type = Movie
@@ -512,15 +487,15 @@ def search_result_movie(request):
     else:
         return render(request, 'polls/search_result.html')
 
-def filter_by_in_production_series(model ,list_of_things, status):
-    Queryset_to_fill = Series.objects.none()
+
+def filter_by_in_production_series(model, list_of_things, status):
+    queryset_to_fill = Series.objects.none()
     for serie in list_of_things:
         qs = serie.in_production
-        test = status
         if qs == status:
             query_to_add = model.objects.filter(id=serie.id)
-            Queryset_to_fill = Queryset_to_fill | query_to_add
-    return Queryset_to_fill
+            queryset_to_fill = queryset_to_fill | query_to_add
+    return queryset_to_fill
 
 
 def search_result_series(request):
@@ -537,7 +512,7 @@ def search_result_series(request):
         if genres:
             final_queryset = filter_by_genre(model_type, final_queryset, genres)
         if in_production:
-            if in_production =="False":
+            if in_production == "False":
                 in_production = False
             else:
                 in_production = True
@@ -552,7 +527,7 @@ def search_result_series(request):
 
 
 def stuff_verification(request):
-        #searched = request.POST['searched']
+    # searched = request.POST['searched']
     games_to_verify = Game.objects.filter(Verified=False)
     movies_to_verify = Movie.objects.filter(Verified=False)
     series_to_verify = Series.objects.filter(Verified=False)
@@ -561,13 +536,14 @@ def stuff_verification(request):
     developers_to_verify = Developer.objects.filter(Verified=False)
 
     return render(request, 'polls/stuff_verification.html',
-                      {'games_to_verify': games_to_verify,
-                       'movies_to_verify': movies_to_verify,
-                       'series_to_verify': series_to_verify,
-                       'actors_to_verify': actors_to_verify,
-                       'directors_to_verify': directors_to_verify,
-                       'developers_to_verify': developers_to_verify})
-
+                  {'games_to_verify': games_to_verify,
+                   'movies_to_verify': movies_to_verify,
+                   'series_to_verify': series_to_verify,
+                   'actors_to_verify': actors_to_verify,
+                   'directors_to_verify': directors_to_verify,
+                   'developers_to_verify': developers_to_verify
+                   }
+                  )
 
 
 def login_user(request):
@@ -678,24 +654,23 @@ class GameCreate(CreateView):
     template_name = "polls/Game/game_form.html"
 
     def form_valid(self, form):
-        messages.success(self.request, "The game has been succesfully crated!")
+        messages.success(self.request, "The game has been successfully crated!")
         form.instance.added_by = self.request.user
         return super(GameCreate, self).form_valid(form)
 
 
-class GameDetailView(UserPassesTestMixin,generic.DetailView):
+class GameDetailView(UserPassesTestMixin, generic.DetailView):
     """Generic class-based detail view for a game."""
     model = Game
     template_name = 'polls/Game/game_detail.html'
 
-
     def test_func(self):
-        get_game_model = Game.objects.get(pk=self.kwargs['pk'])
+        get_game_object = Game.objects.get(pk=self.kwargs['pk'])
         if self.request.user.is_superuser or self.request.user.is_staff:
             return True
-        elif get_game_model.Verified == False and self.request.user == get_game_model.added_by:
+        elif get_game_object.Verified is False and self.request.user == get_game_object.added_by:
             return True
-        elif self.request.user.is_authenticated and get_game_model.Verified== True:
+        elif (self.request.user.is_authenticated or self.request.user.is_anonymous) and get_game_object.Verified:
             return True
         return False
 
@@ -797,6 +772,8 @@ def remove_game_from_game_list(request, game_pk, user_pk):
 class ProfileGameList(generic.DetailView):
     model = Profile
     template_name = "polls/Profile/game_list.html"
+    slug_field = 'name'
+    slug_url_kwarg = 'name'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -843,7 +820,7 @@ class GameUpdate(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
         obj = self.get_object()
         if self.request.user.is_superuser:
             return True
-        if obj.added_by == self.request.user and obj.Verified == False:
+        if obj.added_by == self.request.user and obj.Verified is False:
             return True
         return False
 
@@ -855,7 +832,7 @@ class GameUpdate(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
 #  template_name = "polls/Game/game_confirm_delete.html"
 
 
-class GameDelete(DeleteView):
+class GameDelete(UserPassesTestMixin, DeleteView):
     model = Game
     success_url = reverse_lazy('games')
     template_name = "polls/Game/game_confirm_delete.html"
@@ -864,32 +841,32 @@ class GameDelete(DeleteView):
         obj = self.get_object()
         if self.request.user.is_superuser:
             return True
-        if obj.added_by == self.request.user and obj.Verified == False:
+        if obj.added_by == self.request.user and obj.Verified is False:
             return True
         return False
+
+    def handle_no_permission(self):
+        return redirect('index')
 
     def form_valid(self, form):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
             basic_message_content = 'Your game was deleted from PTC, title: ' + str(self.object)
-            Mail_Notification(self.get_object(), basic_message_content, delete_reason_content)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content)
         messages.success(self.request, "The game has been deleted!")
         return super().form_valid(form)
 
-    def handle_no_permission(self):
-        return redirect('index')
 
-
-def Mail_Notification(object, basic_message_content, additional):
-    user_email = object.added_by.email
+def mail_notification(thing_object, basic_message_content, additional):
+    user_email = thing_object.added_by.email
     if additional:
         message_content = basic_message_content + "\n" + "Reason for removal: " + additional
     else:
         message_content = basic_message_content
 
-    if not object.added_by.is_superuser:
+    if not thing_object.added_by.is_superuser:
         print("Wysłano maila")
-        print(object.added_by)
+        print(thing_object.added_by)
         send_mail(
             'Delete notification from PTC ',
             message_content,
@@ -904,33 +881,6 @@ class GameListView(generic.ListView):
     paginate_by = 12
     template_name = "polls/Game/game_list.html"
     ordering = ["title"]
-
-
-class GameVerify(UserPassesTestMixin, generic.DetailView):
-    model = Game
-    # login_url = '/polls/error401'
-    # redirect_field_name = None
-
-    template_name = "polls/Game/game_verify.html"
-    success_url = reverse_lazy('games')
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-    def handle_no_permission(self):
-        return redirect('index')
-
-
-class GameUnverify(UserPassesTestMixin, generic.DetailView):
-    model = Game
-    template_name = "polls/Game/game_unverify.html"
-    success_url = reverse_lazy('games')
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-    def handle_no_permission(self):
-        return redirect('index')
 
 
 class DeveloperDetailView(generic.DetailView):
@@ -975,6 +925,7 @@ class DeveloperListView(generic.ListView):
     template_name = "polls/Game/developer_list.html"
     ordering = ["company_name"]
 
+
 class PasswordsChangeView(PasswordChangeView):
     # form_class = PasswordChangeForm #domyślne
     form_class = PasswordChangingForm  # Nowe z forms.py
@@ -1013,80 +964,82 @@ class UserProfileEditView(UserPassesTestMixin, generic.UpdateView):
     def handle_no_permission(self):
         return redirect('index')
 
-@login_required
-def SendFriendshipRequest(request,pk):
-    other_user = User.objects.get(id=pk)
-    try:
-        test = Friend.objects.sent_requests(user=request.user)
-        Friend.objects.add_friend(
-        request.user,  # The sender
-        other_user,  # The recipient
-        message='Hi! I would like to add you')  # This message is optional
-        return redirect('profile-page',pk)
-    except :
-        return redirect('profile-page', pk)
 
 @login_required
-def AcceptFriendshipRequest(request,pk):
+def send_friendship_request(request, pk):
+    other_user = User.objects.get(id=pk)
+    try:
+        Friend.objects.add_friend(
+            request.user,  # The sender
+            other_user,  # The recipient
+            message='Hi! I would like to add you')  # This message is optional
+        return redirect('profile-page', pk)
+    except (Exception,):
+        return redirect('profile-page', pk)
+
+
+@login_required
+def accept_friendship_request(request, pk):
     try:
         other_user = User.objects.get(id=pk)
         friend_request = FriendshipRequest.objects.get(from_user=other_user, to_user=request.user)
         friend_request.accept()
         return redirect('profile-page', pk)
-    except:
+    except (Exception,):
         return redirect('profile-page', pk)
 
 
-
 @login_required
-def RejectFriendshipRequest(request,pk):
+def reject_friendship_request(request, pk):
     try:
         other_user = User.objects.get(id=pk)
         friend_request = FriendshipRequest.objects.get(from_user=other_user, to_user=request.user)
         friend_request.reject()
         friend_request.delete()
         return redirect('profile-page', pk)
-    except:
+    except (Exception,):
         return redirect('profile-page', pk)
 
+
 @login_required
-def CancelFriendshipRequest(request,pk):
+def cancel_friendship_request(request, pk):
     try:
         other_user = User.objects.get(id=pk)
         friend_request = FriendshipRequest.objects.get(from_user=request.user, to_user=other_user)
         friend_request.cancel()
-        return redirect('profile-page',pk)
+        return redirect('profile-page', pk)
     except FriendshipRequest.DoesNotExist:
         return redirect('profile-page', pk)
 
+
 @login_required
-def DeleteFriendship(request,pk):
+def delete_friendship(request, pk):
     try:
         other_user = User.objects.get(id=pk)
         Friend.objects.remove_friend(request.user, other_user)
         return redirect('profile-page', pk)
-    except:
+    except (Exception,):
         return redirect('profile-page', pk)
 
 
-
-
-def FriendList(request,pk):
+def friend_list(request, pk):
     get_user = User.objects.get(id=pk)
-    friend_list = Friend.objects.friends(get_user)
+    friends = Friend.objects.friends(get_user)
+    avatar = get_user.profile.profile_image_url
 
     context = {
-        'friend_list': friend_list
+        'friend_list': friends,
+        'avatar': avatar
     }
     return render(request, 'FriendList.html', context=context)
 
 
-def FriendRequestList(request,pk):
+def friend_request_list(request, pk):
     get_user = User.objects.get(id=pk)
-    friend_request_list = Friend.objects.unread_requests(get_user)
+    request_list = Friend.objects.unread_requests(get_user)
 
     context = {
-        'friend_request_list': friend_request_list
+        'friend_request_list': request_list
     }
 
     return render(request, 'FriendRequestList.html', context=context)
@@ -1095,6 +1048,8 @@ def FriendRequestList(request,pk):
 class ProfilePageView(UserPassesTestMixin, generic.DetailView):
     model = Profile
     template_name = "polls/Profile/user_profile.html"
+    slug_field = 'name'
+    slug_url_kwarg = 'name'
 
     def test_func(self):
         return self.request.user.is_authenticated
@@ -1104,11 +1059,10 @@ class ProfilePageView(UserPassesTestMixin, generic.DetailView):
 
     def get_context_data(self, *args, **kwargs):
         # users = Profile.objects.all()
-        context = super(ProfilePageView, self).get_context_data(*args, **kwargs)
-
-        page_user = get_object_or_404(Profile, id=self.kwargs['pk'])
-        request_status = get_object_or_404(Profile, id=self.kwargs['pk'])
-        perm_request = RequestPermission.objects.filter(FromUser=self.kwargs['pk'])
+        context = super(ProfilePageView, self).get_context_data(**kwargs)
+        get_pk = get_object_or_404(Profile, name=self.kwargs['name']).pk
+        page_user = get_object_or_404(Profile, id=get_pk)
+        perm_request = RequestPermission.objects.filter(FromUser=get_pk)
         if perm_request:
             perm_request.first()
         else:
@@ -1124,7 +1078,6 @@ class ProfilePageView(UserPassesTestMixin, generic.DetailView):
         received_friend_request = False
 
         for te2 in received:
-            test3 = te2.from_user
             if te2.from_user == page_user.user:
                 received_friend_request = True
 
@@ -1148,7 +1101,7 @@ class ProfilePageView(UserPassesTestMixin, generic.DetailView):
         return context
 
 
-def LikeView(request, pk):
+def like_view(request, pk):
     profile = get_object_or_404(Profile, id=request.POST.get('profile_id'))
     if profile.likes.filter(id=request.user.id).exists():
         profile.likes.remove(request.user)
@@ -1158,7 +1111,7 @@ def LikeView(request, pk):
     return HttpResponseRedirect(reverse('profile-page', args=[str(pk)]))
 
 
-def AddVerf(request, pk):
+def game_verification(request, pk):
     game = get_object_or_404(Game, id=pk)
     if game.Verified:
         game.Verified = False
@@ -1203,9 +1156,22 @@ class MovieListView(generic.ListView):
     ordering = ["title"]
 
 
-class MovieDetailView(generic.DetailView):
+class MovieDetailView(UserPassesTestMixin, generic.DetailView):
     template_name = "polls/movie/movie_detail.html"
     model = Movie
+
+    def test_func(self):
+        get_movie_object = Movie.objects.get(pk=self.kwargs['pk'])
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            return True
+        elif get_movie_object.Verified is False and self.request.user == get_movie_object.added_by:
+            return True
+        elif (self.request.user.is_authenticated or self.request.user.is_anonymous) and get_movie_object.Verified:
+            return True
+        return False
+
+    def handle_no_permission(self):
+        return redirect('movies')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -1245,7 +1211,7 @@ class MovieDelete(UserPassesTestMixin, DeleteView):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
             basic_message_content = 'Your movie was deleted from PTC, title: ' + str(self.object)
-            Mail_Notification(self.get_object(), basic_message_content, delete_reason_content)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content)
         messages.success(self.request, "The movie has been deleted!")
         return super().form_valid(form)
 
@@ -1267,7 +1233,7 @@ class MovieCreate(UserPassesTestMixin, CreateView):
         return redirect('login')
 
     def form_valid(self, form):
-        messages.success(self.request, "The movie has been succesfully created!")
+        messages.success(self.request, "The movie has been successfully created!")
         form.instance.added_by = self.request.user
         return super().form_valid(form)
 
@@ -1280,21 +1246,8 @@ class MovieUpdate(UserPassesTestMixin, UpdateView):
     # fields = ['title', 'actors', 'director', 'date_of_release', 'language', 'genre', 'running_time']
 
     def form_valid(self, form):
-        messages.success(self.request, "The movie has been succesfully updated!")
+        messages.success(self.request, "The movie has been successfully updated!")
         return super().form_valid(form)
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-    def handle_no_permission(self):
-        return redirect('index')
-
-
-class MovieVerify(UserPassesTestMixin, generic.DetailView):
-    model = Movie
-    template_name = "polls/movie/movie_verify.html"
-
-    # success_url = reverse_lazy('movies')
 
     def test_func(self):
         return self.request.user.is_superuser
@@ -1314,22 +1267,11 @@ def movie_verification(request, pk):
     return HttpResponseRedirect(reverse('movie-detail', args=[str(pk)]))
 
 
-class MovieUnverify(UserPassesTestMixin, generic.DetailView):
-    model = Movie
-    template_name = "polls/movie/movie_unverify.html"
-
-    # success_url = reverse_lazy('movies')
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-    def handle_no_permission(self):
-        return redirect('index')
-
-
 class ProfileWatchlist(generic.DetailView):
     model = Profile
     template_name = "polls/Profile/movie_watchlist.html"
+    slug_field = 'name'
+    slug_url_kwarg = 'name'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -1349,14 +1291,14 @@ class ProfileWatchlist(generic.DetailView):
         for movie in movie_watchlist_movies:
             if movie in movie_reviews_movies:
                 movie_reviews_all.append(MovieReview.objects.filter(
-                    author=self.request.user).filter(movie=movie).first())
+                    author=self.object.user).filter(movie=movie).first())
             else:
                 movie_reviews_all.append(False)
 
         for series in series_watchlist_series:
             if series in series_reviews_series:
                 series_reviews_all.append(SeriesReview.objects.filter(
-                    author=self.request.user).filter(series=series).first())
+                    author=self.object.user).filter(series=series).first())
             else:
                 series_reviews_all.append(False)
 
@@ -1459,9 +1401,22 @@ class SeriesListView(generic.ListView):
     ordering = ["title"]
 
 
-class SeriesDetailView(generic.DetailView):
+class SeriesDetailView(UserPassesTestMixin, generic.DetailView):
     template_name = "polls/movie/series_detail.html"
     model = Series
+
+    def test_func(self):
+        get_series_object = Series.objects.get(pk=self.kwargs['pk'])
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            return True
+        elif get_series_object.Verified is False and self.request.user == get_series_object.added_by:
+            return True
+        elif (self.request.user.is_authenticated or self.request.user.is_anonymous) and get_series_object.Verified:
+            return True
+        return False
+
+    def handle_no_permission(self):
+        return redirect('series')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -1491,6 +1446,10 @@ class SeriesDetailView(generic.DetailView):
 def add_series_to_watchlist(request, series_pk, user_pk, series_status):
     profile = Profile.objects.filter(user=user_pk).first()
     series = Series.objects.filter(pk=series_pk).first()
+    exists_in_watchlist = SeriesWatchlist.objects.filter(profile=profile).filter(series=series).exists()
+    if exists_in_watchlist:
+        return HttpResponseRedirect(reverse('series-detail', args=[str(series_pk)]))
+
     SeriesWatchlist.objects.create(
         series_status=series_status,
         series=series,
@@ -1595,9 +1554,9 @@ class SeriesDelete(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
-            basic_message_content = 'Your serie were deleted from PTC, title: ' + str(self.object)
-            Mail_Notification(self.get_object(), basic_message_content, delete_reason_content)
-        messages.success(self.request, "The serie has been deleted!")
+            basic_message_content = 'Your series were deleted from PTC, title: ' + str(self.object)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content)
+        messages.success(self.request, "The series has been deleted!")
         return super().form_valid(form)
 
     def handle_no_permission(self):
@@ -1618,7 +1577,7 @@ class SeriesCreate(UserPassesTestMixin, CreateView):
         return redirect('login')
 
     def form_valid(self, form):
-        messages.success(self.request, "The serie has been succesfully created!")
+        messages.success(self.request, "The series has been successfully created!")
         form.instance.added_by = self.request.user
         return super().form_valid(form)
 
@@ -1634,21 +1593,8 @@ class SeriesUpdate(UserPassesTestMixin, UpdateView):
         return self.request.user.is_superuser
 
     def form_valid(self, form):
-        messages.success(self.request, "The serie has been succesfully updated!")
+        messages.success(self.request, "The series has been successfully updated!")
         return super().form_valid(form)
-
-    def handle_no_permission(self):
-        return redirect('index')
-
-
-class SeriesVerify(UserPassesTestMixin, generic.DetailView):
-    model = Series
-    template_name = "polls/movie/series_verify.html"
-
-    # success_url = reverse_lazy('series')
-
-    def test_func(self):
-        return self.request.user.is_superuser
 
     def handle_no_permission(self):
         return redirect('index')
@@ -1663,19 +1609,6 @@ def series_verification(request, pk):
         series_object.Verified = True
         series_object.save(update_fields=['Verified'])
     return HttpResponseRedirect(reverse('series-detail', args=[str(pk)]))
-
-
-class SeriesUnverify(UserPassesTestMixin, generic.DetailView):
-    model = Series
-    template_name = "polls/movie/series_unverify.html"
-
-    # success_url = reverse_lazy('series')
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-    def handle_no_permission(self):
-        return redirect('index')
 
 
 class ActorListView(generic.ListView):
@@ -1741,19 +1674,6 @@ class ActorUpdate(UserPassesTestMixin, UpdateView):
         return redirect('index')
 
 
-class ActorVerify(UserPassesTestMixin, generic.DetailView):
-    model = Actor
-    template_name = "polls/movie/actor_verify.html"
-
-    # success_url = reverse_lazy('series')
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-    def handle_no_permission(self):
-        return redirect('index')
-
-
 def actor_verification(request, pk):
     actor_object = get_object_or_404(Actor, id=pk)
     if actor_object.Verified:
@@ -1763,19 +1683,6 @@ def actor_verification(request, pk):
         actor_object.Verified = True
         actor_object.save(update_fields=['Verified'])
     return HttpResponseRedirect(reverse('actor-detail', args=[str(pk)]))
-
-
-class ActorUnverify(UserPassesTestMixin, generic.DetailView):
-    model = Actor
-    template_name = "polls/movie/actor_unverify.html"
-
-    # success_url = reverse_lazy('series')
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-    def handle_no_permission(self):
-        return redirect('index')
 
 
 class DirectorListView(generic.ListView):
@@ -1831,19 +1738,6 @@ class DirectorUpdate(UserPassesTestMixin, UpdateView):
         return redirect('index')
 
 
-class DirectorVerify(UserPassesTestMixin, generic.DetailView):
-    model = Director
-    template_name = "polls/movie/director_verify.html"
-
-    # success_url = reverse_lazy('series')
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-    def handle_no_permission(self):
-        return redirect('index')
-
-
 def director_verification(request, pk):
     director_object = get_object_or_404(Director, id=pk)
     if director_object.Verified:
@@ -1853,19 +1747,6 @@ def director_verification(request, pk):
         director_object.Verified = True
         director_object.save(update_fields=['Verified'])
     return HttpResponseRedirect(reverse('director-detail', args=[str(pk)]))
-
-
-class DirectorUnverify(UserPassesTestMixin, generic.DetailView):
-    model = Director
-    template_name = "polls/movie/director_unverify.html"
-
-    # success_url = reverse_lazy('series')
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-    def handle_no_permission(self):
-        return redirect('index')
 
 
 class SeasonDetailView(generic.DetailView):
@@ -1888,94 +1769,111 @@ def scrape_games_redirect(request):
     return render(request, 'polls/Game/game_scraping_redirect.html', context=context)
 
 
+def scrape_steam_ids(page, start):
+    steam_ids = []
+    url = 'https://store.steampowered.com/search/?page='+str(page)
+    print(page)
+    print(url)
+    response = requests.get(url)
+    only_item_cells = SoupStrainer("div", attrs={'id': 'search_resultsRows'})
+    table = BeautifulSoup(response.content, 'lxml', parse_only=only_item_cells)
+    games = table.find_all("a")
+    for game in games:
+        steam_ids.append(game['data-ds-appid'])
+        if time() - start > 25:
+            return steam_ids, True
+
+    return steam_ids, False
+
+
 @login_required
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def scrape_games(request):
-    # times = []
-    # counter = 0
+    start = time()
     months_eng = {"Jan,": "01", "Feb,": "02", "Mar,": "03", "Apr,": "04", "May,": "05", "Jun,": "06", "Jul,": "07",
                   "Aug,": "08", "Sep,": "09", "Oct,": "10", "Nov,": "11", "Dec,": "12"}
 
-    # months = {"January": "01", "February": "02", "March": "03", "April": "04", "May": "05", "June": "06",
-    # "July": "07", "August": "08", "September": "09", "October": "10", "November": "11", "December": "12"}
-
-    url = "https://api.steampowered.com/ISteamApps/GetAppList/v2/"
-    response = requests.get(url)
-    jsoned_data_from_response_get_app_list = response.json()
     added_games = 0
-    error_counter = 0
-    for dataa in jsoned_data_from_response_get_app_list['applist']['apps']:
-        if added_games == 5:
-            break
-        steam_app_id = dataa['appid']
-        if check_app_id(steam_app_id):
-            # print("To ID jest znane już!")
-            continue
-        url2 = "https://store.steampowered.com/api/appdetails?appids=" + str(steam_app_id)
-        response2 = requests.get(url2)
-        jsoned_data_from_response_app_details = response2.json()
-        try:
-            if not jsoned_data_from_response_app_details[str(steam_app_id)]['success']:
+    # error_counter = 0
+
+    for i in range(1, 20):
+        steams_ids, end = scrape_steam_ids(i, start)
+        if end:
+            return render(request, "polls/Game/scrape_games.html", {'addedGames': added_games})
+
+        for steam_app_id in steams_ids:
+            if time() - start > 25:
+                return render(request, "polls/Game/scrape_games.html", {'addedGames': added_games})
+            if check_app_id(steam_app_id):
+                # print("To ID jest znane już!")
                 continue
-        except TypeError:
-            print("Type error dla ID:", steam_app_id)
-            error_counter += 1
-            if error_counter == 15:
+            url2 = "https://store.steampowered.com/api/appdetails?appids=" + str(steam_app_id)
+            response2 = requests.get(url2)
+            jsoned_data_from_response_app_details = response2.json()
+            try:
+                if not jsoned_data_from_response_app_details[str(steam_app_id)]['success']:
+                    continue
+            except TypeError:
+                print("Type error dla ID:", steam_app_id)
+                # error_counter += 1
+                # if error_counter == 5:
                 break
-            sleep(1)
+                # sleep(1)
+                # continue
+            else:
+                type_app = jsoned_data_from_response_app_details[str(steam_app_id)]['data']['type']
+                if type_app == 'game':
+                    try:
+                        game_date_of_release_check = jsoned_data_from_response_app_details[str(steam_app_id)]['data'][
+                            'release_date']
+                        if game_date_of_release_check['coming_soon']:
+                            continue
 
-            continue
-        else:
-            type_app = jsoned_data_from_response_app_details[str(steam_app_id)]['data']['type']
-            if type_app == 'game':
-                try:
-                    game_date_of_release_check = jsoned_data_from_response_app_details[str(steam_app_id)]['data'][
-                        'release_date']
-                    if game_date_of_release_check['coming_soon']:
+                        game_name = jsoned_data_from_response_app_details[str(steam_app_id)]['data']['name']
+                        game_mode_pk = games_mode_api(
+                            jsoned_data_from_response_app_details[str(steam_app_id)]['data']['categories'])
+                        game_image = jsoned_data_from_response_app_details[str(steam_app_id)]['data']['header_image']
+                        game_genre_pk = games_genres_api(
+                            jsoned_data_from_response_app_details[str(steam_app_id)]['data']['genres'])
+                        game_summary = jsoned_data_from_response_app_details[str(steam_app_id)]['data'][
+                            'short_description']
+                        game_developer_pk = games_developer_api(
+                            jsoned_data_from_response_app_details[str(steam_app_id)]['data']['developers'][0])
+                    except KeyError:
+                        print(steam_app_id)
                         continue
-
-                    game_name = jsoned_data_from_response_app_details[str(steam_app_id)]['data']['name']
-                    game_mode_pk = games_mode_api(
-                        jsoned_data_from_response_app_details[str(steam_app_id)]['data']['categories'])
-                    game_image = jsoned_data_from_response_app_details[str(steam_app_id)]['data']['header_image']
-                    game_genre_pk = games_genres_api(
-                        jsoned_data_from_response_app_details[str(steam_app_id)]['data']['genres'])
-                    game_summary = jsoned_data_from_response_app_details[str(steam_app_id)]['data']['short_description']
-                    game_developer_pk = games_developer_api(
-                        jsoned_data_from_response_app_details[str(steam_app_id)]['data']['developers'][0])
-                except KeyError:
-                    print(steam_app_id)
-                    continue
-                words_to_check = ['porn', 'sex', 'gangbang', 'erotic']
-                if any(ext in game_name.lower() for ext in words_to_check):
-                    print("Nasty word found in name!!")
-                    continue
-                if any(ext in game_summary.lower() for ext in words_to_check):
-                    print("Nasty word found in summary!!")
-                    continue
-                if not game_date_of_release_check['coming_soon']:
-                    game_date_pf_release = game_date_of_release_check['date']
-                    split_date = game_date_pf_release.split()
-                    if len(split_date) != 3:
+                    words_to_check = ['porn', 'sex', 'gangbang', 'erotic']
+                    if any(ext in game_name.lower() for ext in words_to_check):
+                        print("Nasty word found in name!!")
                         continue
-                    correct_date = split_date[2] + '-' + months_eng[split_date[1]] + '-' + split_date[0]
-                else:
-                    correct_date = '1900-01-01'
+                    if any(ext in game_summary.lower() for ext in words_to_check):
+                        print("Nasty word found in summary!!")
+                        continue
+                    if not game_date_of_release_check['coming_soon']:
+                        game_date_pf_release = game_date_of_release_check['date']
+                        split_date = game_date_pf_release.split()
+                        if len(split_date) != 3:
+                            continue
+                        try:
+                            correct_date = split_date[2] + '-' + months_eng[split_date[1]] + '-' + split_date[0]
+                        except TypeError and KeyError:
+                            continue
+                    else:
+                        correct_date = '1900-01-01'
+                    game_object = Game.objects.create(
+                        added_by=User.objects.get(pk=1),
+                        title=game_name,
+                        game_image=game_image,
+                        date_of_release=correct_date,
+                        Verified=True,
+                        summary=game_summary,
+                    )
+                    game_object.mode.set(game_mode_pk)
+                    game_object.developer.set(game_developer_pk)
+                    game_object.genre.set(game_genre_pk)
 
-                game_object = Game.objects.create(
-                    added_by=User.objects.get(pk=1),
-                    title=game_name,
-                    game_image=game_image,
-                    date_of_release=correct_date,
-                    Verified=True,
-                    summary=game_summary,
-                )
-                game_object.mode.set(game_mode_pk)
-                game_object.developer.set(game_developer_pk)
-                game_object.genre.set(game_genre_pk)
-
-                print("Dodano gre i dane dla: ", game_name, added_games)
-                added_games += 1
+                    print(game_name, added_games, time()-start)
+                    added_games += 1
 
     return render(request, "polls/Game/scrape_games.html", {'addedGames': added_games})
 
@@ -2456,7 +2354,7 @@ def games_series_movies_by_genre(request, model_name, pk):
     return render(request, "polls/movie/genre_list.html", context=context)
 
 
-def create_episodes(series, series_imdb_id, start_seasons_number, end_seasons_number, api, months):
+def create_episodes(series, series_imdb_id, start_seasons_number, end_seasons_number, api, months, start):
     episodes_to_create = []
     episodes_to_update = []
     for season in range(start_seasons_number, end_seasons_number + 1):
@@ -2478,23 +2376,36 @@ def create_episodes(series, series_imdb_id, start_seasons_number, end_seasons_nu
             }
         )
 
+        episode_number = 0
         for episode in episodes_data:
+            episode_number += 1
             link = episode.a['href']
             episode_imdb_id = link.split("/")[2]
             if Episode.objects.filter(imdb_id=episode_imdb_id).exists():
-                episodes_to_update = episode_scraping(episode_imdb_id, season_object, months, api, 'update', episodes_to_update)
+                episodes_to_update = episode_scraping(series, episode_imdb_id, season_object, months, api, 'update',
+                                                      episodes_to_update, episode_number)
             else:
-                episodes_to_create = episode_scraping(episode_imdb_id, season_object, months, api, 'create', episodes_to_create)
+                episodes_to_create = episode_scraping(series, episode_imdb_id, season_object, months, api, 'create',
+                                                      episodes_to_create, episode_number)
+
+            if time() - start > 25:
+                print(time() - start)
+                if episodes_to_create:
+                    Episode.objects.bulk_create(episodes_to_create)
+                if episodes_to_update:
+                    Episode.objects.bulk_update(episodes_to_update,
+                                                ['title', 'release_date', 'episode_number', 'runtime',
+                                                 'plot', 'imdb_rating', 'poster', 'imdb_id', 'season'])
+                return True
     if episodes_to_create:
-        print('CREATE')
         Episode.objects.bulk_create(episodes_to_create)
     if episodes_to_update:
-        print('UPDATE')
         Episode.objects.bulk_update(episodes_to_update, ['title', 'release_date', 'episode_number', 'runtime',
                                                          'plot', 'imdb_rating', 'poster', 'imdb_id', 'season'])
+    return False
 
 
-def update_episodes(series, seasons_number, api, months, series_in_production):
+def update_episodes(series, seasons_number, api, months, series_in_production, start):
     episodes_list = []
     if series_in_production:
         seasons = Season.objects.filter(series=series.pk).exclude(season_number=seasons_number)
@@ -2503,11 +2414,20 @@ def update_episodes(series, seasons_number, api, months, series_in_production):
     for season in seasons:
         episodes = Episode.objects.filter(season=season.pk)
         for episode in episodes:
-            episodes_list = episode_scraping(episode.imdb_id, season, months, api, 'update', episodes_list)
+            episodes_list = episode_scraping(series, episode.imdb_id, season, months, api, 'update', episodes_list,
+                                             episode.episode_number)
+
+    if time() - start > 25:
+        print(time() - start)
+        if episodes_list:
+            Episode.objects.bulk_update(episodes_list,
+                                        ['title', 'release_date', 'episode_number', 'runtime',
+                                         'plot', 'imdb_rating', 'poster', 'imdb_id', 'season'])
+        return True
     if episodes_list:
-        print('UPDATE')
         Episode.objects.bulk_update(episodes_list, ['title', 'release_date', 'episode_number', 'runtime',
                                                     'plot', 'imdb_rating', 'poster', 'imdb_id', 'season'])
+    return False
 
 
 def scrape_seasons_number(series_imdb_id):
@@ -2521,10 +2441,15 @@ def scrape_seasons_number(series_imdb_id):
 
 @login_required
 @permission_required('catalog.can_mark_returned', raise_exception=True)
-def episode_ids_scraping(request, how_many_series, pk):
-    api_key = os.environ.get('API_KEY')
+def series_episodes_scraping(request, pk):
     start = time()
+    api_key = os.environ.get('API_KEY')
     api = omdb.OMDBClient(apikey=api_key)
+    episodes_scraping(pk, api, start)
+    return redirect(reverse('series-to-scrape'))
+
+
+def episodes_scraping(pk, api, start):
     series = get_object_or_404(Series, id=pk)
     series_imdb_id = series.imdb_id
     months = {"Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06", "Jul": "07",
@@ -2538,37 +2463,55 @@ def episode_ids_scraping(request, how_many_series, pk):
             current_seasons_number = Season.objects.filter(series=pk).count()
 
             if seasons_number != '1':
-                update_episodes(series, seasons_number, api, months, series.in_production)
-            create_episodes(series, series_imdb_id, int(current_seasons_number), int(seasons_number), api, months)
+                timeout = update_episodes(series, seasons_number, api, months, series.in_production, start)
+                if timeout:
+                    return
+            timeout = create_episodes(series, series_imdb_id, int(current_seasons_number), int(seasons_number), api,
+                                      months, start)
 
         else:
             # UPDATE EPISODES
             seasons_number = series.number_of_seasons
-            update_episodes(series, seasons_number, api, months, series.in_production)
+            timeout = update_episodes(series, seasons_number, api, months, series.in_production, start)
     else:
         # CREATE EPISODES
         series_imdb_id = series.imdb_id
         seasons_number = scrape_seasons_number(series_imdb_id)
         Series.objects.filter(id=pk).update(number_of_seasons=seasons_number)
-        create_episodes(series, series_imdb_id, 1, int(seasons_number), api, months)
+        timeout = create_episodes(series, series_imdb_id, 1, int(seasons_number), api, months, start)
 
     end = time()
-    context = {
-        'series': series,
-        'time': end - start,
-        'api_key': api_key
-    }
     print(end - start)
-    Series.objects.filter(id=pk).update(episodes_update_date=datetime.datetime.today().strftime('%Y-%m-%d'))
-
-    if how_many_series == 'one':
-        # return HttpResponseRedirect(reverse('series-detail', args=[str(pk)]))
-        return redirect(reverse('series-to-scrape', kwargs={'api_key': api_key}))
-    if how_many_series == 'all':
-        return render(request, "polls/Scraping/episodes_scraping_redirect.html", context=context)
+    if not timeout:
+        Series.objects.filter(id=pk).update(episodes_update_date=datetime.datetime.today().strftime('%Y-%m-%d'))
 
 
-def episode_scraping(episode_imdb_id, season_object, months, api, action, episodes):
+def episodes_scraping_script(request):
+    start = time()
+    api_key = os.environ.get('API_KEY')
+    api = omdb.OMDBClient(apikey=api_key)
+    today_date = datetime.datetime.strptime(datetime.datetime.today().strftime('%Y-%m-%d'), "%Y-%m-%d").date()
+    series_pks = []
+    series_set = Series.objects.filter(Verified=True)
+
+    for series in series_set.all():
+        if series.episodes_update_date:
+            days_difference = (today_date - series.episodes_update_date).days
+            if days_difference >= 7:
+                series_pks.append(series.pk)
+        else:
+            series_pks.append(series.pk)
+    for series_pk in series_pks:
+        print(series_pk)
+        episodes_scraping(series_pk, api, start)
+        print(time()-start)
+        if time()-start > 25:
+            print('timeout')
+            return redirect('index')
+    return redirect('index')
+
+
+def episode_scraping(series, episode_imdb_id, season_object, months, api, action, episodes, episode_number):
     # omdb.set_default('apikey', api_key)
     episode = api.imdbid(episode_imdb_id)
     if episode:
@@ -2576,16 +2519,15 @@ def episode_scraping(episode_imdb_id, season_object, months, api, action, episod
         release_date = episode['released']
 
         if release_date == 'N/A':
-            return 0
+            release_date = None
+        else:
+            release_date = release_date.split(' ')
+            release_date = release_date[2] + '-' + months[release_date[1]] + '-' + release_date[0]
 
-        release_date = release_date.split(' ')
-        release_date = release_date[2] + '-' + months[release_date[1]] + '-' + release_date[0]
-
-        episode_number = episode['episode']
         try:
             runtime = int(episode['runtime'].split(' ')[0])
         except ValueError:
-            runtime = 0
+            runtime = None
         plot = episode['plot']
 
         imdb_rating = episode['imdb_rating']
@@ -2595,65 +2537,81 @@ def episode_scraping(episode_imdb_id, season_object, months, api, action, episod
             imdb_rating = float(episode['imdb_rating'])
 
         poster = episode['poster']
-        imdb_id = episode['imdb_id']
+        imdb_id = episode_imdb_id
 
-        episode = Episode.objects.filter(imdb_id=imdb_id).first()
+    else:
+        title = 'Episode not found'
+        release_date = None
+        episode_number = episode_number
+        runtime = None
+        plot = None
+        imdb_rating = None
+        poster = series.poster
+        imdb_id = episode_imdb_id
+        #
 
-        if action == 'update':
-            """
-            Episode.objects.update_or_create(
-                imdb_id=imdb_id,
-                defaults={
-                    'title': title,
-                    'release_date': release_date,
-                    'episode_number': int(episode_number),
-                    'runtime': int(runtime),
-                    'plot': plot,
-                    'imdb_rating': imdb_rating,
-                    'poster': poster,
-                    'imdb_id': imdb_id,
-                    'season': season_object
-                }
-            )
-            """
-            episode.title = title
-            episode.release_date = release_date
-            episode.episode_number = int(episode_number)
-            episode.runtime = int(runtime)
-            episode.plot = plot
-            episode.imdb_rating = imdb_rating
-            episode.poster = poster
-            episode.imdb_id = imdb_id
-            episode.season = season_object
+    episode = Episode.objects.filter(imdb_id=imdb_id).first()
 
+    if action == 'update':
+        """
+        Episode.objects.update_or_create(
+            imdb_id=imdb_id,
+            defaults={
+                'title': title,
+                'release_date': release_date,
+                'episode_number': int(episode_number),
+                'runtime': int(runtime),
+                'plot': plot,
+                'imdb_rating': imdb_rating,
+                'poster': poster,
+                'imdb_id': imdb_id,
+                'season': season_object
+            }
+        )
+        """
+        episode.title = title
+        episode.release_date = release_date
+        episode.episode_number = episode_number
+        episode.runtime = runtime
+        episode.plot = plot
+        episode.imdb_rating = imdb_rating
+        episode.poster = poster
+        episode.imdb_id = imdb_id
+        episode.season = season_object
+
+        episodes.append(episode)
+
+    elif action == 'create':
+        """
+        Episode.objects.create(
+            imdb_id=imdb_id,
+            title=title,
+            release_date=release_date,
+            episode_number=int(episode_number),
+            runtime=int(runtime),
+            plot=plot,
+            imdb_rating=imdb_rating,
+            poster=poster,
+            season=season_object
+        )
+        """
+        episode = Episode(
+                            imdb_id=imdb_id,
+                            title=title,
+                            release_date=release_date,
+                            episode_number=episode_number,
+                            runtime=runtime,
+                            plot=plot,
+                            imdb_rating=imdb_rating,
+                            poster=poster,
+                            season=season_object
+                            )
+        try:
             episodes.append(episode)
-
-        elif action == 'create':
-            """
-            Episode.objects.create(
-                imdb_id=imdb_id,
-                title=title,
-                release_date=release_date,
-                episode_number=int(episode_number),
-                runtime=int(runtime),
-                plot=plot,
-                imdb_rating=imdb_rating,
-                poster=poster,
-                season=season_object
-            )
-            """
-            episode = Episode(
-                                imdb_id=imdb_id,
-                                title=title,
-                                release_date=release_date,
-                                episode_number=int(episode_number),
-                                runtime=int(runtime),
-                                plot=plot,
-                                imdb_rating=imdb_rating,
-                                poster=poster,
-                                season=season_object
-                                )
-            episodes.append(episode)
+        except:
+            test11 = episodes
+            test2 = type(episodes)
+            pass
     return episodes
 
 
@@ -2674,7 +2632,8 @@ def enter_api_key(request):
 @login_required
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def series_to_scrape(request):
-    series_set = Series.objects.order_by('episodes_update_date', 'title')
+
+    series_set = Series.objects.filter(Verified=True).order_by('episodes_update_date', 'title')
 
     context = {
         'series_set': series_set,
@@ -2685,11 +2644,10 @@ def series_to_scrape(request):
 
 @login_required
 @permission_required('catalog.can_mark_returned', raise_exception=True)
-def episode_scraping_in_progress(request, how_many_series, pk):
+def episode_scraping_in_progress(request, pk):
     series = get_object_or_404(Series, id=pk)
 
     context = {
-        'how_many_series': how_many_series,
         'pk': pk,
         'series': series
     }
@@ -2708,10 +2666,9 @@ class RequestPermissionCreate(UserPassesTestMixin, CreateView):
     success_url = reverse_lazy('index')
 
     def test_func(self):
-        test = RequestPermission.objects.filter(FromUser=self.request.user.profile)
-        print(test)
+        check_existence = RequestPermission.objects.filter(FromUser=self.request.user.profile)
 
-        if not test and self.request.user.is_authenticated:
+        if not check_existence and self.request.user.is_authenticated:
             return True
         else:
             return False
@@ -2738,19 +2695,19 @@ class RequestPermissionList(UserPassesTestMixin, generic.ListView):
         return redirect('index')
 
 
-def UserCarnage(request):
+@staff_member_required
+def delete_unverified_users(request):
     get_all_users = User.objects.all()
 
     for userI in get_all_users:
-        testX = userI
-        testY = testX.date_joined
-        czas = datetime.datetime.now(datetime.timezone.utc)
-        testZ = datetime.datetime.now(datetime.timezone.utc) - testY
-        deadline = datetime.timedelta(days=7)
-        if testZ > deadline:
-            print("Usuwam go")
+        if userI.is_superuser or userI.is_staff:
+            continue
+        elif userI.profile.expired_registration_check():
+            userI.delete()
         else:
-            print("Zostaje")
+            continue
+
+    return redirect('index')  # W skryptcie zastąpić jako exit()
 
 
 class UserPageManagement(UserPassesTestMixin, generic.DetailView):
@@ -2765,16 +2722,15 @@ class UserPageManagement(UserPassesTestMixin, generic.DetailView):
 
 
 @staff_member_required
-def DeleteUnverifiedGames(request,pk):
+def delete_unverified_games(request, pk):
     games = Game.objects.filter(added_by=pk, Verified=False)
     for game in games:
-        testFilter = Game.objects.filter(added_by=pk, Verified=False)
         game.delete()
     return redirect('user-page-management', pk)
 
 
 @staff_member_required
-def DeleteUnverifiedMovies(request,pk):
+def delete_unverified_movies(request, pk):
     movies = Movie.objects.filter(added_by=pk, Verified=False)
     for movie in movies:
         movie.delete()
@@ -2782,29 +2738,29 @@ def DeleteUnverifiedMovies(request,pk):
 
 
 @staff_member_required
-def DeleteUnverifiedSeries(request,pk):
+def delete_unverified_series(request, pk):
     series = Series.objects.filter(added_by=pk, Verified=False)
-    for serie in series:
-        serie.delete()
+    for series_object in series:
+        series_object.delete()
     return redirect('user-page-management', pk)
 
 
 @staff_member_required
-def DeleteUser(request,pk):
+def delete_user(request, pk):
     try:
-        u = User.objects.get(id = pk)
+        u = User.objects.get(id=pk)
         u.delete()
         messages.success(request, "The user is deleted")
 
     except User.DoesNotExist:
-        messages.error(request, "User doesnot exist")
+        messages.error(request, "User does not exist")
         return redirect('index')
 
     return redirect('index')
 
 
 @staff_member_required
-def DeleteUnverifiedAll(request,pk):
+def delete_unverified_all(request, pk):
     games = Game.objects.filter(added_by=pk, Verified=False)
     movies = Movie.objects.filter(added_by=pk, Verified=False)
     series = Series.objects.filter(added_by=pk, Verified=False)
@@ -2817,10 +2773,6 @@ def DeleteUnverifiedAll(request,pk):
 
     for serie in series:
         serie.delete()
-    print("TEST")
-    games = Game.objects.filter(added_by=pk, Verified=False)
-    movies = Movie.objects.filter(added_by=pk, Verified=False)
-    series = Series.objects.filter(added_by=pk, Verified=False)
 
     return redirect('user-page-management', pk)
 
@@ -2834,23 +2786,23 @@ def test(request):
     for j in range(30):
         for i in range(1, 10):
             author = Author.objects.filter(id=i).first()
-            author.first_name = 'firstnamev3'+str(i)
+            author.first_name = 'firstnamev3' + str(i)
             author.last_name = 'lastnamev3' + str(i)
             authors.append(author)
         Author.objects.bulk_update(authors, ['first_name', 'last_name'])
-        bulk_update.append(time()-start)
+        bulk_update.append(time() - start)
 
         start = time()
         for i in range(1, 10):
             Author.objects.update_or_create(
                 id=i,
                 defaults={
-                    'first_name': 'firstnamev2'+str(i),
+                    'first_name': 'firstnamev2' + str(i),
                     'last_name': 'lastnamev2' + str(i)
                 }
             )
-        update_or_create.append(time()-start)
-    print('update or create', sum(update_or_create)/len(update_or_create))
+        update_or_create.append(time() - start)
+    print('update or create', sum(update_or_create) / len(update_or_create))
     print(update_or_create)
     print('bulk update', sum(bulk_update) / len(bulk_update))
     print(bulk_update)
@@ -2862,7 +2814,7 @@ def test1(request):
     pk_list = [1]
     movies = []
     for i in range(1, 10):
-        movie = Movie(title='title'+str(i), date_of_release='2022-11-21', summary=str(i),
+        movie = Movie(title='title' + str(i), date_of_release='2022-11-21', summary=str(i),
                       poster=str(i), type_of_show='movie', running_time=i)
         movie.actors.through()
         movie.director.set(pk_list)
@@ -2885,23 +2837,22 @@ def bulk_create(request):
     for i in range(1, 100):
         Author.objects.create(
 
-                first_name= 'firstnamev2'+str(i)+str(random.randint(0,100000)),
-                last_name='lastnamev2' + str(i)+str(random.randint(0,100000))
+            first_name='firstnamev2' + str(i) + str(random.randint(0, 100000)),
+            last_name='lastnamev2' + str(i) + str(random.randint(0, 100000))
 
         )
-    update_or_create.append(time()-start)
+    update_or_create.append(time() - start)
 
     start = time()
     for i in range(1, 100):
-        author = Author(first_name = 'firstnamev3'+str(i)+str(random.randint(0,100000)),
-                        last_name = 'firstnamev3'+str(i)+str(random.randint(0,100000)))
+        author = Author(first_name='firstnamev3' + str(i) + str(random.randint(0, 100000)),
+                        last_name='firstnamev3' + str(i) + str(random.randint(0, 100000)))
         authors.append(author)
     Author.objects.bulk_create(authors)
-    bulk_update.append(time()-start)
+    bulk_update.append(time() - start)
 
-    print('normal create', sum(update_or_create)/len(update_or_create))
+    print('normal create', sum(update_or_create) / len(update_or_create))
     print(update_or_create)
     print('bulk create', sum(bulk_update) / len(bulk_update))
     print(bulk_update)
     return render(request, 'index.html')
-

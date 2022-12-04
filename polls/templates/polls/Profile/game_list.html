@@ -16,12 +16,12 @@
 
     {% for game_list, review in reviews_and_games %}
         <tr style="border: 1px solid; background-color: #d3d3d3">
-            <th> <a href="{{ game_list.game.get_absolute_url }}">{{ game_list.game }}</a></th>
+            <th><a href="{{ game_list.game.get_absolute_url }}"><strong>{{ game_list.game }}</strong></a></th>
             {% if review %}
                 <th>{{ review.rate }}</th>
                 <th>
                     <a href="{% url 'game-review-detail' pk=review.pk%}">
-                        <button class="btn btn-success btn-sm">My review</button>
+                        <button class="btn btn-success btn-sm">Display</button>
                     </a>
                 </th>
             {% else %}
@@ -31,7 +31,7 @@
                 {% else %}
                     <th>
                         <a href="{% url 'create-game-review' game_pk=game_list.game.pk%}">
-                            <button class="btn btn-success btn-sm">Write review</button>
+                            <button class="btn btn-success btn-sm">Write</button>
                         </a>
                     </th>
                 {% endif %}

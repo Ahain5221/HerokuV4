@@ -2,98 +2,41 @@
 {% load static %}
 
 {% block content %}
-
-                {% if user.is_superuser or user.is_staff %}
-                    <a href="{% url 'user-page-management' profile.pk %}"><button>User Management Admin</button></a>
-
-                {% endif %}
-
-                {% if page_user.user == user %}
-                    <a href="{% url 'friend-list' profile.pk %}"><button>Friend list</button></a>
-                    <a href="{% url 'friend-request-list' profile.pk %}"><button>Pending friends requests [{{ amount_of_pending_friend_request }}]</button></a>
-                {% endif %}
-
-                {% if page_user.user != user %}
-                {% if not are_we_friends %}
-
-                {% if not received_friend_request and page_user.user != user %}
-                {% if page_user.user != user and not was_send_friend_request %}
-                <form action="{% url 'add-friend' profile.pk %}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-info btn-sm">Invite a friend</button>
-                </form>
-
-                    {% elif was_send_friend_request and not are_we_friends %}
-
-                    <form action="{% url 'cancel-friend' page_user.user.pk%}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm">Cancel invitation</button>
-                </form>
-                {% endif %}
-
-                {% else %}
-                    <form action="{% url 'accept-friend' profile.pk %}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-info btn-sm">Accept a friend</button>
-                </form>
-                {% endif %}
-
-                    {% else %}
-                    We are friends!
-                    <form action="{% url 'delete-friend' profile.pk %}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm">☠ Destroy friendship ☠</button>
-                </form>
-                {% endif %}
-                {% endif %}
-
-    <h1 style="padding-bottom: 1em; padding-left: 1em"> {{ page_user }}'s Profile</h1>
-
-
+    <h3 style="font-size: xx-large; padding-bottom: 0.5em; padding-left: 1em">{{ page_user }}'s Profile</h3>
+    <hr style="width:auto">
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-2">
                 {% if page_user.profile_image_url %}
                     <img src="{{ page_user.profile_image_url }} " class="card-img">
                 {% endif %}
-            <span style="font-size: 1.5em; margin-left: 0.5em">
-                 <a href="#"> <i class="fa-solid fa-thumbs-up"></i> </a>
-             </span>
-            {{ page_user.likes.count }}
-
+            {% if user.is_authenticated and page_user.user != user %}
+            <form action="{% url 'like_profile' profile.pk%}" method="POST" style="margin-left: 1.25em; margin-bottom: 1em">
+                {% csrf_token %}
+                {% if liked %}
+                    <button type="submit" name="profile_id" value="{{ profile.id }}" class="btn btn-danger btn-sm"> <a class="icon solid fa-thumbs-down" style="color: #710000"></a> Unlike </button>
+                {% else %}
+                    <button type="submit" name="profile_id" value="{{ profile.id }}" class="btn btn-primary btn-sm"> <a class="icon solid fa-thumbs-up fa-xl" style="color: #2b2a5c"></a> Like  </button>
+                {% endif %}
+            </form>
+            {% endif %}
             </div>
             <div class="col">
                 <div class="row" style="padding-bottom: 15px">
-                    {% if user.is_authenticated %}
                     <div class="col">
-                    <form action="{% url 'like_profile' profile.pk%}" method="POST">
-                        {% csrf_token %}
-                        {% if liked %}
-                            <button type="submit" name="profile_id" value="{{ profile.id }}" class="btn btn-danger btn-sm"> <a class="icon solid fa-thumbs-down" style="color: #710000"></a> Unlike </button>
-                        {% else %}
-                            <button type="submit" name="profile_id" value="{{ profile.id }}" class="btn btn-primary btn-sm"> <a class="icon solid fa-thumbs-up fa-xl" style="color: #2b2a5c"></a> Like  </button>
+                        {% if page_user.user == user %}
+                            <a href="{% url 'friend-list' profile.pk %}"><button class="btn btn-dark btn-sm">Friends</button></a>
                         {% endif %}
-
-                    </form>
-                        <!--
-                        {{ page_user.likes.count }}
-                        -->
                     </div>
-                    {% endif %}
                     <div class="col">
-                        <a href="{% url 'my-favorites' page_user.pk %}" style="padding: 1em"><button class="btn btn-dark btn-sm">My favorites</button></a>
+                        <a href="{% url 'my-favorites' page_user.name %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Favorites</button></a>
                     </div>
 
                     <div class="col">
-                        <a href="{% url 'profile-watchlist' page_user.pk %}" style="padding: 1em"><button class="btn btn-dark btn-sm">My watchlist</button></a>
+                        <a href="{% url 'profile-watchlist' page_user.name %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Watchlist</button></a>
                     </div>
                     <div class="col">
-                        <a href="{% url 'profile-game-list' page_user.pk %}" style="padding: 1em"><button class="btn btn-dark btn-sm">My game list</button></a>
-                    </div>
-                    <div class="col" style="margin-top: 0.5em">
-                        {% if not has_perm and page_user.user == user and perm_request == None and not page_user.user.is_superuser %}
-                            <a href="{% url 'request-create' %}"><button>Request Perm</button></a>
-                        {% endif %}
+                        <a href="{% url 'profile-game-list' page_user.name %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Game-list</button></a>
                     </div>
                 </div>
                 <div class="card mb-3">
@@ -107,23 +50,57 @@
                         </p>
                     </div>
                 </div>
+            <div class="row">
+                <div class="col">
+                {% if not has_perm and page_user.user == user and perm_request == None and not page_user.user.is_superuser %}
+                <a href="{% url 'request-create' %}"><button class="btn btn-dark btn-sm">Request Perm</button></a>
+                {% endif %}
+            </div>
+            <div class="col-md-10" style="margin-top: 1.5em">
+            <h5 class="card-title">
+             Joined: {{ page_user.user.date_joined.date }} | Last seen: {{ page_user.user.last_login.date }} | Gender: {{ page_user.gender }} | Likes received: {{ page_user.likes.count }}
+            {% if page_user.date_of_birth %}
+                | Birth date: {{ page_user.date_of_birth }}
+            {% endif %}
+        </h5>
+            {% if user.is_superuser or user.is_staff %}
+                    <a href="{% url 'user-page-management' profile.pk %}" style="margin-left: 10em"><button>User Management Admin</button></a>
+            {% endif %}
+    </div>
             </div>
         </div>
     </div>
-    <div class="col-md-10">
-
-        <h5 class="card-title">
-             Joined: {{ page_user.user.date_joined.date }} | Last seen: {{ page_user.user.last_login.date }} | Gender: {{ page_user.gender }}
-        </h5>
-
-        <p class="small text-muted">
-            {% if page_user.date_of_birth %}
-                Birth date {{ page_user.date_of_birth }}
+        {% if page_user.user != user %}
+        {% if not are_we_friends %}
+            {% if not received_friend_request and page_user.user != user %}
+                {% if page_user.user != user and not was_send_friend_request %}
+                    <form action="{% url 'add-friend' profile.pk %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-info btn-sm">Invite a friend</button>
+                    </form>
+                {% elif was_send_friend_request and not are_we_friends %}
+                    <form action="{% url 'cancel-friend' page_user.user.pk%}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Cancel invitation</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <form action="{% url 'accept-friend' profile.pk %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-info btn-sm">Accept a friend</button>
+                </form>
             {% endif %}
-        </p>
-    </div>
+        {% else %}
+            <form action="{% url 'delete-friend' profile.pk %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">☠ Unfriend ☠</button>
+            </form>
+        {% endif %}
+    {% endif %}
 
-    <h3 style="font-size: xx-large">Statistics</h3>
+    <hr style="width:auto">
+    <h3 style="font-size: xx-large; margin-top: 0.5em; margin-bottom: 1em">Statistics</h3>
+    <hr style="width:auto">
     <div class="row">
         <div class="col">
             <ul class="list-inline" style="font-size: x-large; color: #f7f7f7">Movie statistics
@@ -131,6 +108,7 @@
             <li style="font-size: large; margin: 0">Movies to watch: {{ profile.number_of_want_to_watch_movies }}</li>
             </ul>
         </div>
+
         <div class="col">
             <ul class="list-inline" style="font-size: x-large; color: #f7f7f7">Series statistics
             <li style="font-size: large; margin: 0"> Series watched: {{ profile.number_of_watched_series }}</li>

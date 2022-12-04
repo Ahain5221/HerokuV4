@@ -57,11 +57,11 @@
                 {{ form.content }}
             </td>
             </tr>
-
             <tr>
                 <th>{{ form.rate.label_tag }}</th>
                 <td>
                     {{ form.rate.errors }}
+                    <br>
                     <div class="slider">
                         {{ form.rate }}
                         <p id="rangeValue">{{ object.rate }}</p>

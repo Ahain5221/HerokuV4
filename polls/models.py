@@ -1,12 +1,12 @@
 import uuid  # Required for unique book instances
 from datetime import date
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from django.contrib.auth.models import User
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse  # Used to generate URLs by reversing the URL patterns
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.shortcuts import get_object_or_404
+# from django.shortcuts import get_object_or_404
 
 
 # Create your models here.
@@ -70,14 +70,15 @@ class Game(models.Model):
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=200)
     developer = models.ManyToManyField('Developer', blank=True)
-    #developer = models.ForeignKey('Developer', on_delete=models.SET_NULL, null=True)
+    # developer = models.ForeignKey('Developer', on_delete=models.SET_NULL, null=True)
     date_of_release = models.DateField(null=True, blank=True)
     # game_image = models.ImageField(null = True, blank=True, upload_to="images/")
-    game_image = models.TextField(max_length=100, null=True, blank=True, default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400.jpg")
+    game_image = models.TextField(max_length=100, null=True, blank=True,
+                                  default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400"
+                                          ".jpg")
 
     genre = models.ManyToManyField(GameGenre, help_text='Select a genre for this game')
     mode = models.ManyToManyField(GameMode, help_text='Select which game mode is available')
-    # Nwm czy to jest sens tu trzymać z language
     # language = models.ForeignKey('Language', on_delete=models.SET_NULL, null=True)
     summary = models.TextField(max_length=1000, help_text='Enter a brief description of the game')
     Verified = models.BooleanField(default=False)
@@ -92,16 +93,6 @@ class Game(models.Model):
     def get_absolute_url(self):
         """Returns the URL to access a detail record for this game."""
         return reverse('game-detail', args=[str(self.id)])
-
-    def Verify(self, *args, **kwargs):
-        self.Verified = True
-        self.save(update_fields=['Verified'])
-        return self.Verified
-
-    def Unverify(self, *args, **kwargs):
-        self.Verified = False
-        self.save(update_fields=['Verified'])
-        return self.Verified
 
 
 class Book(models.Model):
@@ -215,7 +206,8 @@ class Developer(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
     # profile_image = models.ImageField(null = True, blank=True, upload_to="images/")
-    profile_image_url = models.TextField(null=True, blank=True, default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400.jpg")
+    profile_image_url = models.TextField(null=True, blank=True, default="https://pbs.twimg.com/profile_images"
+                                                                        "/1510045751803404288/W-AAI2EH_400x400.jpg")
     date_of_birth = models.DateField(null=True, blank=True)
     profile_description = models.TextField(null=True, blank=True)
     signature = models.TextField(null=True, blank=True)
@@ -223,6 +215,9 @@ class Profile(models.Model):
     favorite_games = models.ManyToManyField('Game')
     favorite_movies = models.ManyToManyField('Movie')
     favorite_series = models.ManyToManyField('Series')
+    registration_completed = models.BooleanField(default=False)
+    name = models.CharField(max_length=200, blank=True)
+
     # movie_watchlist = models.ForeignKey('MovieWatchlist', on_delete=models.CASCADE, null=True)
     # movie_watchlist = models.ManyToManyField('MovieWatchlist')
 
@@ -232,6 +227,16 @@ class Profile(models.Model):
     def LastSeen(self):
         return self.user.last_login
 
+    def expired_registration_check(self):
+
+        get_joined_date = self.user.date_joined
+        elapsed_time = datetime.now(timezone.utc) - get_joined_date
+        deadline = timedelta(days=7)
+        if elapsed_time > deadline and not self.registration_completed:
+            return True
+        else:
+            return False
+
     Genders = (
         ('Male', 'Male'),
         ('Female', 'Female'),
@@ -239,6 +244,9 @@ class Profile(models.Model):
     )
 
     gender = models.CharField(max_length=10, choices=Genders, default='Undefined')
+
+    def get_absolute_url(self):
+        return reverse('profile-page', args=[str(self.id)])
 
     def __str__(self):
         return str(self.user)
@@ -285,27 +293,14 @@ class Profile(models.Model):
 
 
 class Person(models.Model):
-    # first_name = models.CharField(max_length=100)
-    # last_name = models.CharField(max_length=100)
     full_name = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
     date_of_death = models.DateField(null=True, blank=True)
     Verified = models.BooleanField(default=False)
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
-    def verified(self, *args, **kwargs):
-        self.Verified = True
-        self.save(update_fields=['Verified'])
-        return self.Verified
-
-    def unverified(self, *args, **kwargs):
-        self.Verified = False
-        self.save(update_fields=['Verified'])
-        return self.Verified
-
     class Meta:
         abstract = True
-  #      ordering = ['full_name']
 
 
 class MovieSeriesBase(models.Model):
@@ -317,7 +312,8 @@ class MovieSeriesBase(models.Model):
     genre = models.ManyToManyField('MovieSeriesGenre')
     Verified = models.BooleanField(default=False)
     summary = models.TextField(max_length=1000, default="summary")
-    poster = models.TextField(max_length=200, default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400.jpg")
+    poster = models.TextField(max_length=200,
+                              default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400.jpg")
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     imdb_rating = models.FloatField(default=None, null=True, blank=True)
     imdb_id = models.CharField(max_length=10, unique=True, null=True)
@@ -328,16 +324,6 @@ class MovieSeriesBase(models.Model):
     ]
     type_of_show = models.CharField(max_length=6, choices=CHOICES, default='movie')
 
-    def verified(self, *args, **kwargs):
-        self.Verified = True
-        self.save(update_fields=['Verified'])
-        return self.Verified
-
-    def unverified(self, *args, **kwargs):
-        self.Verified = False
-        self.save(update_fields=['Verified'])
-        return self.Verified
-
     class Meta:
         abstract = True
 
@@ -347,30 +333,25 @@ class Actor(Person):
     CHOICES = [
         ('actor', 'actor')
     ]
-    #specialisation = 'actor'
     specialisation = models.CharField(max_length=5, choices=CHOICES, default='actor')
 
     def get_absolute_url(self):
         return reverse('actor-detail', args=[str(self.id)])
 
     def __str__(self):
-        # return f'{self.first_name} {self.last_name}'
         return self.full_name
 
 
 class Director(Person):
-    #amount_of_films = models.CharField(max_length=100)
     CHOICES = [
         ('director', 'director')
     ]
-    #specialisation = 'actor'
     specialisation = models.CharField(max_length=8, choices=CHOICES, default='director')
 
     def get_absolute_url(self):
         return reverse('director-detail', args=[str(self.id)])
 
     def __str__(self):
-        # return f'{self.first_name} {self.last_name}'
         return self.full_name
 
 
@@ -417,7 +398,6 @@ class MovieSeriesGenre(models.Model):
     class Meta:
         ordering = ['name']
 
-
     def __str__(self):
         return self.name
 
@@ -432,7 +412,7 @@ class KnownSteamAppID(models.Model):
         return self.id
 
 
-#class Favorite(models.Model):
+# class Favorite(models.Model):
 
 #    user = models.ForeignKey('Profile', related_name='favorites',on_delete=models.SET_NULL, null=True)
 #    game = models.ForeignKey('Game', related_name='favorites',on_delete=models.SET_NULL, null=True)
@@ -455,7 +435,8 @@ class Episode(models.Model):
     runtime = models.IntegerField(null=True)
     plot = models.TextField(max_length=1000, null=True)
     imdb_rating = models.FloatField(null=True, blank=True)
-    poster = models.TextField(max_length=200, default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400.jpg")
+    poster = models.TextField(max_length=200,
+                              default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400.jpg")
     imdb_id = models.CharField(max_length=10, unique=True, null=True)
 
     def __str__(self):
@@ -479,7 +460,7 @@ class MovieWatchlist(models.Model):
 
 class MovieReview(models.Model):
     movie = models.ForeignKey('Movie', on_delete=models.CASCADE)
-    content = models.TextField()
+    content = models.TextField(max_length=1000)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     review_date = models.DateField(default=datetime.today().strftime('%Y-%m-%d'))
     rate = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], null=True)
@@ -513,7 +494,7 @@ class SeriesWatchlist(models.Model):
 
 class SeriesReview(models.Model):
     series = models.ForeignKey('Series', on_delete=models.CASCADE)
-    content = models.TextField()
+    content = models.TextField(max_length=1000)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     review_date = models.DateField(default=datetime.today().strftime('%Y-%m-%d'))
     rate = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], null=True)
@@ -534,17 +515,18 @@ class GameList(models.Model):
 
 class GameReview(models.Model):
     game = models.ForeignKey('Game', on_delete=models.CASCADE)
-    content = models.TextField()
+    content = models.TextField(max_length=1000)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     review_date = models.DateField(default=datetime.today().strftime('%Y-%m-%d'))
     rate = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], null=True)
 
+
 class RequestPermission(models.Model):
-    #FromUser = models.ForeignKey(Profile, on_delete=models.CASCADE, unique=True)
+    # FromUser = models.ForeignKey(Profile, on_delete=models.CASCADE, unique=True)
     FromUser = models.OneToOneField(Profile, on_delete=models.CASCADE)
 
     Request_Reason = models.TextField()
-    #status = models.BooleanField(default=False)
+    # status = models.BooleanField(default=False)
 
     Choice_Status = (
         ('Sent', 'Sent'),
@@ -553,5 +535,3 @@ class RequestPermission(models.Model):
         ('None', 'None'),
     )
     status = models.CharField(max_length=10, choices=Choice_Status, default='None')
-
-

@@ -32,23 +32,24 @@ class SearchForm(forms.Form):
     searched = forms.CharField(label='Game title', max_length=100, required=False)
     genres = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='game_genre-autocomplete'), required=False)
     modes = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='game_mode-autocomplete'), required=False)
-    fromYear = forms.IntegerField(label="Min year", required=False,min_value=1900)
+    fromYear = forms.IntegerField(label="Min year", required=False,min_value=1900, max_value=datetime.datetime.now().year)
     toYear = forms.IntegerField(label="Max year", required=False, min_value=1900, max_value=datetime.datetime.now().year)
 
 
 class SearchForm_Movie(forms.Form):
     searched = forms.CharField(label='Movie title', max_length=100, required=False)
     genres = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='movie_series_genre-autocomplete'), required=False)
-    fromYear = forms.IntegerField(label="Min year", required=False,min_value=1900)
+    fromYear = forms.IntegerField(label="Min year", required=False,min_value=1900, max_value=datetime.datetime.now().year)
     toYear = forms.IntegerField(label="Max year", required=False,min_value=1900, max_value=datetime.datetime.now().year)
     running_time = forms.IntegerField(label="Minimum running time", required=False, min_value=0, max_value=654321)
 
 class SearchForm_Series(forms.Form):
-    searched = forms.CharField(label='Serie title', max_length=100, required=False)
+    searched = forms.CharField(label='Series title', max_length=100, required=False)
     genres = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='movie_series_genre-autocomplete'), required=False)
-    fromYear = forms.IntegerField(label="Min year", required=False,min_value=1900)
+    in_production = forms.ChoiceField(label="Series status", choices=(("", ''), (False, 'Finished'), (True, 'Ongoing')),
+                                      required=False)
+    fromYear = forms.IntegerField(label="Min year", required=False,min_value=1900, max_value=datetime.datetime.now().year)
     toYear = forms.IntegerField(label="Max year", required=False, min_value=1900, max_value=datetime.datetime.now().year)
-    in_production = forms.ChoiceField(label="Series status", choices=(("", ''),(False, 'Finished'), (True, 'Ongoing')), required=False)
 
 
 
@@ -199,10 +200,10 @@ class SeriesStatusForm(forms.ModelForm):
         CHOICES = [
             ('watched', 'watched'),
             ('watching', 'watching'),
-            # ('want to watch', 'want to watch')
+            ('want to watch', 'want to watch')
         ]
         widgets = {
-            'series_status': forms.Select(choices=CHOICES, attrs={'class': 'form-control'}),
+            'series_status': forms.Select(choices=CHOICES, attrs={'class': 'custom-form-control'}),
         }
 
 
@@ -229,7 +230,7 @@ class MovieWatchlistForm(forms.ModelForm):
         # fields = '__all__'
         fields = ('movie_status',)
         widgets = {
-            'movie_status': forms.Select(choices=CHOICES, attrs={'class': 'form-control'}),
+            'movie_status': forms.Select(choices=CHOICES, attrs={'class': 'custom-form-control'}),
         }
 
 
@@ -246,7 +247,7 @@ class SeriesWatchlistForm(forms.ModelForm):
         fields = ['series_status', ]
 
         widgets = {
-            'series_status': forms.TextInput(attrs={'class': 'form-control'})
+            'series_status': forms.TextInput(attrs={'class': 'custom-form-control'})
         }
 
 
@@ -334,6 +335,7 @@ class OmdbApiForm(forms.Form):
 
 class EnterApiKey(forms.Form):
     api_key = forms.CharField(widget=forms.TextInput())
+
 
 class RequestPermissionForm(forms.ModelForm):
     class Meta:

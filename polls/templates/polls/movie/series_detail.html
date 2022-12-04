@@ -15,25 +15,77 @@
             &nbsp;&nbsp;&nbsp;
             {{ series.number_of_seasons }} Seasons
         {% endif %}
-        <div style="margin-left: 8.5em">
+    </a>
+    {% if user.is_authenticated %}
+    <div class="container text-center">
+      <div class="row row-cols-auto">
+        <div class="col">
             <form action="{% url 'add-favorite-series' series.pk%}" method="POST">
                 {% csrf_token %}
                 {% if series in user.profile.favorite_series.all %}
-                    <button type="submit" name="series_id" value="{{ series.pk }}" class="btn btn-secondary btn-sm"><a class="icon solid fa-heart" style="color: #dad0c0"></a>Unfavorite</button>
+                    <button type="submit" name="series_id" value="{{ series.pk }}" class="btn btn-secondary btn-sm"><a class="icon solid fa-heart-broken fa-2xl" style="color: #dad0c0"></a>Unfavorite</button>
                 {% else %}
-                    <button type="submit" name="series_id" value="{{ series.pk }}" class="btn btn-danger btn-sm"><a class="icon solid fa-heart" style="color: #710000"></a>Favorite</button>
+                    <button type="submit" name="series_id" value="{{ series.pk }}" class="btn btn-danger btn-sm"><a class="icon solid fa-heart fa-2xl" style="color: #710000"></a>Favorite</button>
                 {% endif %}
             </form>
         </div>
-    </a>
+        <div class="col">
+            {% if series_in_user_watchlist %}
+                <a onclick="location.href='{% url 'remove-series-from-watchlist' series.pk user.pk %}'"><button class="btn btn-primary btn-sm">REMOVE FROM WATCHLIST</button></a>
+            {% else %}
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">Add to My List</button>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <a onclick="location.href='{% url 'add-series-to-watchlist' series.pk user.pk 'watched'%}'"><button class="btn btn-primary btn-sm">Watched</button></a>
+                            <a onclick="location.href='{% url 'add-series-to-watchlist' series.pk user.pk 'watching'%}'"><button class="btn btn-primary btn-sm">Watching</button></a>
+                            <a onclick="location.href='{% url 'add-series-to-watchlist' series.pk user.pk 'want to watch'%}'"><button class="btn btn-primary btn-sm">Want to watch</button></a>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary btn-sm">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
     <div class="row">
         <div class="col" style="margin-top: 1em">
             <img style='height: initial; width: initial; padding-left: inherit' src="{{ series.poster }}" class="card-img" alt="">
-            <ul>
-                {% for genre in series.genre.all %}
-                    <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
-                {% endfor %}
-            </ul>
+            {% if series.genre.all.count == 3 %}
+                <ul style="margin-left: 4em">
+                    {% for genre in series.genre.all %}
+                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                    {% endfor %}
+                </ul>
+            {% elif series.genre.all.count == 2 %}
+                <ul style="margin-left: 7em">
+                    {% for genre in series.genre.all %}
+                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                    {% endfor %}
+                </ul>
+            {% elif series.genre.all.count == 1 %}
+                <ul style="margin-left: 10em">
+                    {% for genre in series.genre.all %}
+                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <ul>
+                    {% for genre in series.genre.all %}
+                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                    {% endfor %}
+                </ul>
+            {% endif %}
         </div>
         <div class="col" style="padding-top: 25px">
             <article style="display: inline-block; font-size: initial; margin-bottom: 1em">
@@ -61,7 +113,7 @@
                 <li>
                         {% for director in series.director.all %}
                             {% if director.full_name != 'N/A' %}
-                                <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial" href="{{ director.get_absolute_url }}"> {{ director }} </a>
+                                <a style="display: inline; margin-right: 6px; font-size: initial" href="{{ director.get_absolute_url }}"> {{ director }} </a>
                             {% endif %}
                         {% endfor %}
                 </li>
@@ -73,7 +125,7 @@
                 <li>
                         {% for actor in series.actors.all %}
                             {% if actor.full_name != 'N/A' %}
-                                <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial" href="{{ actor.get_absolute_url }}"> {{ actor }} </a>
+                                <a style="display: inline; margin-right: 6px; font-size: initial" href="{{ actor.get_absolute_url }}"> {{ actor }} </a>
                             {% endif %}
                         {% endfor %}
                 </li>
@@ -97,85 +149,77 @@
                 {% endif %}
                 -->
                 {% if  series.added_by%}
-                    <li>Added by <a href="{% url 'profile-page' pk=series.added_by.id %}">{{ series.added_by }}</a></li>
+                    <li>Added by <a href="{% url 'profile-page' name=series.added_by.profile.name %}">{{ series.added_by }}</a></li>
                 {% else %}
                     <li>Added by API</li>
                 {% endif %}
+            {% if user.is_superuser %}
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal_2">EDIT</button>
+            <div class="modal fade" id="exampleModal_2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                {% if series.added_by == user and not series.Verified or user.is_superuser %}
+                                    <div class="col">
+                                        <a href="{% url 'series-update' pk=series.id %}">
+                                            <button class="btn btn-success btn-sm">UPDATE</button>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                <div class="col">
+                                    <a href="{% url 'series-delete' pk=series.id %}">
+                                        <button class="btn btn-danger btn-sm">DELETE SERIES</button>
+                                    </a>
+                                </div>
+                                <div class="col">
+                                    <form action="{% url 'series-verification' series.pk %}">
+                                        {% csrf_token %}
+                                        {% if series.Verified %}
+                                            <button type="submit" value="{{ series.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+                                        {% else %}
+                                            <button type="submit" value="{{ series.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
             </ul>
         </div>
     </div>
     </div>
 
-    <ul class="list-inline">
-        <li>
-            <a href="{% url 'series-update' pk=series.id %}">
-                <button class="btn btn-success btn-sm">UPDATE</button>
-            </a>
-        </li>
-
-        <li>
-            {% if user.is_superuser %}
-                <a href="{% url 'series-delete' pk=series.id %}">
-                    <button class="btn btn-danger btn-sm">DELETE SERIES</button>
-                </a>
-                <form action="{% url 'series-verification' series.pk %}">
-                    {% csrf_token %}
-                    {% if series.Verified %}
-                        <button type="submit" value="{{ series.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
-                    {% else %}
-                        <button type="submit" value="{{ series.pk }}"   class="btn btn-primary btn-sm">Verify</button>
-                    {% endif %}
-                </form>
-            {% endif %}
-        </li>
-    </ul>
-
-
-     {% if user.is_authenticated %}
-
-        {% if series_in_user_watchlist %}
-            <a href="{% url 'remove-series-from-watchlist' series.pk user.pk %}"><button class="btn btn-primary btn-sm">REMOVE FROM WATCHLIST</button></a>
-        {% else %}
-            <strong>ADD TO YOUR WATCHLIST</strong>
-            <a href="{% url 'add-series-to-watchlist' series.pk user.pk 'watched'%}"><button class="btn btn-primary btn-sm">Watched</button></a>
-            <a href="{% url 'add-series-to-watchlist' series.pk user.pk 'watching'%}"><button class="btn btn-primary btn-sm">Watching</button></a>
-            <a href="{% url 'add-series-to-watchlist' series.pk user.pk 'want to watch'%}"><button class="btn btn-primary btn-sm">Want to watch</button></a>
+    <h1 style="padding-bottom: 1em; margin-top: 5em">
+        {% if series_reviews.count > 0 %}
+            Reviews
         {% endif %}
 
-        <a href="{% url 'profile-watchlist' user.pk %}"><button class="btn btn-primary btn-sm">My watchlist</button></a>
-
-        <form action="{% url 'add-favorite-series' series.pk%}" method="POST">
-            {% csrf_token %}
-            {% if series in user.profile.favorite_series.all %}
-                <button type="submit" name="series_id" value="{{ series.pk }}" class="btn btn-danger btn-sm"><s>Favorite</s></button>
-            {% else %}
-                <button type="submit" name="series_id" value="{{ series.pk }}" class="btn btn-primary btn-sm">Favorite</button>
-            {% endif %}
-        </form>
-        <a href="{% url 'my-favorites' user.pk %}"><button class="btn btn-primary btn-sm">My favorites</button></a>
-    {% endif %}
-
-    <br><br>
-    {% if user.is_authenticated%}
-        {% if series_watched_watching %}
-            {% if  series_has_user_review%}
-                <strong>You already wrote review</strong>
-                <a href="{% url 'series-review-update' series_pk=series.pk pk=user_review.pk%}">
-                    <button class="btn btn-success btn-sm">Update review</button>
-                </a>
-            {% else %}
-                <a href="{% url 'create-series-review' series_pk=series.pk%}">
-                    <button class="btn btn-success btn-sm">Write review</button>
-                </a>
+        {% if user.is_authenticated%}
+            {% if series_watched_watching %}
+                {% if  series_has_user_review%}
+                    <a href="{% url 'series-review-update' series_pk=series.pk pk=user_review.pk%}">
+                        <button class="btn btn-success btn-sm" style="margin-left: 4em">Update review</button>
+                    </a>
+                {% else %}
+                    <a href="{% url 'create-series-review' series_pk=series.pk%}">
+                        <button class="btn btn-success btn-sm" style="margin-left: 8em">Write review</button>
+                    </a>
+                {% endif %}
             {% endif %}
         {% endif %}
-    {% endif %}
-
+    </h1>
     {% for review in series_reviews %}
-        <div style="border: thin solid black">
-            <div style="border: thin solid black"> <strong>{{ review.author }}</strong> {{ review.review_date }}</div>
-            <div style="border: thin solid black"> {{ review.author }}'s rate {{ review.rate }} </div>
-            <div style="border: thin solid black">{{ review.content }} </div>
+        <div style="border: 1px solid #262626; width: 50em">
+            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}</div>
+            <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ review.content }} </div>
         </div>
     {% endfor %}
 

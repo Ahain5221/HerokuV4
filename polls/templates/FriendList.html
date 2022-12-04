@@ -2,22 +2,51 @@
 
 {% block content %}
 
-    <h1>Friend List</h1>
+    <h1 style="margin-bottom: 1.5em">Friends</h1>
     {% if friend_list %}
         <ul>
 
             {% for friend in friend_list %}
-                <li>
-                    <a href="{% url 'profile-page' friend.pk %}"> {{ friend }} </a>
-
+                <li class="list-inline">
+                <div class="col-md-1">
+                    <div>
+                        <a href="{% url 'profile-page' friend.pk %}">
+                            <img src="{{ avatar }}" class="card-img">
+                            <p style="font-size: medium; margin-top: 0"> {{ friend }} </p>
+                        </a>
+                    </div>
+                </div>
                 </li>
             {% endfor %}
 
         </ul>
     {% else %}
-        <p>There are no friends available.</p>
+        <p>YOU HAVE NO FRIENDS!</p>
     {% endif %}
 
+    {% if friend_request_list %}
 
+    <h1 style="margin-top: 10em">Friend Requests</h1>
+
+
+        <ul>
+
+            {% for friend in friend_request_list %}
+                <li>
+                    <a href="{% url 'profile-page' friend.from_user.pk %}"> {{ friend.from_user }} </a>
+                    <form action="{% url 'accept-friend' friend.from_user.pk %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-info btn-sm">Accept as friend</button>
+                </form>
+                    <form action="{% url 'reject-friend' friend.from_user.pk %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Reject as friend</button>
+                </form>
+
+
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
 {% endblock %}

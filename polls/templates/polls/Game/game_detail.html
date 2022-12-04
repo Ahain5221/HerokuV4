@@ -59,7 +59,7 @@
                     {% endif %}
                     -->
                     {% if  game.added_by%}
-                        <li>Added by <a href="{% url 'profile-page' pk=game.added_by.id %}">{{ game.added_by }}</a></li>
+                        <li>Added by <a href="{% url 'profile-page' user %}">{{ game.added_by }}</a></li>
                     {% else %}
                         <li>Added by API</li>
                     {% endif %}
@@ -70,18 +70,20 @@
 
 
     <ul class="list-inline">
-        <li>
-            <a href="{% url 'game-update' pk=game.id %}">
-                <button class="btn btn-success btn-sm">UPDATE</button>
-            </a>
-        </li>
+        {% if game.added_by == user and not game.Verified or user.is_superuser %}
+            <li>
+                <a href="{% url 'game-update' pk=game.id %}">
+                    <button class="btn btn-success btn-sm">UPDATE</button>
+                </a>
+            </li>
+        {% endif %}
 
         <li>
             {% if user.is_superuser %}
                 <a href="{% url 'game-delete' pk=game.id %}">
                     <button class="btn btn-danger btn-sm">DELETE SERIES</button>
                 </a>
-                <form action="{% url 'game-verify' game.pk %}">
+                <form action="{% url 'add_verf' game.pk %}">
                     {% csrf_token %}
                     {% if game.Verified %}
                         <button type="submit" value="{{ game.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
@@ -96,15 +98,16 @@
     <br><br>
     {% if user.is_authenticated%}
         {% if game_in_user_game_list %}
-            <a href="{% url 'remove-game-from-game-list' game.pk user.pk %}"><button class="btn btn-primary btn-sm">REMOVE FROM GAME LIST </button></a>
+            <a onclick="location.href='{% url 'remove-game-from-game-list' game.pk user.pk %}'"><button class="btn btn-primary btn-sm">REMOVE FROM GAME LIST </button></a>
         {% else %}
             <strong>ADD TO YOUR GAME LIST</strong>
-            <a href="{% url 'add-game-to-game-list' game.pk user.pk 'played'%}"><button class="btn btn-primary btn-sm">Played</button></a>
-            <a href="{% url 'add-game-to-game-list' game.pk user.pk 'playing'%}"><button class="btn btn-primary btn-sm">Playing</button></a>
-            <a href="{% url 'add-game-to-game-list' game.pk user.pk 'want to play'%}"><button class="btn btn-primary btn-sm">Want to play</button></a>
+            <a onclick="location.href='{% url 'add-game-to-game-list' game.pk user.pk 'played'%}'"><button class="btn btn-primary btn-sm">Played</button></a>
+            <a onclick="location.href='{% url 'add-game-to-game-list' game.pk user.pk 'playing'%}'"><button class="btn btn-primary btn-sm">Playing</button></a>
+            <a onclick="location.href='{% url 'add-game-to-game-list' game.pk user.pk 'want to play'%}'"><button class="btn btn-primary btn-sm">Want to play</button></a>
+
         {% endif %}
 
-        <a href="{% url 'profile-game-list' user.pk %}"><button class="btn btn-primary btn-sm">My game list</button></a>
+        <a href="{% url 'profile-game-list' user %}"><button class="btn btn-primary btn-sm">My game list</button></a>
 
         {% if game_played_playing %}
             {% if  game_has_user_review%}

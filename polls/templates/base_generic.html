@@ -39,8 +39,11 @@
                     <li class="nav-item dropdown" style="padding-left: 1.5em">
                         <a class="icon solid fa-book" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Books</a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown" style="margin-top: 17px; margin-left: 1em; text-align: start; background-color: #000000d4; color: #d1cfcb">
-                            <li style="padding-left: 0"><a class="dropdown-item" style="color: darkgoldenrod; font-size: 1vw" href="{% url 'books' %}">Books</a></li>
-                            <li style="padding-left: 0"><a class="dropdown-item" style="color: goldenrod; font-size: 1vw" href="{% url 'authors' %}">Authors</a></li>
+                            <li style="padding-left: 0"><a class="dropdown-item" style="--bs-dropdown-link-hover-bg: #AD891199; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'books' %}">Books</a></li>
+                            <li style="padding-left: 0"><a class="dropdown-item" style="--bs-dropdown-link-hover-bg: #AD891199; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'authors' %}">Authors</a></li>
+                            <!--
+                            --bs-dropdown-link-active-bg: #b2b7bf;
+                            -->
                         </ul>
                     </li>
                     <li class="nav-item dropdown" style="padding-left: 1.5em">
@@ -55,25 +58,16 @@
                     <li class="nav-item dropdown" style="padding-left: 1.5em">
                         <a class="icon solid fa-film" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Movies&TVs</a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown" style="margin-top: 17px; margin-left: 1em; text-align: start; color: white; background-color: #000000d4">
-                            <li style="padding-left: 0"><a class="dropdown-item" style="color: #0d6efd; font-size: 1vw" href="{% url 'actors' %}">Actors</a></li>
-                            <li style="padding-left: 0"><a class="dropdown-item" style="color: #37EBF3; font-size: 1vw" href="{% url 'directors' %}">Directors</a></li>
-                            <li style="padding-left: 0"><a class="dropdown-item" style="color: steelblue; font-size: 1vw" href="{% url 'movies' %}"> Movies</a></li>
-                            <li style="padding-left: 0"><a class="dropdown-item" style="color: royalblue; font-size: 1vw" href="{% url 'series' %}"> TV Series</a></li>
+                            <li style="padding-left: 0"><a class="dropdown-item" style=" --bs-dropdown-link-hover-bg: #AD891199; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'actors' %}">Actors</a></li>
+                            <li style="padding-left: 0"><a class="dropdown-item" style=" --bs-dropdown-link-hover-bg: #AD891199; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'directors' %}">Directors</a></li>
+                            <li style="padding-left: 0"><a class="dropdown-item" style=" --bs-dropdown-link-hover-bg: #AD891199; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'movies' %}"> Movies</a></li>
+                            <li style="padding-left: 0"><a class="dropdown-item" style=" --bs-dropdown-link-hover-bg: #AD891199; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'series' %}"> TV Series</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <!--<li style="padding-left: 0"><a class="dropdown-item" href="#">Something else here</a></li>-->
                         </ul>
                     </li>
                     <li class="nav-item" style="padding-left: 1.5em">
                         <a class="icon solid fa-comment" href="#" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Forum</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="icon solid fa-search text-white" href="{% url 'search-game' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> S-Game</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="icon solid fa-search text-white" href="{% url 'search-movie' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> S-Movie</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="icon solid fa-search text-white" href="{% url 'search-series' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> S-Series</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav" style="margin-right: 2em">
@@ -82,7 +76,7 @@
                                 <a class="icon solid fa-user" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:1vw; font-weight: bolder"> Profile </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="margin-top: 18px; margin-left: 1em; text-align: start; color: white; background-color: #000000d4">
                                     {% if user.is_authenticated %}
-                                        <li style="padding-left: 0"><a class="dropdown-item" style="--bs-dropdown-link-color: white" href="{% url 'profile-page' user.id %}">Your Profile Page</a></li>
+                                        <li style="padding-left: 0"><a class="dropdown-item" style="--bs-dropdown-link-color: white" href="{% url 'profile-page' user.username %}">Your Profile Page</a></li>
                                 <!--    <li style="padding-left: 0"><a class="dropdown-item" href="{% url 'my-borrowed' %}">My List</a></li>
                                         <li style="padding-left: 0"><a class="dropdown-item" href="{% url 'edit_user' %}">Edit User</a></li>    -->
                                         <li style="padding-left: 0"><a class="dropdown-item" style="--bs-dropdown-link-color: white" href="{% url 'edit_profile' %}">Account Settings</a></li>
@@ -101,8 +95,8 @@
         </div>
     </nav>
 
-    <div id="page-wrapper" style="margin-bottom: 2.6em">
-        <section id="header" style="background-color: #04142cd1">
+    <div id="page-wrapper" style="margin: 2em">
+        <section id="header">
             <div class="container">
                 <h1 id="logo"><a href="{% url 'index' %}">Pop Culture Tracker</a></h1>
                 <p>Welcome to Pop Culture Tracker, a website developed by <em>A(MD)^2 Team</em>!</p>
@@ -110,10 +104,10 @@
         </section>
     </div>
 
-<div class="container-fluid" role="document" style="background-color: #04142cd1">
+<div class="container-fluid" role="document">
     <div class="modal-content row main justify-content-around" style="position: relative">
         <main class="col-lg-8 col-md-12 col-sm-12 col-sm-12 col-12">
-            <article class="container" style="width: available; margin-top: 1em ;margin-bottom: 2em; padding: 3.5em">
+            <article class="container" style="width: available; margin-top: 2em ;margin-bottom: 4em; padding: 2em">
                 {% block content %}{% endblock %}
                 {% block pagination %}
                     {% if is_paginated %}
@@ -166,13 +160,12 @@
     </div>
 </div>
 </body>
-<footer class="modal-footer" style="background-color: #04142cd1">
+<footer class="modal-footer">
     <div class="container">
             <section id="footer">
-            <div class="row section-1" style="margin-left: auto; background-color: #04142cd2">
+            <div class="row section-1" style="margin-left: auto">
 			<div class="col-md-3 col-sm-6 col-5">
 				<h3 style="padding-bottom: 1em; text-align: center">Website for fans of pop culture</h3>
-
 				<p style="font-size: large; color: #919191">
 					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 				</p>
@@ -209,7 +202,5 @@
             </div>
          </section>
     </div>
-
-
 </footer>
 </html>

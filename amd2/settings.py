@@ -30,8 +30,9 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '#**+m)#z@l6^z+)ivz8u+36%=i41jd
 # DEBUG = True
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
-#Potem można niepotrzebne wywalić, dla mojej wygody dodaje teraz
-ALLOWED_HOSTS = ['young-falls-06895.herokuapp.com', 'amd2-django.herokuapp.com','127.0.0.1','my-pct.me']
+# Potem można niepotrzebne wywalić, dla mojej wygody dodaje teraz
+ALLOWED_HOSTS = ['young-falls-06895.herokuapp.com', 'amd2-django.herokuapp.com','127.0.0.1','my-pct.me',
+                 'pop-culture-tracker.herokuapp.com']
 CSRF_TRUSTED_ORIGINS = ['https://my-pct.me']
 # Application definition
 
@@ -173,6 +174,8 @@ MESSAGE_TAGS = {
         messages.WARNING: 'alert-warning',
         messages.ERROR: 'alert-danger',
  }
+
+PASSWORD_RESET_TIMEOUT = 604800
 
 #GRAPH_MODELS = {
  #   'all_applications': True,

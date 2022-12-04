@@ -38,7 +38,8 @@ urlpatterns = [
     # model = Developer, model_field_name="company_name", create_field='company_name'), name='developer-autocomplete'),
     re_path(r'^developer-autocomplete/$', DeveloperAutocomplete.as_view(create_field='company_name'),
             name='developer-autocomplete'),
-    re_path(r'^game_genre-autocomplete/$', autocomplete.Select2QuerySetView.as_view(model = GameGenre, model_field_name="name"),
+    re_path(r'^game_genre-autocomplete/$', autocomplete.Select2QuerySetView.as_view(model=GameGenre,
+                                                                                    model_field_name="name"),
             name='game_genre-autocomplete'),
     re_path(r'^game_mode-autocomplete/$',
             autocomplete.Select2QuerySetView.as_view(model=GameMode, model_field_name="name"),
@@ -57,12 +58,12 @@ urlpatterns = [
     path('login/', login_user, name="login2"),
 
 
-    path('search_game/', views.search, name="search-game"),
-    path('search_movie/', views.search_movie, name="search-movie"),
+    path('search_games/', views.search, name="search-game"),
+    path('search_movies/', views.search_movie, name="search-movie"),
     path('search_series/', views.search_series, name="search-series"),
 
-    path('search_result/', views.search_result_game, name="search-result-game"),
-    path('search_result_movie/', views.search_result_movie, name="search-result-movie"),
+    path('search_result_games/', views.search_result_game, name="search-result-game"),
+    path('search_result_movies/', views.search_result_movie, name="search-result-movie"),
     path('search_result_series/', views.search_result_series, name="search-result-series"),
 
     path('stuff_verification/', views.stuff_verification, name="stuff-verification"),
@@ -73,13 +74,13 @@ urlpatterns = [
     path("testcbv", cbv_view.as_view(), name="cbv-view"),
     path("edit_profile/", UserProfileEditView.as_view(), name="edit_profile"),
 
-    path("profile/<int:pk>", ProfilePageView.as_view(), name="profile-page"),
+    path("profile/<slug:name>", ProfilePageView.as_view(), name="profile-page"),
 
-    path("profile/<int:pk>/my_favorites", MyFavorites.as_view(), name="my-favorites"),
-    path("profile/<int:pk>/watchlist", ProfileWatchlist.as_view(), name="profile-watchlist"),
-    path("profile/<int:pk>/game_list", ProfileGameList.as_view(), name="profile-game-list"),
+    path("profile/<slug:name>/my_favorites", MyFavorites.as_view(), name="my-favorites"),
+    path("profile/<slug:name>/watchlist", ProfileWatchlist.as_view(), name="profile-watchlist"),
+    path("profile/<slug:name>/game_list", ProfileGameList.as_view(), name="profile-game-list"),
 
-    path("like/<int:pk>", LikeView, name="like_profile"),
+    path("like/<int:pk>", like_view, name="like_profile"),
 
     path("add_favorite_game/<int:pk>", add_favorite_game, name="add-favorite-game"),
     path("add_favorite_movie/<int:pk>", add_favorite_movie, name="add-favorite-movie"),
@@ -87,7 +88,7 @@ urlpatterns = [
     path("add_favorite_series/<int:pk>", add_favorite_series, name="add-favorite-series"),
     path("profile/perm<int:pk>", get_autocomplete_permission, name="get-autocomplete-permission"),
 
-    path("addverf/<int:pk>", AddVerf, name="add_verf"),
+    path("addverf/<int:pk>", game_verification, name="add_verf"),
 
     path('book/<uuid:pk>/renew/', views.renew_book_librarian, name='renew-book-librarian'),
     path('author/create/', views.AuthorCreate.as_view(), name='author-create'),
@@ -101,8 +102,6 @@ urlpatterns = [
     path('game/<int:pk>', views.GameDetailView.as_view(), name='game-detail'),
     path('game/<int:pk>/update/', views.GameUpdate.as_view(), name='game-update'),
     path('game/<int:pk>/delete/', views.GameDelete.as_view(), name='game-delete'),
-    path('game/<int:pk>/verify/', views.GameVerify.as_view(), name='game-verify'),
-    path('game/<int:pk>/unverify/', views.GameUnverify.as_view(), name='game-unverify'),
 
     path('game/create/', views.GameCreate.as_view(), name='game-create'),
     path('write_game_review/<int:game_pk>', views.CreateGameReview.as_view(), name='create-game-review'),
@@ -131,12 +130,11 @@ urlpatterns = [
     path('movie/<int:pk>/delete', views.MovieDelete.as_view(), name='movie-delete'),
     path('movie/create', views.MovieCreate.as_view(), name='movie-create'),
     path('movie/<int:pk>/update', views.MovieUpdate.as_view(), name='movie-update'),
-    # path('movie/<int:pk>/verify', views.MovieVerify.as_view(), name='movie-verify'),
-    # path('movie/<int:pk>/unverify', views.MovieUnverify.as_view(), name='movie-unverify'),
     path('movie_verification/<int:pk>', views.movie_verification, name='movie-verification'),
     path('write_movie_review/<int:movie_pk>', views.CreateMovieReview.as_view(), name='create-movie-review'),
     path('movie/<int:movie_pk>/review/<int:pk>/update', views.UpdateMovieReview.as_view(), name='movie-review-update'),
-    path('add_movie_to_watchlist/<int:movie_pk>/<int:user_pk>/<movie_status>', views.add_movie_to_watchlist, name='add-movie-to-watchlist'),
+    path('add_movie_to_watchlist/<int:movie_pk>/<int:user_pk>/<movie_status>', views.add_movie_to_watchlist,
+         name='add-movie-to-watchlist'),
     path('remove_movie_from_watchlist/<int:movie_pk>/<int:user_pk>', views.remove_movie_from_watchlist,
          name='remove-movie-from-watchlist'),
     path('movie_review/<int:pk>', views.MovieReviewDetail.as_view(), name='movie-review-detail'),
@@ -148,19 +146,19 @@ urlpatterns = [
     path('series/<int:pk>/delete', views.SeriesDelete.as_view(), name='series-delete'),
     path('series/create', views.SeriesCreate.as_view(), name='series-create'),
     path('series/<int:pk>/update', views.SeriesUpdate.as_view(), name='series-update'),
-    # path('series/<int:pk>/verify', views.SeriesVerify.as_view(), name='series-verify'),
-    # path('series/<int:pk>/unverify', views.SeriesUnverify.as_view(), name='series-unverify'),
     path('series_verification/<int:pk>', views.series_verification, name='series-verification'),
     path('add_series_to_watchlist/<int:series_pk>/<int:user_pk>/<series_status>', views.add_series_to_watchlist,
          name='add-series-to-watchlist'),
     path('remove_series_from_watchlist/<int:series_pk>/<int:user_pk>', views.remove_series_from_watchlist,
          name='remove-series-from-watchlist'),
     path('write_series_review/<int:series_pk>', views.CreateSeriesReview.as_view(), name='create-series-review'),
-    path('series/<int:series_pk>/review/<int:pk>/update', views.UpdateSeriesReview.as_view(), name='series-review-update'),
+    path('series/<int:series_pk>/review/<int:pk>/update', views.UpdateSeriesReview.as_view(),
+         name='series-review-update'),
     path('series_review/<int:pk>', views.SeriesReviewDetail.as_view(), name='series-review-detail'),
     path('series/progress/<int:pk>/update', views.UpdateSeriesProgress.as_view(), name='series-progress-update'),
     path('series/status/<int:pk>/update', views.UpdateSeriesStatus.as_view(), name='series-status-update'),
-    path('add_series_to_watched/<int:series_pk>/<int:profile_pk>', views.add_series_to_watched, name='add-series-to-watched'),
+    path('add_series_to_watched/<int:series_pk>/<int:profile_pk>', views.add_series_to_watched,
+         name='add-series-to-watched'),
 
 
     # SEASON
@@ -174,14 +172,15 @@ urlpatterns = [
     path('omdb_api_page', views.omdb_api_page, name='omdb-api-page'),
 
     # SCRAPING EPISODES
-    path('scrape_episodes_of_one_series/<how_many_series>/<int:pk>', views.episode_ids_scraping,
+    path('scrape_episodes_of_one_series/<int:pk>', views.series_episodes_scraping,
          name='scrape-episodes'),
-    path('episodes_scarping_in_progress/<how_many_series>/<int:pk>', views.episode_scraping_in_progress,
+    path('episodes_scarping_in_progress/<int:pk>', views.episode_scraping_in_progress,
          name='episodes-scraping-in-progress'),
     # path('scrape_episodes_of_all_series/<api_key>', views.enter_api_key, name='scrape-all-series'),
     path('seriesList', views.series_to_scrape, name='series-to-scrape'),
     # path('scrapeEpisodes', views.enter_api_key, name='enter-api-key'),
     path('scrape_movies/<type_of_show>/<update>', views.scraping_shows_script, name='scrape-shows-script'),
+    path('scrape_episodes_script', views.episodes_scraping_script, name='scrape-episodes-script'),
 
     # ACTOR
     path('actor/', views.ActorListView.as_view(), name='actors'),
@@ -189,8 +188,6 @@ urlpatterns = [
     path('actor/<int:pk>/delete', views.ActorDelete.as_view(), name='actor-delete'),
     path('actor/create', views.ActorCreate.as_view(), name='actor-create'),
     path('actor/<int:pk>/update', views.ActorUpdate.as_view(), name='actor-update'),
-    # path('actor/<int:pk>/verify', views.ActorVerify.as_view(), name='actor-verify'),
-    # path('actor/<int:pk>/unverify', views.ActorUnverify.as_view(), name='actor-unverify'),
     path('actor_verification/<int:pk>', views.actor_verification, name='actor-verification'),
 
     # DIRECTOR
@@ -199,8 +196,6 @@ urlpatterns = [
     path('director/<int:pk>/delete', views.DirectorDelete.as_view(), name='director-delete'),
     path('director/create', views.DirectorCreate.as_view(), name='director-create'),
     path('director/<int:pk>/update', views.DirectorUpdate.as_view(), name='director-update'),
-    # path('director/<int:pk>/verify', views.DirectorVerify.as_view(), name='director-verify'),
-    # path('director/<int:pk>/unverify', views.DirectorUnverify.as_view(), name='director-unverify'),
     path('director_verification/<int:pk>', views.director_verification, name='director-verification'),
 
     path('scrapegames/', views.scrape_games, name='scrape-games'),
@@ -212,24 +207,25 @@ urlpatterns = [
     path('request/create', views.RequestPermissionCreate.as_view(), name='request-create'),
     path('request/list', views.RequestPermissionList.as_view(), name='request-list'),
     path("profile/perm-rejected<int:pk>", reject_autocomplete_permission, name="reject-autocomplete-permission"),
-    path("profile/friendship/add<int:pk>", SendFriendshipRequest, name="add-friend"),
-    path("profile/friendship/accept<int:pk>", AcceptFriendshipRequest, name="accept-friend"),
-    path("profile/friendship/reject<int:pk>", RejectFriendshipRequest, name="reject-friend"),
-    path("profile/friendship/cancel<int:pk>", CancelFriendshipRequest, name="cancel-friend"),
+    path("profile/friendship/add<int:pk>", send_friendship_request, name="add-friend"),
+    path("profile/friendship/accept<int:pk>", accept_friendship_request, name="accept-friend"),
+    path("profile/friendship/reject<int:pk>", reject_friendship_request, name="reject-friend"),
+    path("profile/friendship/cancel<int:pk>", cancel_friendship_request, name="cancel-friend"),
 
-    path("profile/friendship/delete<int:pk>", DeleteFriendship, name="delete-friend"),
-    path("profile/friendship/my_friends<int:pk>", FriendList, name="friend-list"),
-    path("profile/friendship/friend_requests<int:pk>", FriendRequestList, name="friend-request-list"),
+    path("profile/friendship/delete<int:pk>", delete_friendship, name="delete-friend"),
+    path("profile/friendship/my_friends<int:pk>", friend_list, name="friend-list"),
+    path("profile/friendship/friend_requests<int:pk>", friend_request_list, name="friend-request-list"),
 
     path("profile/root/management/<int:pk>", UserPageManagement.as_view(), name="user-page-management"),
-    path("profile/root/management/delete_games/<int:pk>", DeleteUnverifiedGames, name="delete-unverified-games"),
-    path("profile/root/management/delete_movies/<int:pk>", DeleteUnverifiedMovies, name="delete-unverified-movies"),
-    path("profile/root/management/delete_series/<int:pk>", DeleteUnverifiedSeries, name="delete-unverified-series"),
+    path("profile/root/management/delete_games/<int:pk>", delete_unverified_games, name="delete-unverified-games"),
+    path("profile/root/management/delete_movies/<int:pk>", delete_unverified_movies, name="delete-unverified-movies"),
+    path("profile/root/management/delete_series/<int:pk>", delete_unverified_series, name="delete-unverified-series"),
 
-    path("profile/root/management/delete_all/<int:pk>", DeleteUnverifiedAll, name="delete-unverified-everything"),
-    path("profile/root/management/delete_user/<int:pk>", DeleteUser, name="delete-user"),
+    path("profile/root/management/delete_all/<int:pk>", delete_unverified_all, name="delete-unverified-everything"),
+    path("profile/root/management/delete_user/<int:pk>", delete_user, name="delete-user"),
 
     path('test/', views.test, name='test'),
-    path('test1/', views.bulk_create, name='test1')
+    path('test1/', views.bulk_create, name='test1'),
+    path('carnage/', delete_unverified_users, name='carnage')
 
 ]

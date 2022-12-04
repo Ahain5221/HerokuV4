@@ -4,7 +4,7 @@
 
     <h3> {{ season }} </h3>
     <ul class="list-inline" style="margin: 1em">
-        {% for episode in season.episode_set.all %}
+        {% for episode in season.episode_set.all|dictsort:"episode_number" %}
             <li>
                 <div class="row" style="margin-bottom: 1em">
                     <div class="col">

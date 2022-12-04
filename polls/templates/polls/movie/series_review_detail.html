@@ -2,12 +2,11 @@
 
 {% block content %}
 
-    <h1>{{ seriesreview.series }} - {{ seriesreview.author }}'s review</h1>
-    <div style="border: thin solid black">
-        <div style="border: thin solid black">{{ seriesreview.review_date }} </div>
-        <div style="border: thin solid black">My rate {{ seriesreview.rate }} </div>
-        <div style="border: thin solid black">{{ seriesreview.content }} </div>
-    </div>
+    <h1><a href="{{ seriesreview.series.get_absolute_url }}">{{ seriesreview.series }}</a> - {{ seriesreview.author }}'s review</h1>
+    <div style="border: 1px solid #262626; width: 50em">
+            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ seriesreview.author.profile.get_absolute_url }}"><strong>&nbsp;&nbsp;{{ seriesreview.author }}</strong> </a>&nbsp;&nbsp;&nbsp; {{ seriesreview.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ seriesreview.rate }}</div>
+            <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ seriesreview.content }} </div>
+        </div>
 
     <a href="{% url 'series-review-update' series_pk=seriesreview.series.pk pk=seriesreview.pk%}">
         <button class="btn btn-success btn-sm">Update review</button>

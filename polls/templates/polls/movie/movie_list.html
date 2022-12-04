@@ -2,6 +2,10 @@
 
 {% block content %}
 
+    <button class="btn btn-dark">
+        <a class="icon solid fa-search text-white" href="{% url 'search-movie' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Search</a>
+    </button>
+
     {% if movie_list %}
         <h1 style="font-size: 250%; text-align: center;">Movies list</h1>
         <hr style="width:auto">
@@ -23,19 +27,6 @@
                 {% endif %}
             {% endfor %}
         </div>
-
-        {% if user.is_superuser %}
-            <h1>Movies to verify</h1>
-            <ul>
-                {% for movie in movie_list %}
-                    {% if not movie.Verified %}
-                        <li>
-                            <a href="{{ movie.get_absolute_url }}">{{ movie.title }}</a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        {% endif %}
 
     {% else %}
         <p>There are no movies</p>

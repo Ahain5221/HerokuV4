@@ -2,6 +2,10 @@
 
 {% block content %}
 
+    <button class="btn btn-dark">
+        <a class="icon solid fa-search text-white" href="{% url 'search-game' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Search</a>
+    </button>
+
     <h1 style="font-size: 250%; text-align: center;">Games list</h1>
     <hr style="width:auto">
     <div class="row" style="padding-top: 3em">
@@ -22,18 +26,5 @@
              {% endif %}
         {% endfor %}
     </div>
-
-    {% if user.is_superuser %}
-        <h1>Games to verify</h1>
-        <ul>
-            {% for game in game_list %}
-                {% if not game.Verified %}
-                    <li>
-                        <a href="{{ game.get_absolute_url }}">{{ game.title }}</a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-    {% endif %}
 
 {% endblock %}

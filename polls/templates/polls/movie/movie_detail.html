@@ -83,7 +83,7 @@
                 {% endif %}
                 -->
                 {% if  movie.added_by%}
-                    <li>Added by <a href="{% url 'profile-page' pk=movie.added_by.id %}">{{ series.added_by }}</a></li>
+                    <li>Added by <a href="{% url 'profile-page' name=movie.added_by.profile.name %}">{{ series.added_by }}</a></li>
                 {% else %}
                     <li>Added by API</li>
                 {% endif %}
@@ -92,7 +92,7 @@
     </div>
     </div>
     <ul class="list-inline">
-        {% if movie.added_by == user and not movie.verified or user.is_superuser %}
+        {% if movie.added_by == user and not movie.Verified or user.is_superuser %}
             <li>
                 <a href="{% url 'movie-update' pk=movie.id %}">
                     <button class="btn btn-success btn-sm">UPDATE</button>
@@ -120,14 +120,15 @@
     <br><br>
     {% if user.is_authenticated%}
         {% if movie_in_user_watchlist %}
-            <a href="{% url 'remove-movie-from-watchlist' movie.pk user.pk %}"><button class="btn btn-primary btn-sm">REMOVE FROM WATCHLIST</button></a>
+            <a onclick="location.href='{% url 'remove-movie-from-watchlist' movie.pk user.pk %}'"><button class="btn btn-primary btn-sm">REMOVE FROM WATCHLIST</button></a>
         {% else %}
             <strong>ADD TO YOUR WATCHLIST</strong>
-            <a href="{% url 'add-movie-to-watchlist' movie.pk user.pk 'watched'%}"><button class="btn btn-primary btn-sm">Watched</button></a>
-            <a href="{% url 'add-movie-to-watchlist' movie.pk user.pk 'want to watch'%}"><button class="btn btn-primary btn-sm">Want to watch</button></a>
+            <a onclick="location.href='{% url 'add-movie-to-watchlist' movie.pk user.pk 'watched'%}'"><button class="btn btn-primary btn-sm">Watched</button></a>
+            <a onclick="location.href='{% url 'add-movie-to-watchlist' movie.pk user.pk 'want to watch'%}'"><button class="btn btn-primary btn-sm">Want to watch</button></a>
+
         {% endif %}
 
-        <a href="{% url 'profile-watchlist' user.pk %}"><button class="btn btn-primary btn-sm">My watchlist</button></a>
+        <a href="{% url 'profile-watchlist' user %}"><button class="btn btn-primary btn-sm">My watchlist</button></a>
 
         {% if movie_watched %}
             {% if  movie_has_user_review%}

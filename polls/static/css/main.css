@@ -48,6 +48,7 @@ blockquote, q {
 table {
 	border-collapse: collapse;
 	border-spacing: 0;
+	color: #212529
 }
 
 body {
@@ -82,7 +83,7 @@ input, select, textarea {
 	}
 
 	body {
-		background: #f0f0f0;
+		background: #04142cd1;
 	}
 
 		body.is-preload *, body.is-preload *:before, body.is-preload *:after {
@@ -145,6 +146,9 @@ input, select, textarea {
 			-webkit-transition: color 0.25s ease-in-out, border-bottom-color 0.25s ease-in-out;
 			-ms-transition: color 0.25s ease-in-out, border-bottom-color 0.25s ease-in-out;
 			transition: color 0.25s ease-in-out, border-bottom-color 0.25s ease-in-out;
+			color: #4990F8FF;
+			font-size: 0.85vw;
+			font-weight: bolder;
 		}
 
 		a:hover {
@@ -154,6 +158,7 @@ input, select, textarea {
 
 			a:hover strong {
 				color: #dabb1f;
+				text-shadow: -1px -1px 0 #7a6b0d, 1px -1px 0 #7a6b0d, -1px 1px 0 #7a6b0d, 1px 1px 0 #7a6b0d;
 			}
 
 	strong, b {
@@ -1478,6 +1483,7 @@ input, select, textarea {
 
 	section, article {
 		margin-bottom: 3em;
+		color: #d1cfcb;
 	}
 
 	section > :last-child,
@@ -1906,6 +1912,16 @@ input, select, textarea {
 			font-family: 'Font Awesome 5 Brands';
 		}
 
+
+	span {
+
+	}
+
+		.helptext {
+		color: white;
+		}
+
+
 /* Page Wrapper */
 
 	#page-wrapper > section {
@@ -1916,7 +1932,7 @@ input, select, textarea {
 
 	#header {
 		position: relative;
-		background: #fff;
+		background: rgba(4, 20, 44, 0);
 		text-align: center;
 	}
 
@@ -2212,7 +2228,7 @@ input, select, textarea {
 		position: relative;
 		overflow: hidden;
 		border-top: solid 2px #00000000;
-		background: #fffffff2;
+		background: rgba(4, 20, 44, 0);
 		background-clip: content-box;
 		margin-top: 6em;
 		margin-bottom: 1em;
@@ -2291,6 +2307,7 @@ input, select, textarea {
 
 			#header h1 {
 				font-size: 2.5em;
+
 			}
 
 		/* Nav */

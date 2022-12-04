@@ -14,12 +14,13 @@
 !-->
 
         <form action="{% url 'search-result-series' %}" method="post">
-    {% csrf_token %}
-                        {{ form.media }}
-
-    {{ form }}
-    <input type="submit" value="Submit">
-</form>
+            {% csrf_token %}
+            <div style="margin-bottom: 2em">
+            {{ form.media }}
+            {{ form }}
+            </div>
+            <input type="submit" value="Submit">
+        </form>
 
 
 

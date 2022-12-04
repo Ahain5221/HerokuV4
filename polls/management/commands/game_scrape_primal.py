@@ -20,7 +20,7 @@ class Command(BaseCommand):
         added_games = 0
         error_counter = 0
         for dataa in jsoned_data_from_response_get_app_list['applist']['apps']:
-            if added_games == 25:
+            if added_games == 5:
                 break
             steam_app_id = dataa['appid']
             if check_app_id(steam_app_id):
@@ -36,8 +36,8 @@ class Command(BaseCommand):
                 print("Type error dla ID:", steam_app_id)
                 error_counter += 1
                 if error_counter == 15:
-                    exit()
-                
+                    break
+                sleep(1)
 
                 continue
             else:

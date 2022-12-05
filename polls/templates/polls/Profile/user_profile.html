@@ -33,7 +33,7 @@
                     </div>
 
                     <div class="col">
-                        <a href="{% url 'profile-watchlist' page_user.name %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Watchlist</button></a>
+                        <a href="{% url 'profile-watchlist' page_user.name 'all' 'all'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Watchlist</button></a>
                     </div>
                     <div class="col">
                         <a href="{% url 'profile-game-list' page_user.name %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Game-list</button></a>
@@ -57,7 +57,7 @@
                 {% endif %}
             </div>
             <div class="col-md-10" style="margin-top: 1.5em">
-            <h5 class="card-title">
+            <h5 class="card-title" style="; margin-bottom: 1em">
              Joined: {{ page_user.user.date_joined.date }} | Last seen: {{ page_user.user.last_login.date }} | Gender: {{ page_user.gender }} | Likes received: {{ page_user.likes.count }}
             {% if page_user.date_of_birth %}
                 | Birth date: {{ page_user.date_of_birth }}

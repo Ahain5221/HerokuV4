@@ -55,7 +55,7 @@ urlpatterns = [
     re_path(r'^director-autocomplete/$', DirectorAutocomplete.as_view(create_field='full_name'),
             name='director-autocomplete'),
     path('signup2/', signup_view, name="signup2"),
-    path('login/', login_user, name="login2"),
+    path('login/', login_user, name="login"),
 
 
     path('search_games/', views.search, name="search-game"),
@@ -72,13 +72,28 @@ urlpatterns = [
     # path("signup/", SignUpView.as_view(), name="signup"), STARA REJESTRACJA. VIEW DO WYWALENIA?
     path("edit_user/", UserEditView.as_view(), name="edit_user"),
     path("testcbv", cbv_view.as_view(), name="cbv-view"),
-    path("edit_profile/", UserProfileEditView.as_view(), name="edit_profile"),
 
-    path("profile/<slug:name>", ProfilePageView.as_view(), name="profile-page"),
+    path("edit_profile/", UserProfileEditView.as_view(), name="edit_profile"),
+    #re_path(r'^profile/username/(?P<slug>[\w.@+-]+)/$', ProfilePageView.as_view(), name="profile-page"),
+    #re_path(r'^(?P<name>[\w-]+)/profile/$', ProfilePageView.as_view(), name="profile-page"),
+    re_path(r'^profile/(?P<name>[\w-]+)/$(?i)', ProfilePageView.as_view(), name="profile-page"),
+
+    #path("profile/<slug:name>", ProfilePageView.as_view(), name="profile-page"),
+    #path("profile/<slug:name>/gosc", ProfilePageView_Gosc.as_view(), name="profile-page-gosc"),
+
+    #path("profile/<slug:name>/my_favorites", MyFavorites.as_view(), name="my-favorites"),
+    # re_path(r'^profile/(?P<name>[\w-]+)/my_favorites$(?i)', MyFavorites.as_view(), name="my-favorites"),
+
+    #path("profile/<slug:name>/watchlist", ProfileWatchlist.as_view(), name="profile-watchlist"),
+    # re_path(r'^profile/(?P<name>[\w-]+)/watchlist$(?i)',ProfileWatchlist.as_view(), name="profile-watchlist"),
+
 
     path("profile/<slug:name>/my_favorites", MyFavorites.as_view(), name="my-favorites"),
-    path("profile/<slug:name>/watchlist", ProfileWatchlist.as_view(), name="profile-watchlist"),
+    path("profile/<slug:name>/watchlist/<type_of_show>/<status>", ProfileWatchlist.as_view(), name="profile-watchlist"),
     path("profile/<slug:name>/game_list", ProfileGameList.as_view(), name="profile-game-list"),
+    # path("profile/<slug:name>/game_list", ProfileGameList.as_view(), name="profile-game-list"),
+    # re_path(r'^profile/(?P<name>[\w-]+)/game_list$(?i)', ProfileGameList.as_view(), name="profile-game-list"),
+    # KOMENTARZ DLA DAWIDA
 
     path("like/<int:pk>", like_view, name="like_profile"),
 
@@ -86,7 +101,8 @@ urlpatterns = [
     path("add_favorite_movie/<int:pk>", add_favorite_movie, name="add-favorite-movie"),
 
     path("add_favorite_series/<int:pk>", add_favorite_series, name="add-favorite-series"),
-    path("profile/perm/<int:pk>", get_autocomplete_permission, name="get-autocomplete-permission"),
+    path("profile/give-perm/<int:pk>", get_autocomplete_permission, name="get-autocomplete-permission"),
+    path("profile/perm-rejected/<int:pk>", reject_autocomplete_permission, name="reject-autocomplete-permission"),
 
     path("addverf/<int:pk>", game_verification, name="add_verf"),
 
@@ -98,10 +114,17 @@ urlpatterns = [
     path('book/<int:pk>/update/', views.BookUpdate.as_view(), name='book-update'),
     path('book/<int:pk>/delete/', views.BookDelete.as_view(), name='book-delete'),
 
-    path('games/', views.GameListView.as_view(), name='games'),
-    path('game/<int:pk>', views.GameDetailView.as_view(), name='game-detail'),
-    path('game/<int:pk>/update/', views.GameUpdate.as_view(), name='game-update'),
-    path('game/<int:pk>/delete/', views.GameDelete.as_view(), name='game-delete'),
+    # path('games/', views.GameListView.as_view(), name='games'),
+    re_path(r'^games/$(?i)', views.GameListView.as_view(), name='games'),
+
+    # path('game/<int:pk>', views.GameDetailView.as_view(), name='game-detail'),
+    re_path(r'^game/(?P<pk>\d+)/$(?i)', views.GameDetailView.as_view(), name='game-detail'),
+
+    #path('game/<int:pk>/update/', views.GameUpdate.as_view(), name='game-update'),
+    re_path(r'^game/(?P<pk>\d+)/update/$(?i)', views.GameUpdate.as_view(), name='game-update'),
+
+    #path('game/<int:pk>/delete/', views.GameDelete.as_view(), name='game-delete'),
+    re_path(r'^game/(?P<pk>\d+)/delete/$(?i)', views.GameDelete.as_view(), name='game-delete'),
 
     path('game/create/', views.GameCreate.as_view(), name='game-create'),
     path('write_game_review/<int:game_pk>', views.CreateGameReview.as_view(), name='create-game-review'),
@@ -115,6 +138,7 @@ urlpatterns = [
     path('game_review/<int:pk>', views.GameReviewDetail.as_view(), name='game-review-detail'),
 
     path('developers/', views.DeveloperListView.as_view(), name='developers'),
+
     path('developer/<int:pk>', views.DeveloperDetailView.as_view(), name='developer-detail'),
     path('developer/<int:pk>/update', views.DeveloperUpdate.as_view(), name='developer-update'),
 
@@ -206,15 +230,14 @@ urlpatterns = [
     path('create_records', views.create_record, name='create_record'),
     path('request/create', views.RequestPermissionCreate.as_view(), name='request-create'),
     path('request/list', views.RequestPermissionList.as_view(), name='request-list'),
-    path("profile/perm-rejected/<int:pk>", reject_autocomplete_permission, name="reject-autocomplete-permission"),
     path("profile/friendship/add<int:pk>", send_friendship_request, name="add-friend"),
     path("profile/friendship/accept<int:pk>", accept_friendship_request, name="accept-friend"),
     path("profile/friendship/reject<int:pk>", reject_friendship_request, name="reject-friend"),
     path("profile/friendship/cancel<int:pk>", cancel_friendship_request, name="cancel-friend"),
 
-    path("profile/friendship/delete<int:pk>", delete_friendship, name="delete-friend"),
-    path("profile/friendship/my_friends<int:pk>", friend_list, name="friend-list"),
-    path("profile/friendship/friend_requests<int:pk>", friend_request_list, name="friend-request-list"),
+    path("profile/friendship/delete/<int:pk>", delete_friendship, name="delete-friend"),
+    path("profile/friendship/my_friends/<int:pk>", friend_list, name="friend-list"),
+    path("profile/friendship/friend_requests/<int:pk>", friend_request_list, name="friend-request-list"),
 
     path("profile/root/management/<int:pk>", UserPageManagement.as_view(), name="user-page-management"),
     path("profile/root/management/delete_games/<int:pk>", delete_unverified_games, name="delete-unverified-games"),

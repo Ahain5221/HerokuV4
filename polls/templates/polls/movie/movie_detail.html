@@ -128,7 +128,7 @@
 
         {% endif %}
 
-        <a href="{% url 'profile-watchlist' user %}"><button class="btn btn-primary btn-sm">My watchlist</button></a>
+        <a href="{% url 'profile-watchlist' user 'all' 'all'%}"><button class="btn btn-primary btn-sm">My watchlist</button></a>
 
         {% if movie_watched %}
             {% if  movie_has_user_review%}

@@ -4,6 +4,66 @@
 {% block content %}
     <h1 style="padding-bottom: 1em"> {{ profile.user }}'s watchlist</h1>
 
+    <div class="row" style="padding-bottom: 15px">
+        <div class="col-sm-1">
+            {% if type_of_show == 'movies' %}
+                <a href="{% url 'profile-watchlist' profile.user 'movies' status%}" style="padding: 1em"><button class="btn btn-success btn-sm">Movies</button></a>
+            {% else %}
+                <a href="{% url 'profile-watchlist' profile.user 'movies' status%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Movies</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-1">
+            {% if type_of_show == 'series' %}
+                <a href="{% url 'profile-watchlist' profile.user 'series' status%}" style="padding: 1em"><button class="btn btn-success btn-sm">Series</button></a>
+            {% else %}
+                <a href="{% url 'profile-watchlist' profile.user 'series' status%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Series</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-1">
+            {% if type_of_show == 'all' %}
+                <a href="{% url 'profile-watchlist' profile.user 'all' status%}" style="padding: 1em"><button class="btn btn-success btn-sm">All</button></a>
+            {% else %}
+                <a href="{% url 'profile-watchlist' profile.user 'all' status%}" style="padding: 1em"><button class="btn btn-dark btn-sm">All</button></a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row" style="padding-bottom: 15px">
+        <div class="col-sm-2">
+            {% if status == 'watched' %}
+                <a href="{% url 'profile-watchlist' profile.user type_of_show 'watched'%}" style="padding: 1em"><button class="btn btn-success btn-sm">Watched</button></a>
+            {% else %}
+                <a href="{% url 'profile-watchlist' profile.user type_of_show 'watched'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Watched</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-2">
+            {% if status == 'watching' %}
+                <a href="{% url 'profile-watchlist' profile.user type_of_show 'watching'%}" style="padding: 1em"><button class="btn btn-success btn-sm">Watching</button></a>
+            {% else %}
+                <a href="{% url 'profile-watchlist' profile.user type_of_show 'watching'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Watching</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-2">
+            {% if status == 'want to watch' %}
+                <a href="{% url 'profile-watchlist' profile.user type_of_show 'want to watch'%}" style="padding: 1em"><button class="btn btn-success btn-sm">Want to watch</button></a>
+            {% else %}
+                <a href="{% url 'profile-watchlist' profile.user type_of_show 'want to watch'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Want to watch</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-2">
+            {% if status == 'all' %}
+                <a href="{% url 'profile-watchlist' profile.user type_of_show 'all'%}" style="padding: 1em"><button class="btn btn-success btn-sm">All</button></a>
+            {% else %}
+                <a href="{% url 'profile-watchlist' profile.user type_of_show 'all'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">All</button></a>
+            {% endif %}
+        </div>
+    </div>
+
     <table class="center" style="border: 1px solid;">
     <tr style="border: 1px solid; background-color: #262626">
         <th style="color: white">Title</th>
@@ -57,6 +117,8 @@
                     <th> {{ movie_watchlist.movie_status }}</th>
                 {% endif %}
             {% endif %}
+
+        {% if user.is_authenticated %}
             {% if user == profile.user %}
                 <th>
                     <a href="{% url 'remove-movie-from-watchlist' movie_watchlist.movie.pk profile.user_id %}">
@@ -70,6 +132,9 @@
                     </a>
                 </th>
             {% endif %}
+        {% else %}
+            <th>NONE</th>
+        {% endif %}
         </tr>
     {% endfor %}
 
@@ -119,39 +184,43 @@
             {% else %}
                 <th> {{ series_watchlist.series_status }}</th>
             {% endif %}
-            {% if user == profile.user %}
-                <th>
-                <!-- Button trigger modal -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal{{ series_watchlist.series.pk }}">Edit</button>
-                    <!-- Modal -->
-                    <div class="modal fade" id="exampleModal{{ series_watchlist.series.pk }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                              <a href="{% url 'remove-series-from-watchlist' series_watchlist.series.pk profile.user_id %}">
-                                <button class="btn btn-danger btn-sm" style="margin-right: 10em">Delete</button>
-                              </a>
+            {% if user.is_authenticated %}
+                {% if user == profile.user %}
+                    <th>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal{{ series_watchlist.series.pk }}">Edit</button>
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal{{ series_watchlist.series.pk }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                  <a href="{% url 'remove-series-from-watchlist' series_watchlist.series.pk profile.user_id %}">
+                                    <button class="btn btn-danger btn-sm" style="margin-right: 10em">Delete</button>
+                                  </a>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
 
-                    {% if series_watchlist.series_status == 'watching' %}
-                        <a href="{% url 'series-progress-update' series_watchlist.pk %}">
-                            <button class="btn btn-success btn-sm">Change progress</button>
+                        {% if series_watchlist.series_status == 'watching' %}
+                            <a href="{% url 'series-progress-update' series_watchlist.pk %}">
+                                <button class="btn btn-success btn-sm">Change progress</button>
+                            </a>
+                        {% endif %}
+                    </th>
+                {% else %}
+                    <th>
+                        <a href="{% url 'add-movie-to-watchlist' series_watchlist.series.pk user.pk 'want to watch' %}">
+                            <button class="btn btn-success btn-sm">Add to my watchlist</button>
                         </a>
-                    {% endif %}
-                </th>
+                    </th>
+                {% endif %}
             {% else %}
-                <th>
-                    <a href="{% url 'add-movie-to-watchlist' series_watchlist.series.pk user.pk 'want to watch' %}">
-                        <button class="btn btn-success btn-sm">Add to my watchlist</button>
-                    </a>
-                </th>
+                <th>NONE</th>
             {% endif %}
         </tr>
     {% endfor %}

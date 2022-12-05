@@ -26,7 +26,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.core.mail import send_mail, BadHeaderError
 from django.db.models.query_utils import Q
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, Http404
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
@@ -52,7 +52,7 @@ from friendship.models import Friend, Follow, Block, FriendshipRequest
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 import random
-
+from polls.decorators import *
 
 class cbv_view(generic.ListView):
     model = Developer
@@ -64,6 +64,7 @@ def handler(request, exception):
     return render(request, 'errorrr.html', context=context)
 
 
+@stuff_or_superuser_required
 def get_autocomplete_permission(request, pk):
     new_group, created = Group.objects.get_or_create(name='new_group')
     user_object = User.objects.get(id=pk)
@@ -78,11 +79,12 @@ def get_autocomplete_permission(request, pk):
         checkP.status = "Accepted"
         checkP.save(update_fields=['status'])
     except (Exception,):
-        return redirect('profile-page', pk)
+        return redirect('profile-page', user_object.username)
     return redirect('request-list')
     # return redirect('profile-page',pk)
 
 
+@stuff_or_superuser_required
 def reject_autocomplete_permission(request, pk):
     request_object = RequestPermission.objects.get(FromUser=pk)
     request_object.status = "Rejected"
@@ -169,6 +171,7 @@ def signup(request):
                     return redirect('form')
                 user = form.save(commit=False)
                 user.is_active = False
+                user.username = user.username.lower()
                 user.save()
 
                 # to get the domain of the current site
@@ -198,6 +201,7 @@ def signup(request):
     return render(request, 'registration/signup.html', {'form': form})
 
 
+@anonymous_required
 def password_reset_request(request):
     if request.method == "POST":
         password_reset_form = PasswordResetForm(request.POST)
@@ -230,6 +234,7 @@ def password_reset_request(request):
                   context={"password_reset_form": password_reset_form})
 
 
+@anonymous_required
 def activate(request, uidb64, token):
     user_model = get_user_model()
     try:
@@ -526,6 +531,7 @@ def search_result_series(request):
         return render(request, 'polls/search_result.html')
 
 
+@stuff_or_superuser_required
 def stuff_verification(request):
     # searched = request.POST['searched']
     games_to_verify = Game.objects.filter(Verified=False)
@@ -546,6 +552,7 @@ def stuff_verification(request):
                   )
 
 
+@anonymous_required
 def login_user(request):
     if request.user.is_authenticated:
         return redirect('index')
@@ -553,6 +560,7 @@ def login_user(request):
     if request.POST:
         username = request.POST['username']
         password = request.POST['password']
+        username = username.lower()
 
         user = authenticate(username=username, password=password)
         if user is not None:
@@ -562,7 +570,7 @@ def login_user(request):
                 return redirect('index')
         else:
             messages.error(request, 'Username or password is incorrect!')
-    return render(request, 'registration/login2.html')
+    return render(request, 'registration/login.html')
 
 
 def signup_view(request):
@@ -580,7 +588,7 @@ def signup_view(request):
     return render(request, 'registration/signup2.html', {'form': form})
 
 
-@login_required
+@login_required(login_url='/polls/login/')
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def renew_book_librarian(request, pk):
     """View function for renewing a specific BookInstance by librarian."""
@@ -713,10 +721,18 @@ class CreateGameReview(UserPassesTestMixin, CreateView):
     form_class = GameReviewForm
 
     def test_func(self):
-        return self.request.user.is_authenticated
+        if not self.request.user.is_authenticated:
+            return False
+
+        review_exists = GameReview.objects.filter(
+            author_id=self.request.user, movie_id=self.kwargs['game_pk']).exists()
+
+        return not review_exists and self.request.user.is_authenticated
 
     def handle_no_permission(self):
-        return redirect('login')
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -733,10 +749,13 @@ class UpdateGameReview(UserPassesTestMixin, UpdateView):
     form_class = GameReviewForm
 
     def test_func(self):
-        return self.request.user.is_authenticated
+        author = GameReview.objects.filter(id=self.kwargs['pk']).first().author
+        return self.request.user == author and self.request.user.is_authenticated
 
     def handle_no_permission(self):
-        return redirect('login')
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -965,7 +984,7 @@ class UserProfileEditView(UserPassesTestMixin, generic.UpdateView):
         return redirect('index')
 
 
-@login_required
+@login_required(login_url='/polls/login/')
 def send_friendship_request(request, pk):
     other_user = User.objects.get(id=pk)
     try:
@@ -973,62 +992,64 @@ def send_friendship_request(request, pk):
             request.user,  # The sender
             other_user,  # The recipient
             message='Hi! I would like to add you')  # This message is optional
-        return redirect('profile-page', pk)
+        return redirect('profile-page', other_user)
     except (Exception,):
-        return redirect('profile-page', pk)
+        return redirect('profile-page', other_user)
 
 
-@login_required
+@login_required(login_url='/polls/login/')
 def accept_friendship_request(request, pk):
     try:
         other_user = User.objects.get(id=pk)
         friend_request = FriendshipRequest.objects.get(from_user=other_user, to_user=request.user)
         friend_request.accept()
-        return redirect('profile-page', pk)
+        return redirect('profile-page', other_user)
     except (Exception,):
-        return redirect('profile-page', pk)
+        return redirect('profile-page', other_user)
 
 
-@login_required
+@login_required(login_url='/polls/login/')
 def reject_friendship_request(request, pk):
     try:
         other_user = User.objects.get(id=pk)
         friend_request = FriendshipRequest.objects.get(from_user=other_user, to_user=request.user)
         friend_request.reject()
         friend_request.delete()
-        return redirect('profile-page', pk)
+        return redirect('profile-page', other_user)
     except (Exception,):
-        return redirect('profile-page', pk)
+        return redirect('profile-page', other_user)
 
 
-@login_required
+@login_required(login_url='/polls/login/')
 def cancel_friendship_request(request, pk):
     try:
         other_user = User.objects.get(id=pk)
         friend_request = FriendshipRequest.objects.get(from_user=request.user, to_user=other_user)
         friend_request.cancel()
-        return redirect('profile-page', pk)
+        return redirect('profile-page', other_user)
     except FriendshipRequest.DoesNotExist:
-        return redirect('profile-page', pk)
+        return redirect('profile-page', other_user)
 
 
-@login_required
+@login_required(login_url='/polls/login/')
 def delete_friendship(request, pk):
     try:
         other_user = User.objects.get(id=pk)
         Friend.objects.remove_friend(request.user, other_user)
-        return redirect('profile-page', pk)
+        return redirect('profile-page', other_user)
     except (Exception,):
-        return redirect('profile-page', pk)
+        return redirect('profile-page', other_user)
 
 
 def friend_list(request, pk):
     get_user = User.objects.get(id=pk)
     friends = Friend.objects.friends(get_user)
     avatar = get_user.profile.profile_image_url
+    request_list = Friend.objects.unread_requests(get_user)
 
     context = {
         'friend_list': friends,
+        'friend_request_list': request_list,
         'avatar': avatar
     }
     return render(request, 'FriendList.html', context=context)
@@ -1051,16 +1072,53 @@ class ProfilePageView(UserPassesTestMixin, generic.DetailView):
     slug_field = 'name'
     slug_url_kwarg = 'name'
 
+    def get_object(self, queryset=None):
+        """
+        Return the object the view is displaying.
+        Require `self.queryset` and a `pk` or `slug` argument in the URLconf.
+        Subclasses can override this to return any object.
+        """
+        # Use a custom queryset if provided; this is required for subclasses
+        # like DateDetailView
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        # Next, try looking up by primary key.
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        slug = self.kwargs.get(self.slug_url_kwarg).lower()
+        if pk is not None:
+            queryset = queryset.filter(pk=pk)
+
+        # Next, try looking up by slug.
+        if slug is not None and (pk is None or self.query_pk_and_slug):
+            slug_field = self.get_slug_field()
+            queryset = queryset.filter(**{slug_field: slug})
+
+        # If none of those are defined, it's an error.
+        if pk is None and slug is None:
+            raise AttributeError(
+                "Generic detail view %s must be called with either an object "
+                "pk or a slug in the URLconf." % self.__class__.__name__
+            )
+
+        try:
+            # Get the single item from the filtered queryset
+            obj = queryset.get()
+        except queryset.model.DoesNotExist:
+            raise Http404("No Profile found matching the query")
+        return obj
+
     def test_func(self):
         return self.request.user.is_authenticated
 
-    def handle_no_permission(self):
+    def handle_no_permission(self, **kwargs):
         return redirect('index')
 
     def get_context_data(self, *args, **kwargs):
         # users = Profile.objects.all()
         context = super(ProfilePageView, self).get_context_data(**kwargs)
-        get_pk = get_object_or_404(Profile, name=self.kwargs['name']).pk
+        name_lower = self.kwargs['name'].lower()
+        get_pk = get_object_or_404(Profile, name=name_lower).pk
         page_user = get_object_or_404(Profile, id=get_pk)
         perm_request = RequestPermission.objects.filter(FromUser=get_pk)
         if perm_request:
@@ -1101,16 +1159,17 @@ class ProfilePageView(UserPassesTestMixin, generic.DetailView):
         return context
 
 
+@login_required(login_url='/polls/login/')
 def like_view(request, pk):
     profile = get_object_or_404(Profile, id=request.POST.get('profile_id'))
     if profile.likes.filter(id=request.user.id).exists():
         profile.likes.remove(request.user)
     else:
         profile.likes.add(request.user)
+    return redirect('profile-page',profile.user)
 
-    return HttpResponseRedirect(reverse('profile-page', args=[str(pk)]))
 
-
+@stuff_or_superuser_required
 def game_verification(request, pk):
     game = get_object_or_404(Game, id=pk)
     if game.Verified:
@@ -1122,6 +1181,7 @@ def game_verification(request, pk):
     return HttpResponseRedirect(reverse('game-detail', args=[str(pk)]))
 
 
+@login_required(login_url='/polls/login/')
 def add_favorite_game(request, pk):
     game = get_object_or_404(Game, id=pk)
     if game in Profile.objects.get(id=request.user.id).favorite_games.filter(id=pk):
@@ -1131,6 +1191,7 @@ def add_favorite_game(request, pk):
     return HttpResponseRedirect(reverse('game-detail', args=[str(pk)]))
 
 
+@login_required(login_url='/polls/login/')
 def add_favorite_movie(request, pk):
     movie = get_object_or_404(Movie, id=pk)
     if movie in Profile.objects.get(id=request.user.id).favorite_movies.filter(id=pk):
@@ -1140,6 +1201,7 @@ def add_favorite_movie(request, pk):
     return HttpResponseRedirect(reverse('movie-detail', args=[str(pk)]))
 
 
+@login_required(login_url='/polls/login/')
 def add_favorite_series(request, pk):
     series = get_object_or_404(Series, id=pk)
     if series in Profile.objects.get(id=request.user.id).favorite_series.filter(id=pk):
@@ -1256,6 +1318,7 @@ class MovieUpdate(UserPassesTestMixin, UpdateView):
         return redirect('index')
 
 
+@stuff_or_superuser_required
 def movie_verification(request, pk):
     movie_object = get_object_or_404(Movie, id=pk)
     if movie_object.Verified:
@@ -1273,40 +1336,96 @@ class ProfileWatchlist(generic.DetailView):
     slug_field = 'name'
     slug_url_kwarg = 'name'
 
+    def get_object(self, queryset=None):
+        """
+        Return the object the view is displaying.
+        Require `self.queryset` and a `pk` or `slug` argument in the URLconf.
+        Subclasses can override this to return any object.
+        """
+        # Use a custom queryset if provided; this is required for subclasses
+        # like DateDetailView
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        # Next, try looking up by primary key.
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        slug = self.kwargs.get(self.slug_url_kwarg).lower()
+        if pk is not None:
+            queryset = queryset.filter(pk=pk)
+
+        # Next, try looking up by slug.
+        if slug is not None and (pk is None or self.query_pk_and_slug):
+            slug_field = self.get_slug_field()
+            queryset = queryset.filter(**{slug_field: slug})
+
+        # If none of those are defined, it's an error.
+        if pk is None and slug is None:
+            raise AttributeError(
+                "Generic detail view %s must be called with either an object "
+                "pk or a slug in the URLconf." % self.__class__.__name__
+            )
+
+        try:
+            # Get the single item from the filtered queryset
+            obj = queryset.get()
+        except queryset.model.DoesNotExist:
+            raise Http404("No Profile found matching the query")
+        return obj
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        movie_watchlist_all = MovieWatchlist.objects.filter(profile=self.object)
-        movie_watchlist_movies = MovieWatchlist.objects.filter(profile=self.object).values_list('movie', flat=True)
 
-        movie_reviews_all = []
-        movie_reviews_movies = MovieReview.objects.filter(author=self.object.user).values_list('movie', flat=True)
-        print(self.request.user, self.object.user)
+        type_of_show = self.kwargs['type_of_show']
+        status = self.kwargs['status']
 
-        series_watchlist_all = SeriesWatchlist.objects.filter(profile=self.object)
-        series_watchlist_series = SeriesWatchlist.objects.filter(profile=self.object).values_list('series', flat=True)
-
-        series_reviews_all = []
-        series_reviews_series = SeriesReview.objects.filter(author=self.object.user).values_list('series', flat=True)
-
-        for movie in movie_watchlist_movies:
-            if movie in movie_reviews_movies:
-                movie_reviews_all.append(MovieReview.objects.filter(
-                    author=self.object.user).filter(movie=movie).first())
+        if type_of_show in ['all', 'movies'] and status != 'watching':
+            if status == 'all':
+                movie_watchlist_all = MovieWatchlist.objects.filter(profile=self.object)
+                movie_watchlist_movies = MovieWatchlist.objects.filter(profile=self.object).values_list('movie',
+                                                                                                        flat=True)
             else:
-                movie_reviews_all.append(False)
+                movie_watchlist_all = MovieWatchlist.objects.filter(profile=self.object).filter(movie_status=status)
+                movie_watchlist_movies = MovieWatchlist.objects.filter(
+                    profile=self.object).filter(movie_status=status).values_list('movie', flat=True)
 
-        for series in series_watchlist_series:
-            if series in series_reviews_series:
-                series_reviews_all.append(SeriesReview.objects.filter(
-                    author=self.object.user).filter(series=series).first())
+            movie_reviews_all = []
+            movie_reviews_movies = MovieReview.objects.filter(author=self.object.user).values_list('movie', flat=True)
+
+            for movie in movie_watchlist_movies:
+                if movie in movie_reviews_movies:
+                    movie_reviews_all.append(MovieReview.objects.filter(
+                        author=self.object.user).filter(movie=movie).first())
+                else:
+                    movie_reviews_all.append(False)
+
+            reviews_and_movies = zip(movie_watchlist_all, movie_reviews_all)
+            context['reviews_and_movies'] = reviews_and_movies
+
+        if type_of_show in ['all', 'series']:
+            if status == 'all':
+                series_watchlist_all = SeriesWatchlist.objects.filter(profile=self.object)
+                series_watchlist_series = SeriesWatchlist.objects.filter(profile=self.object).values_list('series',
+                                                                                                          flat=True)
             else:
-                series_reviews_all.append(False)
+                series_watchlist_all = SeriesWatchlist.objects.filter(profile=self.object).filter(series_status=status)
+                series_watchlist_series = SeriesWatchlist.objects.filter(
+                    profile=self.object).filter(series_status=status).values_list('series', flat=True)
+            series_reviews_all = []
+            series_reviews_series = SeriesReview.objects.filter(author=self.object.user).values_list('series',
+                                                                                                     flat=True)
 
-        reviews_and_movies = zip(movie_watchlist_all, movie_reviews_all)
-        reviews_and_series = zip(series_watchlist_all, series_reviews_all)
+            for series in series_watchlist_series:
+                if series in series_reviews_series:
+                    series_reviews_all.append(SeriesReview.objects.filter(
+                        author=self.object.user).filter(series=series).first())
+                else:
+                    series_reviews_all.append(False)
 
-        context['reviews_and_movies'] = reviews_and_movies
-        context['reviews_and_series'] = reviews_and_series
+            reviews_and_series = zip(series_watchlist_all, series_reviews_all)
+            context['reviews_and_series'] = reviews_and_series
+
+        context['type_of_show'] = type_of_show
+        context['status'] = status
 
         return context
 
@@ -1342,14 +1461,21 @@ class CreateMovieReview(UserPassesTestMixin, CreateView):
     form_class = MovieReviewForm
 
     def test_func(self):
-        return self.request.user.is_authenticated
+
+        if not self.request.user.is_authenticated:
+            return False
+
+        review_exists = MovieReview.objects.filter(
+            author_id=self.request.user, movie_id=self.kwargs['movie_pk']).exists()
+
+        return not review_exists and self.request.user.is_authenticated
 
     def handle_no_permission(self):
-        return redirect('login')
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
 
     def form_valid(self, form):
-        if MovieReview.objects.filter(author_id=self.request.user, movie_id=self.kwargs['movie_pk']).exists():
-            return redirect('index')
         form.instance.author = self.request.user
         form.instance.movie_id = self.kwargs['movie_pk']
         return super().form_valid(form)
@@ -1364,10 +1490,13 @@ class UpdateMovieReview(UserPassesTestMixin, UpdateView):
     form_class = MovieReviewForm
 
     def test_func(self):
-        return self.request.user.is_authenticated
+        author = MovieReview.objects.filter(id=self.kwargs['pk']).first().author
+        return self.request.user == author and self.request.user.is_authenticated
 
     def handle_no_permission(self):
-        return redirect('login')
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -1483,10 +1612,19 @@ class CreateSeriesReview(UserPassesTestMixin, CreateView):
     form_class = SeriesReviewForm
 
     def test_func(self):
-        return self.request.user.is_authenticated
+
+        if not self.request.user.is_authenticated:
+            return False
+
+        review_exists = SeriesReview.objects.filter(
+            author_id=self.request.user, movie_id=self.kwargs['series_pk']).exists()
+
+        return not review_exists and self.request.user.is_authenticated
 
     def handle_no_permission(self):
-        return redirect('login')
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -1503,10 +1641,13 @@ class UpdateSeriesReview(UserPassesTestMixin, UpdateView):
     form_class = SeriesReviewForm
 
     def test_func(self):
-        return self.request.user.is_authenticated
+        author = SeriesReview.objects.filter(id=self.kwargs['pk']).first().author
+        return self.request.user == author and self.request.user.is_authenticated
 
     def handle_no_permission(self):
-        return redirect('login')
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -1600,6 +1741,7 @@ class SeriesUpdate(UserPassesTestMixin, UpdateView):
         return redirect('index')
 
 
+@stuff_or_superuser_required
 def series_verification(request, pk):
     series_object = get_object_or_404(Series, id=pk)
     if series_object.Verified:
@@ -1674,6 +1816,7 @@ class ActorUpdate(UserPassesTestMixin, UpdateView):
         return redirect('index')
 
 
+@stuff_or_superuser_required
 def actor_verification(request, pk):
     actor_object = get_object_or_404(Actor, id=pk)
     if actor_object.Verified:
@@ -1738,6 +1881,7 @@ class DirectorUpdate(UserPassesTestMixin, UpdateView):
         return redirect('index')
 
 
+@stuff_or_superuser_required
 def director_verification(request, pk):
     director_object = get_object_or_404(Director, id=pk)
     if director_object.Verified:
@@ -1759,7 +1903,7 @@ class EpisodeDetailView(generic.DetailView):
     template_name = "polls/Episode/episode_detail.html"
 
 
-@login_required
+@login_required(login_url='/polls/login/')
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def scrape_games_redirect(request):
     random_digit = random.randint(1, 3)
@@ -1786,7 +1930,7 @@ def scrape_steam_ids(page, start):
     return steam_ids, False
 
 
-@login_required
+@login_required(login_url='/polls/login/')
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def scrape_games(request):
     start = time()
@@ -2227,7 +2371,7 @@ def scrape_show(url, multi_search, type_of_show, api, update, months, start):
     return time() - start, False
 
 
-@login_required
+@login_required(login_url='/polls/login/')
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def scraping_shows_script(request, type_of_show, update):
     start = time()
@@ -2255,7 +2399,7 @@ def scraping_shows_script(request, type_of_show, update):
     return render(request, 'index.html')
 
 
-@login_required
+@login_required(login_url='/polls/login/')
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def omdb_api(request, url, multi_search, type_of_show):
     api_key = os.environ.get('API_KEY')
@@ -2281,7 +2425,7 @@ def omdb_api(request, url, multi_search, type_of_show):
     return render(request, "polls/Scraping/scrape_movies.html", context=context)
 
 
-@login_required
+@login_required(login_url='/polls/login/')
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def omdb_api_page(request):
     if request.method == 'POST':
@@ -2439,7 +2583,6 @@ def scrape_seasons_number(series_imdb_id):
     return seasons_number
 
 
-@login_required
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def series_episodes_scraping(request, pk):
     start = time()
@@ -2486,7 +2629,9 @@ def episodes_scraping(pk, api, start):
         Series.objects.filter(id=pk).update(episodes_update_date=datetime.datetime.today().strftime('%Y-%m-%d'))
 
 
+@stuff_or_superuser_required
 def episodes_scraping_script(request):
+    print("Start z req")
     start = time()
     api_key = os.environ.get('API_KEY')
     api = omdb.OMDBClient(apikey=api_key)
@@ -2606,16 +2751,12 @@ def episode_scraping(series, episode_imdb_id, season_object, months, api, action
                             poster=poster,
                             season=season_object
                             )
-        try:
-            episodes.append(episode)
-        except:
-            test11 = episodes
-            test2 = type(episodes)
-            pass
+
+        episodes.append(episode)
+
     return episodes
 
 
-@login_required
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def enter_api_key(request):
     if request.method == 'POST':
@@ -2629,7 +2770,6 @@ def enter_api_key(request):
     return render(request, 'polls/Scraping/enter_api_key.html', {'form': form})
 
 
-@login_required
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def series_to_scrape(request):
 
@@ -2642,7 +2782,6 @@ def series_to_scrape(request):
     return render(request, 'polls/Scraping/series_to_scrape.html', context=context)
 
 
-@login_required
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def episode_scraping_in_progress(request, pk):
     series = get_object_or_404(Series, id=pk)
@@ -2695,7 +2834,7 @@ class RequestPermissionList(UserPassesTestMixin, generic.ListView):
         return redirect('index')
 
 
-@staff_member_required
+@stuff_or_superuser_required
 def delete_unverified_users(request):
     get_all_users = User.objects.all()
 
@@ -2721,7 +2860,7 @@ class UserPageManagement(UserPassesTestMixin, generic.DetailView):
         return redirect('index')
 
 
-@staff_member_required
+@stuff_or_superuser_required
 def delete_unverified_games(request, pk):
     games = Game.objects.filter(added_by=pk, Verified=False)
     for game in games:
@@ -2729,7 +2868,7 @@ def delete_unverified_games(request, pk):
     return redirect('user-page-management', pk)
 
 
-@staff_member_required
+@stuff_or_superuser_required
 def delete_unverified_movies(request, pk):
     movies = Movie.objects.filter(added_by=pk, Verified=False)
     for movie in movies:
@@ -2737,7 +2876,7 @@ def delete_unverified_movies(request, pk):
     return redirect('user-page-management', pk)
 
 
-@staff_member_required
+@stuff_or_superuser_required
 def delete_unverified_series(request, pk):
     series = Series.objects.filter(added_by=pk, Verified=False)
     for series_object in series:
@@ -2745,7 +2884,7 @@ def delete_unverified_series(request, pk):
     return redirect('user-page-management', pk)
 
 
-@staff_member_required
+@stuff_or_superuser_required
 def delete_user(request, pk):
     try:
         u = User.objects.get(id=pk)
@@ -2759,7 +2898,7 @@ def delete_user(request, pk):
     return redirect('index')
 
 
-@staff_member_required
+@stuff_or_superuser_required
 def delete_unverified_all(request, pk):
     games = Game.objects.filter(added_by=pk, Verified=False)
     movies = Movie.objects.filter(added_by=pk, Verified=False)

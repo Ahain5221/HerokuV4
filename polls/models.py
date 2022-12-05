@@ -94,6 +94,21 @@ class Game(models.Model):
         """Returns the URL to access a detail record for this game."""
         return reverse('game-detail', args=[str(self.id)])
 
+    @property
+    def users_rating(self):
+        rate_sum = 0
+        counter = 0
+        reviews = GameReview.objects.filter(game=self.pk)
+        for review in reviews:
+            if review.rate:
+                rate_sum += review.rate
+                counter += 1
+        try:
+            users_rating = rate_sum / counter
+        except ZeroDivisionError:
+            users_rating = 'None'
+        return users_rating
+
 
 class Book(models.Model):
     """Model representing a book (but not a specific copy of a book)."""
@@ -322,10 +337,25 @@ class MovieSeriesBase(models.Model):
         ('movie', 'movie'),
         ('series', 'series')
     ]
-    type_of_show = models.CharField(max_length=6, choices=CHOICES, default='movie')
+    type_of_show = models.CharField(max_length=6, choices=CHOICES)
 
     class Meta:
         abstract = True
+
+    @property
+    def users_rating(self):
+        rate_sum = 0
+        counter = 0
+        reviews = MovieReview.objects.filter(movie=self.pk)
+        for review in reviews:
+            if review.rate:
+                rate_sum += review.rate
+                counter += 1
+        try:
+            users_rating = rate_sum/counter
+        except ZeroDivisionError:
+            users_rating = 'None'
+        return users_rating
 
 
 class Actor(Person):
@@ -363,21 +393,6 @@ class Movie(MovieSeriesBase):
 
     def __str__(self):
         return f"{self.title} ({self.date_of_release.year})"
-
-    @property
-    def users_rating(self):
-        rate_sum = 0
-        counter = 0
-        reviews = MovieReview.objects.filter(movie=self.pk)
-        for review in reviews:
-            if review.rate:
-                rate_sum += review.rate
-                counter += 1
-        try:
-            users_rating = rate_sum/counter
-        except ZeroDivisionError:
-            users_rating = 'None'
-        return users_rating
 
 
 class Series(MovieSeriesBase):

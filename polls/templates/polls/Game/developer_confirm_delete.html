@@ -8,10 +8,12 @@
 
         <form action="" method="POST">
             {% csrf_token %}
+            <textarea id="delete_reason" name="delete_reason" placeholder="Enter any reason, if necessary" maxlength="200" rows="4" cols="30"></textarea>
             <input type="submit" value="Yes, delete."/>
+            <a href="{{ object.get_absolute_url }}" class="btn btn-default">Cancel</a>
         </form>
     {% else %}
-        <p>You are not supposted to be here</p>
+        <p>You are not supposed to be here</p>
     {% endif %}
     <a class="d-inline-block"> </a>
 {% endblock %}

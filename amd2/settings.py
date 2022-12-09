@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     # 'django_extensions',
     'captcha',
     'friendship',
+    'isbn_field',
 
 ]
 

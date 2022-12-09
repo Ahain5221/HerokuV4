@@ -11,6 +11,11 @@
                 <hr style="width:100px">
                 <li><a class="btn btn-close-white" href="{% url 'movie-create' %}"> Create movie </a></li>
                 <li><a class="btn btn-close-white" href="{% url 'series-create' %}"> Create series </a></li>
+                <hr style="width:100px">
+                <li><a class="btn btn-close-white" href="{% url 'book-create' %}"> Create book </a></li>
+                <li><a class="btn btn-close-white" href="{% url 'search-user' %}"> Search people </a></li>
+                <li><a class="btn btn-close-white" href="{% url 'search-general' %}"> General search </a></li>
+
                 <!--
                 <li><a class="btn" href="{% url 'actor-create' %}"> Create actor </a></li>
                 <li><a class="btn" href="{% url 'director-create' %}"> Create director </a></li>
@@ -18,7 +23,7 @@
                 {% if user.is_superuser %}
                     <hr style="width:100px">
                     <li><a class="btn btn-close-white" href="{% url 'omdb-api-page' %}"> OMDB API page</a></li>
-                    <li><a class="btn btn-close-white" href="{% url 'scrape-games-redirect' %}"> Scrape 5 games </a></li>
+                    <li><a class="btn btn-close-white" href="{% url 'scrape-games-redirect' %}"> Scrape games </a></li>
                     <li><a class="btn btn-close-white" href="{% url 'series-to-scrape' %}"> Scrape episodes</a></li>
                     <li><a class="btn btn-close-white" href="{% url 'stuff-verification' %}"> Stuff to verify </a></li>
                     <li><a class="btn btn-close-white" href="{% url 'request-list' %}"> Permission requests </a></li>

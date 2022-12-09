@@ -2,15 +2,21 @@
 
 {% block content %}
 
-    <h1>{{ moviereview.movie }} - {{ moviereview.author }}'s review</h1>
-    <div style="border: thin solid black">
-        <div style="border: thin solid black">{{ moviereview.review_date }} </div>
-        <div style="border: thin solid black">My rate {{ moviereview.rate }} </div>
-        <div style="border: thin solid black">{{ moviereview.content }} </div>
+    <h1>
+        <a href="{{ object.movie.get_absolute_url }}">{{ object.movie }}</a> review
+    </h1>
+
+    <div style="border: 1px solid #262626; width: 50em">
+        <div style="border: 1px solid #262626; background-color: #262626">
+            <a href="{{ object.author.profile.get_absolute_url }}">
+                <strong>&nbsp;&nbsp;{{ object.author }}</strong>
+            </a> &nbsp;&nbsp;&nbsp; {{ object.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ object.rate }}
+        </div>
+        <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ object.content }} </div>
     </div>
 
-    <a href="{% url 'movie-review-update' movie_pk=moviereview.movie.pk pk=moviereview.pk%}">
+    <a href="{% url 'movie-review-update' movie_pk=object.movie.pk pk=object.pk%}">
         <button class="btn btn-success btn-sm">Update review</button>
     </a>
-
 {% endblock %}
+

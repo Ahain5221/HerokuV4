@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block title %}<title>Welcome to Pop tracker!</title>{% endblock %}
+    <meta charset="UTF-8">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+    <!--
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" >
+    -->
+</head>
+<body>
+
+<div class="main-container">
+
+    <div class="top-logo-and-login">
+        <div class="tll-left-side">
+            <h2>Pop Tracker</h2>
+        </div>
+        <div class="tll-right-side">
+            <a href="{% url 'login2' %}">Login</a>
+            <a href="{% url 'signup' %}">Register</a>
+        </div>
+    </div>
+
+    <div class="splash-screen">
+        <h1>
+            Your whole digital Pop culture
+            <br>
+            in one place
+        </h1>
+    </div>
+
+    {% block content %}
+    <div class="statistics-container">
+        <div class="icon-text">
+            <p class="text-descr">{{ num_movies }} Movies</p>
+        </div>
+        <div class="icon-text">
+            <p class="text-descr">{{ num_series }} Series</p>
+        </div>
+        <div class="icon-text">
+            <p class="text-descr">{{ num_games}} Games</p>
+        </div>
+        <div class="icon-text">
+            <p class="text-descr">{{ num_directors }} Directors</p>
+        </div>
+        <div class="icon-text">
+            <p class="text-descr">{{ num_actors }} Actors</p>
+        </div>
+        <div class="icon-text">
+            <p class="text-descr">{{ num_users }} User Profiles</p>
+        </div>
+    </div>
+    {% endblock %}
+
+    <div class="hanger-container">
+
+    </div>
+</div>
+</body>
+<footer>
+</footer>
+</html>

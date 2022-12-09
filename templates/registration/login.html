@@ -3,35 +3,38 @@
 {% block content %}
 
     <div id="login">
+    <h2 class="text-center">Login</h2>
         <form class="form-horizontal" name="LoginForm"  method="post">
         {% csrf_token %}
         {% if next %}
             <input type="hidden" name="next" value="{{ next }}" />
         {% endif %}
-        <div class="control-group" style="padding-bottom: 1em">
-            <label class="control-label" for="username">Username</label>
+        <div class="control-group text-center" style="padding-bottom: 1em">
+            <label class="control-label" for="username" style="font-size: medium">Username</label>
             <div class="controls">
-                <input type="text" id="username" name="username"  placeholder="Username">
+                <input type="text" id="username" name="username"  placeholder="Username" style="display: inline; font-size: large">
             </div>
         </div>
-        <div class="control-group" style="padding-bottom: 1em">
-            <label class="control-label" for="password">Password</label>
+        <div class="control-group text-center" style="padding-bottom: 1em">
+            <label class="control-label" for="password" style="font-size: medium">Password</label>
             <div class="controls">
-                <input type="password" name="password" id="password" placeholder="Password">
+                <input type="password" name="password" id="password" placeholder="Password" style="display: inline; font-size: large">
                 <input type="checkbox" id="box" onclick="reveal()">
-                <label for="box">Show/Hide password</label>
-                <i class="fa-duotone fa-eye"></i>
-
+                <label for="box" style="font-size: smaller"><i class="fa-solid fa-eye"></i> Show/Hide password</label>
             </div>
         </div>
         <div class="control-group">
             <div class="controls">
-                <button type="submit" >Login</button>
+                <div class="position-relative">
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                        <button class="btn btn-dark btn-sm" type="submit" style="">Login</button>
+                    </div>
+                </div>
             </div>
         </div>
         </form>
-      <p><a href="{% url 'password_reset_polls' %}">Lost password?</a></p>
-      <p><a href="{% url 'signup' %}">Create account</a></p>
+      <p style="margin-top: 2em; margin-bottom: 0; font-size: medium"><a href="{% url 'password_reset_polls' %}">Lost password?</a></p>
+      <p style="margin-top: 0; font-size: medium"><a href="{% url 'signup' %}">Create account</a></p>
     </div>
     <script type="text/javascript">
 function reveal()

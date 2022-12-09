@@ -2,29 +2,28 @@ import uuid  # Required for unique book instances
 from datetime import date
 from datetime import datetime, timezone, timedelta
 from django.contrib.auth.models import User
-from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse  # Used to generate URLs by reversing the URL patterns
 from django.core.validators import MaxValueValidator, MinValueValidator
+from isbn_field import ISBNField
+
+
 # from django.shortcuts import get_object_or_404
 
 
 # Create your models here.
 
 class Genre(models.Model):
-    """Model representing a book genre."""
     name = models.CharField(max_length=200, help_text='Enter a book genre (e.g. Science Fiction)')
 
     class Meta:
         ordering = ['name']
 
     def __str__(self):
-        """String for representing the Model object."""
         return self.name
 
 
 class Language(models.Model):
-    """Model representing a Language (e.g. English, French, Japanese, etc.)"""
     name = models.CharField(max_length=200,
                             help_text="Enter the book's natural language (e.g. English, French, Japanese etc.)")
 
@@ -32,12 +31,10 @@ class Language(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        """String for representing the Model object (in Admin site etc.)"""
         return self.name
 
 
 class GameGenre(models.Model):
-    """Model representing a game genre."""
     name = models.CharField(max_length=200, help_text='Enter a game genre (e.g. Adventure)')
     Verified = models.BooleanField(default=False)
 
@@ -45,7 +42,6 @@ class GameGenre(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        """String for representing the Model object."""
         return self.name
 
     def class_name(self):
@@ -53,7 +49,6 @@ class GameGenre(models.Model):
 
 
 class GameMode(models.Model):
-    """Model representing a game mode."""
     name = models.CharField(max_length=200, help_text='Enter a game genre (e.g. SinglePlayer)')
     Verified = models.BooleanField(default=False)
 
@@ -61,12 +56,10 @@ class GameMode(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        """String for representing the Model object."""
         return self.name
 
 
 class Game(models.Model):
-    """Model representing a game (but not a specific game)."""
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=200)
     developer = models.ManyToManyField('Developer', blank=True)
@@ -76,7 +69,6 @@ class Game(models.Model):
     game_image = models.TextField(max_length=100, null=True, blank=True,
                                   default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400"
                                           ".jpg")
-
     genre = models.ManyToManyField(GameGenre, help_text='Select a genre for this game')
     mode = models.ManyToManyField(GameMode, help_text='Select which game mode is available')
     # language = models.ForeignKey('Language', on_delete=models.SET_NULL, null=True)
@@ -87,11 +79,9 @@ class Game(models.Model):
         ordering = ['title']
 
     def __str__(self):
-        """String for representing the Model object."""
         return self.title
 
     def get_absolute_url(self):
-        """Returns the URL to access a detail record for this game."""
         return reverse('game-detail', args=[str(self.id)])
 
     @property
@@ -110,97 +100,90 @@ class Game(models.Model):
         return users_rating
 
 
+
+
 class Book(models.Model):
-    """Model representing a book (but not a specific copy of a book)."""
     title = models.CharField(max_length=200)
-    author = models.ForeignKey('Author', on_delete=models.SET_NULL, null=True)
+    authors = models.ManyToManyField('Author')
 
     summary = models.TextField(max_length=1000, help_text='Enter a brief description of the book')
-    isbn = models.CharField('ISBN', max_length=13, unique=True,
-                            help_text='13 Character <a href="https://www.isbn-international.org/content/what-isbn'
-                                      '">ISBN number</a>')
-
-    genre = models.ManyToManyField(Genre, help_text='Select a genre for this book')
-    language = models.ForeignKey('Language', on_delete=models.SET_NULL, null=True)
+    isbn = ISBNField('ISBN', unique=True,
+                     help_text='13 Character <a href="https://www.isbn-international.org/content/what-isbn'
+                               '">ISBN number</a>')
+    genre = models.ManyToManyField('MovieSeriesGenre', help_text='Select a genre for this book')
+    languages = models.ManyToManyField('Language')
+    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    Verified = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ['title', 'author']
+        ordering = ['title']
 
     def __str__(self):
-        """String for representing the Model object."""
         return self.title
 
     def get_absolute_url(self):
-        """Returns the URL to access a detail record for this book."""
         return reverse('book-detail', args=[str(self.id)])
 
     def display_genre(self):
-        """Create a string for the Genre. This is required to display genre in Admin."""
-        return ', '.join(genre.name for genre in self.genre.all()[:3])
+        return ', '.join(genr.name for genr in self.genre.all()[:3])
 
     display_genre.short_description = 'Genre'
 
-
-class BookInstance(models.Model):
-    """Model representing a specific copy of a book (i.e. that can be borrowed from the library)."""
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4,
-                          help_text='Unique ID for this particular book across whole library')
-    book = models.ForeignKey('Book', on_delete=models.RESTRICT, null=True)
-    imprint = models.CharField(max_length=200)
-    due_back = models.DateField(null=True, blank=True)
-    borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-
     @property
-    def is_overdue(self):
-        if self.due_back and date.today() > self.due_back:
-            return True
-        return False
+    def users_rating(self):
+        rate_sum = 0
+        counter = 0
+        reviews = BookReview.objects.filter(book=self.pk)
+        for review in reviews:
+            if review.rate:
+                rate_sum += review.rate
+                counter += 1
+        try:
+            users_rating = rate_sum / counter
+        except ZeroDivisionError:
+            users_rating = 'None'
+        return users_rating
 
-    LOAN_STATUS = (
-        ('m', 'Maintenance'),
-        ('o', 'On loan'),
-        ('a', 'Available'),
-        ('r', 'Reserved'),
-    )
 
-    status = models.CharField(
-        max_length=1,
-        choices=LOAN_STATUS,
-        blank=True,
-        default='m',
-        help_text='Book availability',
-    )
+class BookReview(models.Model):
+    book = models.ForeignKey('Book', on_delete=models.CASCADE)
+    content = models.TextField(max_length=1000)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    review_date = models.DateField(default=datetime.today().strftime('%Y-%m-%d'))
+    rate = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], null=True)
 
-    class Meta:
-        ordering = ['due_back']
-        permissions = (("can_mark_returned", "Set book as returned"),)
 
-    def __str__(self):
-        """String for representing the Model object."""
-        return f'{self.id} ({self.book.title})'
+class BookList(models.Model):
+    CHOICES = [
+        ('read', 'read'),
+        ('reading', 'reading'),
+        ('want to read', 'want to read'),
+        ('dropped', 'dropped')
+    ]
+
+    book = models.ForeignKey('Book', on_delete=models.CASCADE, default=None)
+    book_status = models.CharField(max_length=12, choices=CHOICES)
+    profile = models.ForeignKey('Profile', on_delete=models.CASCADE, default=None)
 
 
 class Author(models.Model):
-    """Model representing an author."""
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
+    first_last_name = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
     date_of_death = models.DateField('Died', null=True, blank=True)
+    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    Verified = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ['last_name', 'first_name']
+        ordering = ['first_last_name']
 
     def get_absolute_url(self):
-        """Returns the URL to access a particular author instance."""
         return reverse('author-detail', args=[str(self.id)])
 
     def __str__(self):
-        """String for representing the Model object."""
-        return f'{self.last_name}, {self.first_name}'
+        return f'{self.first_last_name}'
 
 
 class Developer(models.Model):
-    """Model representing a Developer."""
     company_name = models.CharField(max_length=100)
     date_of_foundation = models.DateField(null=True, blank=True)
     Verified = models.BooleanField(default=False)
@@ -210,11 +193,9 @@ class Developer(models.Model):
         ordering = ['company_name']
 
     def get_absolute_url(self):
-        """Returns the URL to access a particular developer instance."""
         return reverse('developer-detail', args=[str(self.id)])
 
     def __str__(self):
-        """String for representing the Model object."""
         return f'{self.company_name}'
 
 
@@ -224,12 +205,13 @@ class Profile(models.Model):
     profile_image_url = models.TextField(null=True, blank=True, default="https://pbs.twimg.com/profile_images"
                                                                         "/1510045751803404288/W-AAI2EH_400x400.jpg")
     date_of_birth = models.DateField(null=True, blank=True)
-    profile_description = models.TextField(null=True, blank=True)
-    signature = models.TextField(null=True, blank=True)
+    profile_description = models.TextField(null=True, blank=True, max_length=1000)
+    signature = models.TextField(null=True, blank=True, max_length=250)
     likes = models.ManyToManyField(User, related_name="blog_posts")
     favorite_games = models.ManyToManyField('Game')
     favorite_movies = models.ManyToManyField('Movie')
     favorite_series = models.ManyToManyField('Series')
+    favorite_books = models.ManyToManyField('Book')
     registration_completed = models.BooleanField(default=False)
     name = models.CharField(max_length=200, blank=True)
 
@@ -261,7 +243,7 @@ class Profile(models.Model):
     gender = models.CharField(max_length=10, choices=Genders, default='Undefined')
 
     def get_absolute_url(self):
-        return reverse('profile-page', args=[str(self.id)])
+        return reverse('profile-page', args=[str(self.user.username)])
 
     def __str__(self):
         return str(self.user)
@@ -352,14 +334,13 @@ class MovieSeriesBase(models.Model):
                 rate_sum += review.rate
                 counter += 1
         try:
-            users_rating = rate_sum/counter
+            users_rating = rate_sum / counter
         except ZeroDivisionError:
             users_rating = 'None'
         return users_rating
 
 
 class Actor(Person):
-
     CHOICES = [
         ('actor', 'actor')
     ]
@@ -462,7 +443,6 @@ class Episode(models.Model):
 
 
 class MovieWatchlist(models.Model):
-
     CHOICES = [
         ('watched', 'watched'),
         ('want to watch', 'want to watch')
@@ -482,11 +462,11 @@ class MovieReview(models.Model):
 
 
 class SeriesWatchlist(models.Model):
-
     CHOICES = [
         ('watched', 'watched'),
         ('watching', 'watching'),
-        ('want to watch', 'want to watch')
+        ('want to watch', 'want to watch'),
+        ('dropped', 'dropped')
     ]
 
     series = models.ForeignKey('Series', on_delete=models.CASCADE, default=None)
@@ -501,8 +481,9 @@ class SeriesWatchlist(models.Model):
         for season in seasons:
             season_number = season.season_number
             episodes = season.number_of_episodes
-            for episode in range(1, episodes+1):
-                choices.append(('S'+str(season_number)+'E'+str(episode), 'S'+str(season_number)+'E'+str(episode)))
+            for episode in range(1, episodes + 1):
+                choices.append(
+                    ('S' + str(season_number) + 'E' + str(episode), 'S' + str(season_number) + 'E' + str(episode)))
 
         return choices
 
@@ -516,11 +497,11 @@ class SeriesReview(models.Model):
 
 
 class GameList(models.Model):
-
     CHOICES = [
         ('played', 'played'),
         ('playing', 'playing'),
-        ('want to play', 'want to play')
+        ('want to play', 'want to play'),
+        ('dropped', 'dropped')
     ]
 
     game = models.ForeignKey('Game', on_delete=models.CASCADE, default=None)
@@ -540,7 +521,7 @@ class RequestPermission(models.Model):
     # FromUser = models.ForeignKey(Profile, on_delete=models.CASCADE, unique=True)
     FromUser = models.OneToOneField(Profile, on_delete=models.CASCADE)
 
-    Request_Reason = models.TextField()
+    Request_Reason = models.TextField(max_length=1000)
     # status = models.BooleanField(default=False)
 
     Choice_Status = (

@@ -4,6 +4,40 @@
 {% block content %}
     <h1 style="padding-bottom: 1em"> {{ profile.user }}'s game list</h1>
 
+    <div class="row" style="padding-bottom: 15px">
+        <div class="col-sm-2">
+            {% if status == 'played' %}
+                <a href="{% url 'profile-game-list' profile.user 'played'%}" style="padding: 1em"><button class="btn btn-success btn-sm">Played</button></a>
+            {% else %}
+                <a href="{% url 'profile-game-list' profile.user 'played'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Played</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-2">
+            {% if status == 'playing' %}
+                <a href="{% url 'profile-game-list' profile.user 'playing'%}" style="padding: 1em"><button class="btn btn-success btn-sm">Playing</button></a>
+            {% else %}
+                <a href="{% url 'profile-game-list' profile.user 'playing'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Playing</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-2">
+            {% if status == 'want to play' %}
+                <a href="{% url 'profile-game-list' profile.user 'want to play'%}" style="padding: 1em"><button class="btn btn-success btn-sm">Want to play</button></a>
+            {% else %}
+                <a href="{% url 'profile-game-list' profile.user 'want to play'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Want to play</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-2">
+            {% if status == 'all' %}
+                <a href="{% url 'profile-game-list' profile.user 'all'%}" style="padding: 1em"><button class="btn btn-success btn-sm">All</button></a>
+            {% else %}
+                <a href="{% url 'profile-game-list' profile.user 'all'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">All</button></a>
+            {% endif %}
+        </div>
+    </div>
+
     <table class="center" style="border: 1px solid;">
     <tr style="border: 1px solid; background-color: #262626">
         <th style="color: white">Title</th>
@@ -16,16 +50,17 @@
 
     {% for game_list, review in reviews_and_games %}
         <tr style="border: 1px solid; background-color: #d3d3d3">
-            <th><a href="{{ game_list.game.get_absolute_url }}"><strong>{{ game_list.game }}</strong></a></th>
-            {% if review %}
-                <th>{{ review.rate }}</th>
-                <th>
-                    <a href="{% url 'game-review-detail' pk=review.pk%}">
-                        <button class="btn btn-success btn-sm">Display</button>
-                    </a>
-                </th>
-            {% else %}
-                <th>None</th>
+        <th><a href="{{ game_list.game.get_absolute_url }}"><strong>{{ game_list.game }}</strong></a></th>
+        {% if review %}
+            <th>{{ review.rate }}</th>
+            <th>
+                <a href="{% url 'game-review-detail' pk=review.pk%}">
+                    <button class="btn btn-success btn-sm">Display</button>
+                </a>
+            </th>
+        {% else %}
+            <th>None</th>
+            {% if user == profile.user %}
                 {% if game_list.game_status == 'want to play' %}
                     <th>Prohibited</th>
                 {% else %}
@@ -35,25 +70,72 @@
                         </a>
                     </th>
                 {% endif %}
+            {% else %}
+                <th>NO REVIEW</th>
             {% endif %}
+        {% endif %}
 
-            <th> {{ game_list.game_status }}</th>
+        <th> {{ game_list.game_status }}</th>
 
-            <th>
-                <a href="{% url 'remove-game-from-game-list' game_list.game.pk profile.user_id %}">
-                    <button class="btn btn-danger btn-sm">Delete</button>
-                </a>
-                {% if game_list.game_status == 'want to play' %}
-                    <a href="{% url 'change-game-status' game_list.game.pk profile.user_id 'playing'%}">
-                        <button class="btn btn-success btn-sm">Change to playing</button>
+        {% if user.is_authenticated %}
+            {% if user == profile.user %}
+                <th>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal{{ game_list.game.pk }}">Edit</button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal{{ game_list.game.pk }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <a href="{% url 'remove-game-from-game-list' game_list.game.pk profile.user_id %}">
+                                        <button class="btn btn-danger btn-sm">Delete</button>
+                                    </a>
+                                    {% if game_list.game_status == 'want to play' %}
+                                        <a href="{% url 'change-game-status' game_list.game.pk profile.pk 'playing'%}">
+                                            <button class="btn btn-success btn-sm">Playing</button>
+                                        </a>
+                                        <a href="{% url 'change-game-status' game_list.game.pk profile.pk 'played'%}">
+                                            <button class="btn btn-success btn-sm">Played</button>
+                                        </a>
+                                        <a href="{% url 'change-game-status' game_list.game.pk profile.pk 'dropped'%}">
+                                            <button class="btn btn-success btn-sm">Dropped</button>
+                                        </a>
+                                    {% endif %}
+                                    {% if game_list.game_status == 'playing' %}
+                                        <a href="{% url 'change-game-status' game_list.game.pk profile.pk 'played'%}">
+                                            <button class="btn btn-success btn-sm">Played</button>
+                                        </a>
+                                        <a href="{% url 'change-game-status' game_list.game.pk profile.pk 'dropped'%}">
+                                            <button class="btn btn-success btn-sm">Dropped</button>
+                                        </a>
+                                    {% endif %}
+                                    {% if game_list.game_status == 'dropped' %}
+                                        <a href="{% url 'change-game-status' game_list.game.pk profile.pk 'playing'%}">
+                                            <button class="btn btn-success btn-sm">Playing</button>
+                                        </a>
+                                        <a href="{% url 'change-game-status' game_list.game.pk profile.pk 'played'%}">
+                                            <button class="btn btn-success btn-sm">Played</button>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </th>
+            {% else %}
+                <th>
+                    <a href="{% url 'add-game-to-game-list' game_list.game.pk user.pk 'want to play' %}">
+                        <button class="btn btn-success btn-sm">Add to my game list</button>
                     </a>
-                {% endif %}
-                {% if game_list.game_status == 'playing' %}
-                    <a href="{% url 'change-game-status' game_list.game.pk profile.user_id 'played'%}">
-                        <button class="btn btn-success btn-sm">Change to played</button>
-                    </a>
-                {% endif %}
-            </th>
+                </th>
+            {% endif %}
+        {% else %}
+            <th>NONE</th>
+        {% endif %}
         </tr>
     {% endfor %}
 

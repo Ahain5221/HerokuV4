@@ -83,7 +83,7 @@
                 {% endif %}
                 -->
                 {% if  movie.added_by%}
-                    <li>Added by <a href="{% url 'profile-page' name=movie.added_by.profile.name %}">{{ series.added_by }}</a></li>
+                    <li>Added by <a href="{% url 'profile-page' name=movie.added_by.profile.name %}">{{ movie.added_by }}</a></li>
                 {% else %}
                     <li>Added by API</li>
                 {% endif %}
@@ -103,7 +103,7 @@
         <li>
             {% if user.is_superuser %}
                 <a href="{% url 'movie-delete' pk=movie.id %}">
-                    <button class="btn btn-danger btn-sm">DELETE SERIES</button>
+                    <button class="btn btn-danger btn-sm">DELETE MOVIE</button>
                 </a>
                 <form action="{% url 'movie-verification' movie.pk %}">
                     {% csrf_token %}

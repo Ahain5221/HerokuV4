@@ -8,6 +8,8 @@ from .models import GameGenre, GameMode, MovieSeriesGenre, Language
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path("sections/<int:num>", views.news_sections, name="section"),
+
     path('sendmail', views.sendmail, name='send'),
     path('form/', views.signup, name='form'),
     path('activate/<slug:uidb64>/<slug:token>/', views.activate, name='activate'),
@@ -25,19 +27,49 @@ urlpatterns = [
 
     # re_path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/',
     #    views.activate, name='activate'),
-    path('books/', views.BookListView.as_view(), name='books'),
-    path('book/<int:pk>', views.BookDetailView.as_view(), name='book-detail'),
+    # path("sections/<int:num>", views.news_section, name="section"),
+    # path("sections/<int:num>", views.newsSections(), name="section"),
+
+    path('sendmail', views.sendmail, name='send'),
+    path('activate/<slug:uidb64>/<slug:token>/', views.activate, name='activate'),
+
+    # re_path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/',
+    #    views.activate, name='activate'),
     path('authors/', views.AuthorListView.as_view(), name='authors'),
     path('author/<int:pk>', views.AuthorDetailView.as_view(), name='author-detail'),
-    path('mybooks/', views.LoanedBooksByUserListView.as_view(), name='my-borrowed'),
+    path('author/create/', views.AuthorCreate.as_view(), name='author-create'),
+    path('author/<int:pk>/update/', views.AuthorUpdate.as_view(), name='author-update'),
+    path('author/<int:pk>/delete/', views.AuthorDelete.as_view(), name='author-delete'),
+    path('author_verification/<int:pk>', views.author_verification, name='author-verification'),
 
-    path(r'borrowed/', views.LoanedBooksAllListView.as_view(), name='all-borrowed'),
+    path('books/', views.BookListView.as_view(), name='books'),
+    path('book/<int:pk>', views.BookDetailView.as_view(), name='book-detail'),
+    path('book/create/', views.BookCreate.as_view(), name='book-create'),
+    path('book/<int:pk>/update/', views.BookUpdate.as_view(), name='book-update'),
+    path('book/<int:pk>/delete/', views.BookDelete.as_view(), name='book-delete'),
+    path('book_verification/<int:pk>', views.book_verification, name='book-verification'),
+    path("add_favorite_book/<int:pk>", add_favorite_book, name="add-favorite-book"),
+    path('write_book_review/<int:book_pk>', views.CreateBookReview.as_view(), name='create-book-review'),
+    path('book/<int:book_pk>/review/<int:pk>/update', views.UpdateBookReview.as_view(), name='book-review-update'),
+    path('add_book_to_book_list/<int:book_pk>/<int:user_pk>/<book_status>', views.add_book_to_book_list,
+         name='add-book-to-book-list'),
+    path('remove_book_from_book_list/<int:book_pk>/<int:user_pk>', views.remove_book_from_book_list,
+         name='remove-book-from-book-list'),
+    path('book_review/<int:pk>', views.BookReviewDetail.as_view(), name='book-review-detail'),
+    path('change_book_status/<int:book_pk>/<int:profile_pk>/<status>', views.change_book_status,
+         name='change-book-status'),
+
     # re_path(r'^developer-autocomplete/$', autocomplete.Select2QuerySetView.as_view(
     # model = Developer, model_field_name="company_name", create_field='company_name'), name='developer-autocomplete'),
     # re_path(r'^developer-autocomplete/$', autocomplete.Select2QuerySetView.as_view(
     # model = Developer, model_field_name="company_name", create_field='company_name'), name='developer-autocomplete'),
+
+    # re_path(r'^developer-autocomplete/$', autocomplete.Select2QuerySetView.as_view(model = Developer, model_field_name="company_name", create_field='company_name'), name='developer-autocomplete'),
+
+    # re_path(r'^developer-autocomplete/$', autocomplete.Select2QuerySetView.as_view(model = Developer, model_field_name="company_name", create_field='company_name'), name='developer-autocomplete'),
     re_path(r'^developer-autocomplete/$', DeveloperAutocomplete.as_view(create_field='company_name'),
             name='developer-autocomplete'),
+
     re_path(r'^game_genre-autocomplete/$', autocomplete.Select2QuerySetView.as_view(model=GameGenre,
                                                                                     model_field_name="name"),
             name='game_genre-autocomplete'),
@@ -54,17 +86,27 @@ urlpatterns = [
             name='actor-autocomplete'),
     re_path(r'^director-autocomplete/$', DirectorAutocomplete.as_view(create_field='full_name'),
             name='director-autocomplete'),
+    re_path(r'^author-autocomplete/$', AuthorAutocomplete.as_view(create_field='first_last_name'),
+            name='author-autocomplete'),
     path('signup2/', signup_view, name="signup2"),
     path('login/', login_user, name="login"),
 
+    path('search_game/', views.search, name="search-game"),
+    path('search_movie/', views.search_movie, name="search-movie"),
 
-    path('search_games/', views.search, name="search-game"),
-    path('search_movies/', views.search_movie, name="search-movie"),
     path('search_series/', views.search_series, name="search-series"),
+    path('search_user/', views.search_user, name="search-user"),
+    path('search_book/', views.search_book, name="search-book"),
+
+    path('search_general/', views.search_general, name="search-general"),
 
     path('search_result_games/', views.search_result_game, name="search-result-game"),
     path('search_result_movies/', views.search_result_movie, name="search-result-movie"),
     path('search_result_series/', views.search_result_series, name="search-result-series"),
+    path('search_result_user/', views.search_result_user, name="search-result-user"),
+    path('search_result_book/', views.search_result_book, name="search-result-book"),
+
+    path('search_result_general/', views.search_result_general, name="search-result-general"),
 
     path('stuff_verification/', views.stuff_verification, name="stuff-verification"),
 
@@ -90,7 +132,8 @@ urlpatterns = [
 
     path("profile/<slug:name>/my_favorites", MyFavorites.as_view(), name="my-favorites"),
     path("profile/<slug:name>/watchlist/<type_of_show>/<status>", ProfileWatchlist.as_view(), name="profile-watchlist"),
-    path("profile/<slug:name>/game_list", ProfileGameList.as_view(), name="profile-game-list"),
+    path("profile/<slug:name>/game_list/<status>", ProfileGameList.as_view(), name="profile-game-list"),
+    path("profile/<slug:name>/book_list/<status>", ProfileBookList.as_view(), name="profile-book-list"),
     # path("profile/<slug:name>/game_list", ProfileGameList.as_view(), name="profile-game-list"),
     # re_path(r'^profile/(?P<name>[\w-]+)/game_list$(?i)', ProfileGameList.as_view(), name="profile-game-list"),
     # KOMENTARZ DLA DAWIDA
@@ -99,20 +142,12 @@ urlpatterns = [
 
     path("add_favorite_game/<int:pk>", add_favorite_game, name="add-favorite-game"),
     path("add_favorite_movie/<int:pk>", add_favorite_movie, name="add-favorite-movie"),
-
     path("add_favorite_series/<int:pk>", add_favorite_series, name="add-favorite-series"),
+
     path("profile/give-perm/<int:pk>", get_autocomplete_permission, name="get-autocomplete-permission"),
     path("profile/perm-rejected/<int:pk>", reject_autocomplete_permission, name="reject-autocomplete-permission"),
 
     path("addverf/<int:pk>", game_verification, name="add_verf"),
-
-    path('book/<uuid:pk>/renew/', views.renew_book_librarian, name='renew-book-librarian'),
-    path('author/create/', views.AuthorCreate.as_view(), name='author-create'),
-    path('author/<int:pk>/update/', views.AuthorUpdate.as_view(), name='author-update'),
-    path('author/<int:pk>/delete/', views.AuthorDelete.as_view(), name='author-delete'),
-    path('book/create/', views.BookCreate.as_view(), name='book-create'),
-    path('book/<int:pk>/update/', views.BookUpdate.as_view(), name='book-update'),
-    path('book/<int:pk>/delete/', views.BookDelete.as_view(), name='book-delete'),
 
     # path('games/', views.GameListView.as_view(), name='games'),
     re_path(r'^games/$(?i)', views.GameListView.as_view(), name='games'),
@@ -133,7 +168,7 @@ urlpatterns = [
          name='add-game-to-game-list'),
     path('remove_game_from_game_list/<int:game_pk>/<int:user_pk>', views.remove_game_from_game_list,
          name='remove-game-from-game-list'),
-    path('change_movie_status/<int:game_pk>/<int:profile_pk>/<status>', views.change_game_status,
+    path('change_game_status/<int:game_pk>/<int:profile_pk>/<status>', views.change_game_status,
          name='change-game-status'),
     path('game_review/<int:pk>', views.GameReviewDetail.as_view(), name='game-review-detail'),
 
@@ -144,6 +179,7 @@ urlpatterns = [
 
     path('developer/<int:pk>/delete', views.DeveloperDelete.as_view(), name='developer-delete'),
     path('developer/create/', views.DeveloperCreate.as_view(), name='developer-create'),
+    path('developer_verification/<int:pk>', views.developer_verification, name='developer-verification'),
 
     path('password/', PasswordsChangeView.as_view(), name="change-password"),
     path('password_success', views.password_change_success, name="password_success"),
@@ -179,11 +215,10 @@ urlpatterns = [
     path('series/<int:series_pk>/review/<int:pk>/update', views.UpdateSeriesReview.as_view(),
          name='series-review-update'),
     path('series_review/<int:pk>', views.SeriesReviewDetail.as_view(), name='series-review-detail'),
-    path('series/progress/<int:pk>/update', views.UpdateSeriesProgress.as_view(), name='series-progress-update'),
-    path('series/status/<int:pk>/update', views.UpdateSeriesStatus.as_view(), name='series-status-update'),
+    path('series_watchlist/<int:pk>/update', views.UpdateSeriesWatchlist.as_view(), name='series-watchlist-update'),
+    # path('series/status/<int:pk>/update', views.UpdateSeriesStatus.as_view(), name='series-status-update'),
     path('add_series_to_watched/<int:series_pk>/<int:profile_pk>', views.add_series_to_watched,
          name='add-series-to-watched'),
-
 
     # SEASON
     path('season/<int:pk>', views.SeasonDetailView.as_view(), name='season-detail'),

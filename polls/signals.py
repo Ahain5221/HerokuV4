@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from polls.models import Game
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib import messages
@@ -11,7 +12,7 @@ from .models import Profile
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         get_name = instance
-        Profile.objects.create(user=instance,name=get_name.username)
+        Profile.objects.create(user=instance, name=get_name.username)
 
 
 @receiver(post_save, sender=User)

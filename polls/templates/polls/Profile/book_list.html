@@ -1,0 +1,144 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block content %}
+    <h1 style="padding-bottom: 1em"> {{ profile.user }}'s book list</h1>
+
+    <div class="row" style="padding-bottom: 15px">
+        <div class="col-sm-1">
+            {% if status == 'read' %}
+                <a href="{% url 'profile-book-list' profile.user 'read'%}"><button class="btn btn-success btn-sm">Read</button></a>
+            {% else %}
+                <a href="{% url 'profile-book-list' profile.user 'read'%}"><button class="btn btn-dark btn-sm">Read</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-1">
+            {% if status == 'reading' %}
+                <a href="{% url 'profile-book-list' profile.user 'reading'%}"><button class="btn btn-success btn-sm">Reading</button></a>
+            {% else %}
+                <a href="{% url 'profile-book-list' profile.user 'reading'%}"><button class="btn btn-dark btn-sm">Reading</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-1">
+            {% if status == 'want to read' %}
+                <a href="{% url 'profile-book-list' profile.user 'want to read'%}"><button class="btn btn-success btn-sm">Want to read</button></a>
+            {% else %}
+                <a href="{% url 'profile-book-list' profile.user 'want to read'%}"><button class="btn btn-dark btn-sm">Want to read</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-1">
+            {% if status == 'all' %}
+                <a href="{% url 'profile-book-list' profile.user 'all'%}"><button class="btn btn-success btn-sm">All</button></a>
+            {% else %}
+                <a href="{% url 'profile-book-list' profile.user 'all'%}"><button class="btn btn-dark btn-sm">All</button></a>
+            {% endif %}
+        </div>
+    </div>
+
+    <table class="center" style="border: 1px solid;">
+    <tr style="border: 1px solid; background-color: #262626">
+        <th style="color: white">Title</th>
+        <th style="color: white">Score</th>
+        <th style="color: white">Review</th>
+        <th style="color: white">Progress</th>
+        <th style="color: white">Action</th>
+    </tr>
+
+
+    {% for book_list, review in reviews_and_books %}
+        <tr style="border: 1px solid; background-color: #d3d3d3">
+        <th> <a href="{{ book_list.book.get_absolute_url }}"><strong>{{ book_list.book }}</strong></a></th>
+        {% if review %}
+            <th>{{ review.rate }}</th>
+            <th>
+                <a href="{% url 'book-review-detail' pk=review.pk%}">
+                    <button class="btn btn-success btn-sm">Display</button>
+                </a>
+            </th>
+        {% else %}
+            <th>None</th>
+            {% if user == profile.user %}
+                {% if book_list.movie_status == 'want to read' %}
+                    <th>Prohibited</th>
+                {% else %}
+                    <th>
+                        <a href="{% url 'create-book-review' book_pk=book_list.book.pk%}">
+                            <button class="btn btn-success btn-sm">Write</button>
+                        </a>
+                    </th>
+                {% endif %}
+            {% else %}
+                <th>NO REVIEW</th>
+            {% endif %}
+        {% endif %}
+
+        <th> {{ book_list.book_status }}</th>
+
+        {% if user.is_authenticated %}
+            {% if user == profile.user %}
+                <th>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal{{ book_list.book.pk }}">Edit</button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal{{ book_list.book.pk }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <a href="{% url 'remove-book-from-book-list' book_list.book.pk profile.user_id %}">
+                                        <button class="btn btn-danger btn-sm">Delete</button>
+                                    </a>
+
+                                    {% if book_list.book_status == 'want to read' %}
+                                        <a href="{% url 'change-book-status' book_list.book.pk profile.pk 'reading'%}">
+                                            <button class="btn btn-success btn-sm">Reading</button>
+                                        </a>
+                                        <a href="{% url 'change-book-status' book_list.book.pk profile.pk 'read'%}">
+                                            <button class="btn btn-success btn-sm">Read</button>
+                                        </a>
+                                        <a href="{% url 'change-book-status' book_list.book.pk profile.pk 'dropped'%}">
+                                            <button class="btn btn-success btn-sm">Dropped</button>
+                                        </a>
+                                    {% endif %}
+                                    {% if book_list.book_status == 'reading' %}
+                                        <a href="{% url 'change-book-status' book_list.book.pk profile.pk 'read'%}">
+                                            <button class="btn btn-success btn-sm">Read</button>
+                                        </a>
+                                        <a href="{% url 'change-book-status' book_list.book.pk profile.pk 'dropped'%}">
+                                            <button class="btn btn-success btn-sm">Dropped</button>
+                                        </a>
+                                    {% endif %}
+                                    {% if book_list.book_status == 'dropped' %}
+                                        <a href="{% url 'change-book-status' book_list.book.pk profile.pk 'reading'%}">
+                                            <button class="btn btn-success btn-sm">Reading</button>
+                                        </a>
+                                        <a href="{% url 'change-book-status' book_list.book.pk profile.pk 'read'%}">
+                                            <button class="btn btn-success btn-sm">Read</button>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </th>
+            {% else %}
+                <th>
+                    <a href="{% url 'add-book-to-book-list' book_list.book.pk user.pk 'want to read' %}">
+                        <button class="btn btn-success btn-sm">Add to my book list</button>
+                    </a>
+                </th>
+            {% endif %}
+        {% else %}
+            <th>NONE</th>
+        {% endif %}
+        </tr>
+    {% endfor %}
+    </table>
+
+{% endblock %}

@@ -81,7 +81,7 @@
         <li>
             {% if user.is_superuser %}
                 <a href="{% url 'game-delete' pk=game.id %}">
-                    <button class="btn btn-danger btn-sm">DELETE SERIES</button>
+                    <button class="btn btn-danger btn-sm">DELETE GAME</button>
                 </a>
                 <form action="{% url 'add_verf' game.pk %}">
                     {% csrf_token %}
@@ -107,7 +107,7 @@
 
         {% endif %}
 
-        <a href="{% url 'profile-game-list' user %}"><button class="btn btn-primary btn-sm">My game list</button></a>
+        <a href="{% url 'profile-game-list' user 'all'%}"><button class="btn btn-primary btn-sm">My game list</button></a>
 
         {% if game_played_playing %}
             {% if  game_has_user_review%}

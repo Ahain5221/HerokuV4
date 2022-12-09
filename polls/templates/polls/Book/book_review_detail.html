@@ -3,7 +3,7 @@
 {% block content %}
 
     <h1>
-        <a href="{{ object.game.get_absolute_url }}">{{ object.game }}</a> review
+        <a href="{{ object.book.get_absolute_url }}">{{ object.book }}</a> review
     </h1>
 
     <div style="border: 1px solid #262626; width: 50em">
@@ -15,7 +15,7 @@
         <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ object.content }} </div>
     </div>
 
-    <a href="{% url 'game-review-update' game_pk=object.game.pk pk=object.pk%}">
+    <a href="{% url 'book-review-update' book_pk=object.book.pk pk=object.pk%}">
         <button class="btn btn-success btn-sm">Update review</button>
     </a>
 

@@ -1544,7 +1544,7 @@ input, select, textarea {
 /* List */
 
 	ul {
-		list-style: disc;
+		list-style: none;
 		padding-left: 1em;
 	}
 
@@ -1619,7 +1619,6 @@ input, select, textarea {
 
 		ul.divided li {
 			border-top: solid 2px #e5e5e5;
-			padding-left: 0;
 			margin: 2.5em 0 0 0;
 			padding: 2.5em 0 0 0;
 		}
@@ -1687,14 +1686,16 @@ input, select, textarea {
 		-ms-transition: background-color 0.25s ease-in-out;
 		transition: background-color 0.25s ease-in-out;
 		-webkit-appearance: none;
+		margin: 0 auto;
 		display: block;
 		border: 0;
-		background: #ffffff;
-		width: 50%;
+		background: #212529;
+		color: white;
+		width: 35%;
 		box-shadow: inset 2px 2px 0 0 rgba(0, 0, 0, 0.1);
 		border-radius: 4px;
 		line-height: 1.25em;
-		padding: 0.75em 1em 0.75em 1em;
+		padding: 0.75em 1em 0.75em 1em
 	}
 
 		form input[type="text"]:focus,
@@ -1702,7 +1703,7 @@ input, select, textarea {
 		form input[type="password"]:focus,
 		form select:focus,
 		form textarea:focus {
-			background: #f0f0f0;
+			background: rgba(33, 37, 41, 0.47);
 		}
 
 	form textarea {
@@ -2729,3 +2730,4 @@ input, select, textarea {
 				}
 
 	}
+

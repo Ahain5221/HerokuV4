@@ -31,6 +31,11 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
+
+from django.http import HttpResponseRedirect, HttpResponse, Http404
+
+from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django.utils.encoding import force_bytes
@@ -41,10 +46,35 @@ from django.views import generic
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormMixin
 from polls.models import Author
 from .forms import *
-from .models import Book, BookInstance
+from .models import Book
 from .models import Game, Developer, Profile, GameGenre, GameMode, KnownSteamAppID
 from .models import Movie, Series, Actor, Director, Language, MovieSeriesGenre, Season, Episode, MovieReview, \
+    MovieWatchlist, SeriesWatchlist, SeriesReview, GameReview, GameList, BookReview, BookList
+from .models import Movie, Series, Actor, Director, Language, MovieSeriesGenre, Season, Episode, MovieReview, \
     MovieWatchlist, SeriesWatchlist, SeriesReview, GameReview, GameList
+from .models import Movie, Series, Actor, Director, Language, MovieSeriesGenre
+
+
+# standard library imports
+import csv
+import datetime as dt
+import json
+import os
+import statistics
+#import time
+
+# third-party imports
+import requests
+
+
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, authenticate
+from .forms import SignUpForm
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.template.loader import render_to_string
 from .token import account_activation_token
 from django.views import View
 # from .models import *
@@ -155,6 +185,27 @@ class DirectorAutocomplete(autocomplete.Select2QuerySetView):
                                                  full_name=create_field_from_url)[0]
 
 
+class AuthorAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated:
+            return Author.objects.none()
+
+        basic_qs = Author.objects.all()
+        qs1 = basic_qs.filter(Verified=False, added_by=self.request.user.id)
+        qs2 = basic_qs.filter(Verified=True)
+        qs = qs1 | qs2
+        if self.q:
+            qs = qs.filter(first_last_name__istartswith=self.q)
+
+        return qs
+
+    def create_object(self, create_field_from_url):
+        """Create an object given a text."""
+        return self.get_queryset().get_or_create(added_by=self.request.user,
+                                                 first_last_name=create_field_from_url)[0]
+
+
 def signup(request):
     if request.user.is_authenticated:
         return redirect('index')
@@ -234,7 +285,7 @@ def password_reset_request(request):
                   context={"password_reset_form": password_reset_form})
 
 
-@anonymous_required
+
 def activate(request, uidb64, token):
     user_model = get_user_model()
     try:
@@ -268,40 +319,54 @@ def sendmail(request):
 
 def index(request):
     """View function for home page of site."""
+    if request.user.is_authenticated:
 
-    # Generate counts of the main objects
-    num_books = Book.objects.all().count()
-    num_instances = BookInstance.objects.all().count()
+        # num_visits = request.session.get('num_visits', 0)
+        last_book = Book.objects.all().last()
+        #last_game = Game.objects.all().last()
+        #last_series = Series.objects.all().last()
+        #last_movie = Movie.objects.all().last()
 
-    # Available books (status = 'a')
-    num_instances_available = BookInstance.objects.filter(status__exact='a').count()
+        # request.session['num_visits'] = num_visits + 1
+        # Generate counts of the main objects
 
-    # The 'all()' is implied by default.
-    num_authors = Author.objects.count()
+        index_context = {
+            'last_book': last_book,
+            #'last_game': last_game,
+            #'last_series': last_series,
+            #'last_movie': last_movie
+        }
+        return render(request, 'index.html', context=index_context)
 
-    # Number of visits to this view, as counted in the session variable.
-    num_visits = request.session.get('num_visits', 0)
-    request.session['num_visits'] = num_visits + 1
+    else:
+        num_movies = Movie.objects.all().count()
+        num_series = Series.objects.all().count()
+        num_games = Game.objects.all().count()
+        num_directors = Director.objects.all().count()
+        num_actors = Actor.objects.all().count()
+        num_users = Profile.objects.all().count()
+        num_developers = Developer.objects.all().count()
+        num_books = Book.objects.all().count()
 
-    context = {
-        'num_books': num_books,
-        'num_instances': num_instances,
-        'num_instances_available': num_instances_available,
-        'num_authors': num_authors,
-        'num_visits': num_visits,
-    }
+        landing_context = {
+            'num_movies': num_movies,
+            'num_series': num_series,
+            'num_games': num_games,
+            'num_directors': num_directors,
+            'num_actors': num_actors,
+            'num_users': num_users,
+            'num_developers': num_developers,
+            'num_books': num_books
 
-    # Render the HTML template index.html with the data in the context variable.
-    return render(request, 'index.html', context=context)
+        }
 
-
-class BookListView(generic.ListView):
-    model = Book
-    paginate_by = 10
+        return render(request, 'landing2.html', context=landing_context)
 
 
-class BookDetailView(generic.DetailView):
-    model = Book
+def news_sections(request, num):
+    # todo
+    if num <= 5:
+        return HttpResponse("Book.objects.all()")
 
 
 class MyFavorites(generic.DetailView):
@@ -311,43 +376,10 @@ class MyFavorites(generic.DetailView):
     slug_url_kwarg = 'name'
 
 
-# @method_decorator(login_required, name='dispatch')
-class AuthorListView(generic.ListView):
-    """Generic class-based list view for a list of authors."""
-    model = Author
-    paginate_by = 10
-
-
-class AuthorDetailView(generic.DetailView):
-    """Generic class-based detail view for an author."""
-    model = Author
-
-
-class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
-    """Generic class-based view listing books on loan to current user."""
-    model = BookInstance
-    template_name = 'polls/bookinstance_list_borrowed_user.html'
-    paginate_by = 10
-
-    def get_queryset(self):
-        return BookInstance.objects.filter(borrower=self.request.user).filter(status__exact='o').order_by('due_back')
-
-
-class LoanedBooksAllListView(PermissionRequiredMixin, generic.ListView):
-    """Generic class-based view listing all books on loan. Only visible to users with can_mark_returned permission."""
-    model = BookInstance
-    permission_required = 'catalog.can_mark_returned'
-    template_name = 'polls/bookinstance_list_borrowed_all.html'
-    paginate_by = 10
-
-    def get_queryset(self):
-        return BookInstance.objects.filter(status__exact='o').order_by('due_back')
-
-
 class SignUpView(SuccessMessageMixin, generic.CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy("login")
-    success_message = "Profileee was created successfully"
+    success_message = "Profile was created successfully"
 
     template_name = "registration/signup.html"
 
@@ -360,6 +392,25 @@ def search(request):
     else:
         form = SearchForm()
     return render(request, 'polls/search_form_game.html', {'form': form})
+
+
+def search_user(request):
+    if request.method == 'POST':
+        form = SearchForm_User(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect('/thanks/')
+    else:
+        form = SearchForm_User()
+    return render(request, 'polls/search_form_user.html', {'form': form})
+
+def search_general(request):
+    if request.method == 'POST':
+        form = SearchForm_User(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect('/thanks/')
+    else:
+        form = SearchForm_User()
+    return render(request, 'polls/search_form_general.html', {'form': form})
 
 
 def search_movie(request):
@@ -380,6 +431,16 @@ def search_series(request):
     else:
         form = SearchForm_Series()
     return render(request, 'polls/search_form_series.html', {'form': form})
+
+
+def search_book(request):
+    if request.method == 'POST':
+        form = SearchForm_Book(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect('/thanks/')
+    else:
+        form = SearchForm_Book()
+    return render(request, 'polls/search_form_book.html', {'form': form})
 
 
 def filter_by_mode(queryset_to_fill, list_of_things, modes2):
@@ -451,6 +512,27 @@ def search_result_game(request):
 
         return render(request, 'polls/Game/game_list.html',
                       {'game_list': final_queryset})
+    else:
+        return render(request, 'polls/search_result.html')
+
+
+def search_result_book(request):
+    if request.method == "POST":
+        searched = request.POST['searched']
+        genres = request.POST.getlist('genres')
+        isbn = request.POST['isbn']
+        model_type = Book
+        if isbn:
+            final_queryset = Book.objects.filter(isbn__icontains=isbn)
+            return render(request, 'polls/Book/book_list.html',
+                          {'book_list': final_queryset})
+        searched_books = Book.objects.filter(title__icontains=searched, Verified=True)
+        final_queryset = searched_books
+        if genres:
+            final_queryset = filter_by_genre(model_type, final_queryset, genres)
+
+        return render(request, 'polls/Book/book_list.html',
+                      {'book_list': final_queryset})
     else:
         return render(request, 'polls/search_result.html')
 
@@ -540,6 +622,8 @@ def stuff_verification(request):
     actors_to_verify = Actor.objects.filter(Verified=False)
     directors_to_verify = Director.objects.filter(Verified=False)
     developers_to_verify = Developer.objects.filter(Verified=False)
+    books_to_verify = Book.objects.filter(Verified=False)
+    authors_to_verify = Author.objects.filter(Verified=False)
 
     return render(request, 'polls/stuff_verification.html',
                   {'games_to_verify': games_to_verify,
@@ -547,7 +631,10 @@ def stuff_verification(request):
                    'series_to_verify': series_to_verify,
                    'actors_to_verify': actors_to_verify,
                    'directors_to_verify': directors_to_verify,
-                   'developers_to_verify': developers_to_verify
+                   'developers_to_verify': developers_to_verify,
+                   'books_to_verify': books_to_verify,
+                   'authors_to_verify': authors_to_verify
+
                    }
                   )
 
@@ -588,70 +675,271 @@ def signup_view(request):
     return render(request, 'registration/signup2.html', {'form': form})
 
 
-@login_required(login_url='/polls/login/')
-@permission_required('catalog.can_mark_returned', raise_exception=True)
-def renew_book_librarian(request, pk):
-    """View function for renewing a specific BookInstance by librarian."""
-    book_instance = get_object_or_404(BookInstance, pk=pk)
+# @method_decorator(login_required, name='dispatch')
+class AuthorListView(generic.ListView):
+    model = Author
+    template_name = "polls/Book/author_list.html"
+    paginate_by = 10
 
-    # If this is a POST request then process the Form data
-    if request.method == 'POST':
 
-        # Create a form instance and populate it with data from the request (binding):
-        form = RenewBookForm(request.POST)
-
-        # Check if the form is valid:
-        if form.is_valid():
-            # process the data in form.cleaned_data as required (here we just write it to the model due_back field)
-            book_instance.due_back = form.cleaned_data['renewal_date']
-            book_instance.save()
-
-            # redirect to a new URL:
-            return HttpResponseRedirect(reverse('all-borrowed'))
-
-    # If this is a GET (or any other method) create the default form.
-    else:
-        proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
-        form = RenewBookForm(initial={'renewal_date': proposed_renewal_date})
-
-    context = {
-        'form': form,
-        'book_instance': book_instance,
-    }
-
-    return render(request, 'polls/book_renew_librarian.html', context)
+class AuthorDetailView(generic.DetailView):
+    model = Author
+    template_name = "polls/Book/author_detail.html"
 
 
 class AuthorCreate(CreateView):
     model = Author
-    fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death']
-    initial = {'date_of_death': '11/06/2020'}
+    template_name = "polls/Book/author_form.html"
+    # fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death']
+    # initial = {'date_of_death': '11/06/2020'}
+    form_class = AuthorForm
 
 
 class AuthorUpdate(UpdateView):
     model = Author
-    fields = '__all__'  # Not recommended (potential security issue if more fields added)
+    template_name = "polls/Book/author_form.html"
+    form_class = AuthorForm
+    # fields = '__all__'
 
 
 class AuthorDelete(DeleteView):
     model = Author
+    template_name = "polls/Book/author_confirm_delete.html"
     success_url = reverse_lazy('authors')
 
 
-class BookCreate(CreateView):
+def author_verification(request, pk):
+    author_object = get_object_or_404(Author, id=pk)
+    if author_object.Verified:
+        author_object.Verified = False
+        author_object.save(update_fields=['Verified'])
+    else:
+        author_object.Verified = True
+        author_object.save(update_fields=['Verified'])
+    return HttpResponseRedirect(reverse('author-detail', args=[str(pk)]))
+
+
+class BookListView(generic.ListView):
     model = Book
-    fields = ['title', 'author', 'summary', 'isbn', 'genre', 'language']
-    template_name = "polls/book_form.html"
+    template_name = "polls/Book/book_list.html"
+    paginate_by = 10
+
+
+class BookDetailView(generic.DetailView):
+    model = Book
+    template_name = "polls/Book/book_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        if self.request.user.is_authenticated:
+            profile_pk = Profile.objects.filter(user=self.request.user.pk).first().pk
+
+            book_in_user_book_list = BookList.objects.filter(
+                book__booklist__book__exact=self.object).filter(
+                profile__booklist__profile__exact=profile_pk).exists()
+            context['book_in_user_book_list'] = book_in_user_book_list
+
+            if book_in_user_book_list:
+                context['book_read_reading'] = BookList.objects.filter(
+                    book__booklist__book__exact=self.object).filter(
+                    profile__booklist__profile__exact=profile_pk).exclude(book_status='want to read').exists()
+
+            context['book_has_user_review'] = BookReview.objects.filter(book_id=self.object).filter(
+                author=self.request.user).exists()
+
+            context['user_review'] = BookReview.objects.filter(book_id=self.object).filter(
+                author=self.request.user).first()
+        context['book_reviews'] = BookReview.objects.filter(book_id=self.object)
+
+        return context
+
+
+class BookCreate(UserPassesTestMixin, CreateView):
+    model = Book
+    template_name = "polls/Book/book_form.html"
+    form_class = BookForm
+
+    def test_func(self):
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        return redirect('login')
+
+    def form_valid(self, form):
+        messages.success(self.request, "The book has been successfully created!")
+        form.instance.added_by = self.request.user
+        return super().form_valid(form)
 
 
 class BookUpdate(UpdateView):
     model = Book
-    fields = ['title', 'author', 'summary', 'isbn', 'genre', 'language']
+    template_name = "polls/Book/book_form.html"
+    form_class = BookForm
+    # fields = ['title', 'author', 'summary', 'isbn', 'genre', 'language']
 
 
-class BookDelete(DeleteView):
+class BookDelete(UserPassesTestMixin, DeleteView):
     model = Book
+    template_name = "polls/Book/book_confirm_delete.html"
     success_url = reverse_lazy('books')
+
+    def test_func(self):
+        obj = self.get_object()
+        if self.request.user.is_superuser:
+            return True
+        if obj.added_by == self.request.user and obj.Verified is False:
+            return True
+        return False
+
+    def handle_no_permission(self):
+        return redirect('index')
+
+    def form_valid(self, form):
+        if self.object.added_by is not None:
+            delete_reason_content = form.data['delete_reason']
+            basic_message_content = 'Your book was deleted from PTC, title: ' + str(self.object)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content)
+        messages.success(self.request, "The book has been deleted!")
+        return super().form_valid(form)
+
+
+def book_verification(request, pk):
+    book_object = get_object_or_404(Book, id=pk)
+    if book_object.Verified:
+        book_object.Verified = False
+        book_object.save(update_fields=['Verified'])
+    else:
+        book_object.Verified = True
+        book_object.save(update_fields=['Verified'])
+    return HttpResponseRedirect(reverse('book-detail', args=[str(pk)]))
+
+
+class CreateBookReview(UserPassesTestMixin, CreateView):
+    model = BookReview
+    template_name = "polls/Profile/review_create.html"
+    form_class = BookReviewForm
+
+    def test_func(self):
+        if not self.request.user.is_authenticated:
+            return False
+
+        review_exists = BookReview.objects.filter(
+            author_id=self.request.user, book_id=self.kwargs['book_pk']).exists()
+
+        return not review_exists and self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('login2')
+        return redirect('index')
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.book_id = self.kwargs['book_pk']
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('book-detail', kwargs={'pk': self.kwargs['book_pk']})
+
+
+class UpdateBookReview(UserPassesTestMixin, UpdateView):
+    model = BookReview
+    template_name = "polls/Profile/review_create.html"
+    form_class = BookReviewForm
+
+    def test_func(self):
+        author = BookReview.objects.filter(id=self.kwargs['pk']).first().author
+        return self.request.user == author and self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('login2')
+        return redirect('index')
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.book_id = self.kwargs['book_pk']
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('book-detail', kwargs={'pk': self.kwargs['book_pk']})
+
+
+def add_book_to_book_list(request, book_pk, user_pk, book_status):
+    profile = Profile.objects.filter(user=user_pk).first()
+    book = Book.objects.filter(pk=book_pk).first()
+
+    exists_in_watchlist = BookList.objects.filter(profile=profile).filter(book=book).exists()
+    if exists_in_watchlist:
+        return HttpResponseRedirect(reverse('book-detail', args=[str(book_pk)]))
+
+    BookList.objects.create(
+        book_status=book_status,
+        book=book,
+        profile=profile
+    )
+
+    return HttpResponseRedirect(reverse('book-detail', args=[str(book_pk)]))
+
+
+def remove_book_from_book_list(request, book_pk, user_pk):
+    profile_pk = Profile.objects.filter(user_id=user_pk).first().pk
+    review = BookReview.objects.filter(book=book_pk).filter(author=user_pk)
+    book_list = BookList.objects.filter(book=book_pk).filter(profile=profile_pk)
+    review.delete()
+    book_list.delete()
+
+    return HttpResponseRedirect(reverse('book-detail', args=[str(book_pk)]))
+
+
+class BookReviewDetail(generic.DetailView):
+    model = BookReview
+    template_name = "polls/Book/book_review_detail.html"
+
+
+class ProfileBookList(generic.DetailView):
+    model = Profile
+    template_name = "polls/Profile/book_list.html"
+    slug_field = 'name'
+    slug_url_kwarg = 'name'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+
+        status = self.kwargs['status']
+
+        if status == 'all':
+            book_list_all = BookList.objects.filter(profile=self.object)
+            book_list_books = BookList.objects.filter(profile=self.object).values_list('book', flat=True)
+        else:
+            book_list_all = BookList.objects.filter(profile=self.object).filter(book_status=status)
+            book_list_books = BookList.objects.filter(
+                profile=self.object).filter(book_status=status).values_list('book', flat=True)
+
+        book_reviews_all = []
+        book_reviews_books = BookReview.objects.filter(author=self.object.user).values_list('book', flat=True)
+
+        for book in book_list_books:
+            if book in book_reviews_books:
+                book_reviews_all.append(BookReview.objects.filter(
+                    author=self.object.user).filter(book=book).first())
+            else:
+                book_reviews_all.append(False)
+
+        reviews_and_books = zip(book_list_all, book_reviews_all)
+        context['reviews_and_books'] = reviews_and_books
+
+        context['status'] = status
+
+        return context
+
+
+def change_book_status(request, book_pk, profile_pk, status):
+    game_list_object = BookList.objects.filter(book_id=book_pk).filter(profile_id=profile_pk).first()
+    game_list_object.book_status = status
+    game_list_object.save(update_fields=['book_status'])
+
+    return HttpResponseRedirect(reverse('profile-book-list', args=[request.user, 'all']))
 
 
 class GameCreate(CreateView):
@@ -717,7 +1005,7 @@ class GameDetailView(UserPassesTestMixin, generic.DetailView):
 
 class CreateGameReview(UserPassesTestMixin, CreateView):
     model = GameReview
-    template_name = "polls/movie/review_create.html"
+    template_name = "polls/Profile/review_create.html"
     form_class = GameReviewForm
 
     def test_func(self):
@@ -725,7 +1013,7 @@ class CreateGameReview(UserPassesTestMixin, CreateView):
             return False
 
         review_exists = GameReview.objects.filter(
-            author_id=self.request.user, movie_id=self.kwargs['game_pk']).exists()
+            author_id=self.request.user, game_id=self.kwargs['game_pk']).exists()
 
         return not review_exists and self.request.user.is_authenticated
 
@@ -745,7 +1033,7 @@ class CreateGameReview(UserPassesTestMixin, CreateView):
 
 class UpdateGameReview(UserPassesTestMixin, UpdateView):
     model = GameReview
-    template_name = "polls/movie/review_create.html"
+    template_name = "polls/Profile/review_create.html"
     form_class = GameReviewForm
 
     def test_func(self):
@@ -769,6 +1057,11 @@ class UpdateGameReview(UserPassesTestMixin, UpdateView):
 def add_game_to_game_list(request, game_pk, user_pk, game_status):
     profile = Profile.objects.filter(user=user_pk).first()
     game = Game.objects.filter(pk=game_pk).first()
+
+    exists_in_watchlist = GameList.objects.filter(profile=profile).filter(game=game).exists()
+    if exists_in_watchlist:
+        return HttpResponseRedirect(reverse('game-detail', args=[str(game_pk)]))
+
     GameList.objects.create(
         game_status=game_status,
         game=game,
@@ -796,22 +1089,31 @@ class ProfileGameList(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        game_list_all = GameList.objects.filter(profile=self.object)
-        game_list_games = GameList.objects.filter(profile=self.object).values_list('game', flat=True)
+
+        status = self.kwargs['status']
+
+        if status == 'all':
+            game_list_all = GameList.objects.filter(profile=self.object)
+            game_list_games = GameList.objects.filter(profile=self.object).values_list('game', flat=True)
+        else:
+            game_list_all = GameList.objects.filter(profile=self.object).filter(game_status=status)
+            game_list_games = GameList.objects.filter(
+                profile=self.object).filter(game_status=status).values_list('game', flat=True)
 
         game_reviews_all = []
-        game_reviews_games = GameReview.objects.filter(author=self.request.user).values_list('game', flat=True)
+        game_reviews_games = GameReview.objects.filter(author=self.object.user).values_list('game', flat=True)
 
         for game in game_list_games:
             if game in game_reviews_games:
                 game_reviews_all.append(GameReview.objects.filter(
-                    author=self.request.user).filter(game=game).first())
+                    author=self.object.user).filter(game=game).first())
             else:
                 game_reviews_all.append(False)
 
         reviews_and_games = zip(game_list_all, game_reviews_all)
 
         context['reviews_and_games'] = reviews_and_games
+        context['status'] = status
 
         return context
 
@@ -826,7 +1128,7 @@ def change_game_status(request, game_pk, profile_pk, status):
     game_list_object.game_status = status
     game_list_object.save(update_fields=['game_status'])
 
-    return HttpResponseRedirect(reverse('profile-game-list', args=[str(profile_pk)]))
+    return HttpResponseRedirect(reverse('profile-game-list', args=[request.user, 'all']))
 
 
 class GameUpdate(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
@@ -914,10 +1216,23 @@ class DeveloperDelete(UserPassesTestMixin, DeleteView):
     template_name = "polls/Game/developer_confirm_delete.html"
 
     def test_func(self):
-        return self.request.user.is_superuser
+        obj = self.get_object()
+        if self.request.user.is_superuser:
+            return True
+        if obj.added_by == self.request.user and obj.Verified is False:
+            return True
+        return False
 
     def handle_no_permission(self):
         return redirect('index')
+
+    def form_valid(self, form):
+        if self.object.added_by is not None:
+            delete_reason_content = form.data['delete_reason']
+            basic_message_content = 'Your developer was deleted from PTC, title: ' + str(self.object)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content)
+        messages.success(self.request, "The developer has been deleted!")
+        return super().form_valid(form)
 
 
 class DeveloperCreate(CreateView):
@@ -1181,6 +1496,17 @@ def game_verification(request, pk):
     return HttpResponseRedirect(reverse('game-detail', args=[str(pk)]))
 
 
+def developer_verification(request, pk):
+    developer = get_object_or_404(Developer, id=pk)
+    if developer.Verified:
+        developer.Verified = False
+        developer.save(update_fields=['Verified'])
+    else:
+        developer.Verified = True
+        developer.save(update_fields=['Verified'])
+    return HttpResponseRedirect(reverse('developer-detail', args=[str(pk)]))
+
+
 @login_required(login_url='/polls/login/')
 def add_favorite_game(request, pk):
     game = get_object_or_404(Game, id=pk)
@@ -1189,6 +1515,15 @@ def add_favorite_game(request, pk):
     else:
         Profile.objects.get(id=request.user.id).favorite_games.add(game)
     return HttpResponseRedirect(reverse('game-detail', args=[str(pk)]))
+
+
+def add_favorite_book(request, pk):
+    book = get_object_or_404(Book, id=pk)
+    if book in Profile.objects.get(id=request.user.id).favorite_books.filter(id=pk):
+        Profile.objects.get(id=request.user.id).favorite_books.remove(book)
+    else:
+        Profile.objects.get(id=request.user.id).favorite_books.add(book)
+    return HttpResponseRedirect(reverse('book-detail', args=[str(pk)]))
 
 
 @login_required(login_url='/polls/login/')
@@ -1297,6 +1632,7 @@ class MovieCreate(UserPassesTestMixin, CreateView):
     def form_valid(self, form):
         messages.success(self.request, "The movie has been successfully created!")
         form.instance.added_by = self.request.user
+        form.instance.type_of_show = 'movie'
         return super().form_valid(form)
 
 
@@ -1332,7 +1668,7 @@ def movie_verification(request, pk):
 
 class ProfileWatchlist(generic.DetailView):
     model = Profile
-    template_name = "polls/Profile/movie_watchlist.html"
+    template_name = "polls/Profile/watchlist.html"
     slug_field = 'name'
     slug_url_kwarg = 'name'
 
@@ -1438,6 +1774,11 @@ class MovieReviewDetail(generic.DetailView):
 def add_movie_to_watchlist(request, movie_pk, user_pk, movie_status):
     profile = Profile.objects.filter(user=user_pk).first()
     movie = Movie.objects.filter(pk=movie_pk).first()
+
+    exists_in_watchlist = MovieWatchlist.objects.filter(profile=profile).filter(movie=movie).exists()
+    if exists_in_watchlist:
+        return HttpResponseRedirect(reverse('movie-detail', args=[str(movie_pk)]))
+
     MovieWatchlist.objects.create(
         movie_status=movie_status,
         movie=movie,
@@ -1451,13 +1792,15 @@ def movie_watched(request, movie_pk, profile_pk):
     watchlist_object = MovieWatchlist.objects.filter(movie_id=movie_pk).filter(profile_id=profile_pk).first()
     watchlist_object.movie_status = 'watched'
     watchlist_object.save(update_fields=['movie_status'])
+    profile = get_object_or_404(Profile, id=profile_pk)
+    user = profile.user
 
-    return HttpResponseRedirect(reverse('profile-watchlist', args=[str(profile_pk)]))
+    return HttpResponseRedirect(reverse('profile-watchlist', args=[user, 'all', 'all']))
 
 
 class CreateMovieReview(UserPassesTestMixin, CreateView):
     model = MovieReview
-    template_name = "polls/movie/review_create.html"
+    template_name = "polls/Profile/review_create.html"
     form_class = MovieReviewForm
 
     def test_func(self):
@@ -1486,7 +1829,7 @@ class CreateMovieReview(UserPassesTestMixin, CreateView):
 
 class UpdateMovieReview(UserPassesTestMixin, UpdateView):
     model = MovieReview
-    template_name = "polls/movie/review_create.html"
+    template_name = "polls/Profile/review_create.html"
     form_class = MovieReviewForm
 
     def test_func(self):
@@ -1518,7 +1861,7 @@ def remove_movie_from_watchlist(request, movie_pk, user_pk):
 
 
 class MovieWatchlistView(generic.ListView):
-    template_name = "polls/Profile/movie_watchlist.html"
+    template_name = "polls/Profile/watchlist.html"
     model = MovieWatchlist.objects.filter()
     paginate_by = 18
 
@@ -1608,7 +1951,7 @@ def remove_series_from_watchlist(request, series_pk, user_pk):
 
 class CreateSeriesReview(UserPassesTestMixin, CreateView):
     model = SeriesReview
-    template_name = "polls/movie/review_create.html"
+    template_name = "polls/Profile/review_create.html"
     form_class = SeriesReviewForm
 
     def test_func(self):
@@ -1617,7 +1960,7 @@ class CreateSeriesReview(UserPassesTestMixin, CreateView):
             return False
 
         review_exists = SeriesReview.objects.filter(
-            author_id=self.request.user, movie_id=self.kwargs['series_pk']).exists()
+            author_id=self.request.user, series_id=self.kwargs['series_pk']).exists()
 
         return not review_exists and self.request.user.is_authenticated
 
@@ -1637,7 +1980,7 @@ class CreateSeriesReview(UserPassesTestMixin, CreateView):
 
 class UpdateSeriesReview(UserPassesTestMixin, UpdateView):
     model = SeriesReview
-    template_name = "polls/movie/review_create.html"
+    template_name = "polls/Profile/review_create.html"
     form_class = SeriesReviewForm
 
     def test_func(self):
@@ -1658,24 +2001,17 @@ class UpdateSeriesReview(UserPassesTestMixin, UpdateView):
         return reverse('series-detail', kwargs={'pk': self.kwargs['series_pk']})
 
 
-class UpdateSeriesProgress(UpdateView):
+class UpdateSeriesWatchlist(UpdateView):
     model = SeriesWatchlist
-    template_name = "polls/movie/series_progress_update.html"
-    form_class = SeriesProgressForm
+    template_name = "polls/movie/series_watchlist_update.html"
+    form_class = SeriesProgressStatusForm
 
     def get_success_url(self):
         profile_pk = Profile.objects.filter(user=self.request.user.pk).first().pk
-        return reverse('profile-watchlist', kwargs={'pk': profile_pk})
+        profile = get_object_or_404(Profile, id=profile_pk)
+        user = profile.user
 
-
-class UpdateSeriesStatus(UpdateView):
-    model = SeriesWatchlist
-    template_name = "polls/movie/series_progress_update.html"
-    form_class = SeriesStatusForm
-
-    def get_success_url(self):
-        profile_pk = Profile.objects.filter(user=self.request.user.pk).first().pk
-        return reverse('profile-watchlist', kwargs={'pk': profile_pk})
+        return reverse('profile-watchlist', kwargs={'name': user, 'type_of_show': 'all', 'status': 'all'})
 
 
 class SeriesReviewDetail(generic.DetailView):
@@ -1720,6 +2056,7 @@ class SeriesCreate(UserPassesTestMixin, CreateView):
     def form_valid(self, form):
         messages.success(self.request, "The series has been successfully created!")
         form.instance.added_by = self.request.user
+        form.instance.type_of_show = 'series'
         return super().form_valid(form)
 
 
@@ -2925,10 +3262,9 @@ def test(request):
     for j in range(30):
         for i in range(1, 10):
             author = Author.objects.filter(id=i).first()
-            author.first_name = 'firstnamev3' + str(i)
-            author.last_name = 'lastnamev3' + str(i)
+            author.first_last_name = 'firstnamev3' + str(i)
             authors.append(author)
-        Author.objects.bulk_update(authors, ['first_name', 'last_name'])
+        Author.objects.bulk_update(authors, ['first_last_name'])
         bulk_update.append(time() - start)
 
         start = time()
@@ -2936,8 +3272,7 @@ def test(request):
             Author.objects.update_or_create(
                 id=i,
                 defaults={
-                    'first_name': 'firstnamev2' + str(i),
-                    'last_name': 'lastnamev2' + str(i)
+                    'first_last_name': 'firstnamev2' + str(i),
                 }
             )
         update_or_create.append(time() - start)
@@ -2995,3 +3330,44 @@ def bulk_create(request):
     print('bulk create', sum(bulk_update) / len(bulk_update))
     print(bulk_update)
     return render(request, 'index.html')
+
+
+def search_result_user(request):
+    if request.method == "POST":
+        searched = request.POST['searched']
+
+        searched_profiles = Profile.objects.filter(name__icontains=searched)
+
+        return render(request, 'polls/search_result.html',
+                      {'searched_profiles': searched_profiles})
+    else:
+        return render(request, 'polls/search_result.html')
+
+
+def search_result_general(request):
+    if request.method == "POST":
+        searched = request.POST['searched']
+        if searched:
+            searched_profiles = Profile.objects.filter(name__icontains=searched)
+            searched_games = Game.objects.filter(title__icontains=searched, Verified=True)
+            searched_movies = Movie.objects.filter(title__icontains=searched, Verified=True)
+            searched_series = Series.objects.filter(title__icontains=searched, Verified=True)
+            searched_books = Book.objects.filter(title__icontains=searched, Verified=True)
+            searched_actors = Actor.objects.filter(full_name__icontains=searched, Verified=True)
+        else:
+            searched_profiles = Profile.objects.none()
+            searched_games = Game.objects.none()
+            searched_movies = Movie.objects.none()
+            searched_series = Series.objects.none()
+            searched_books = Book.objects.none()
+            searched_actors = Actor.objects.none()
+        return render(request, 'polls/search_result.html',
+                      {'searched_profiles': searched_profiles,
+                       'searched_games': searched_games,
+                       'searched_movies': searched_movies,
+                       'searched_series': searched_series,
+                       'searched_actors': searched_actors,
+                       'searched_books': searched_books})
+    else:
+        return render(request, 'polls/search_result.html')
+

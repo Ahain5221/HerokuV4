@@ -1,0 +1,281 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,900;1,700&display=swap");
+
+/* CSS Variables */
+:root {
+    --normal-font: 400;
+    --bold-font: 600;
+    --bolder-font: 900;
+    --background-primary-color: #04142cd1;
+    --primary-color: #fff;
+    --secondary-color: #4990F8FF;
+    --tertiary-color: gold;
+    --line-height: 1.7rem;
+    --transition: 0.3s ease-in;
+}
+
+/* Smooth scroll effect */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Resets */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: var(--transition);
+}
+
+
+/* navbar and logo */
+ul li {
+    list-style-type: none;
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+a:hover {
+    color: var(--tertiary-color);
+}
+
+.logo-graphic {
+    color: var(--secondary-color);
+}
+
+.logo-p .logo-c {
+    color: var(--primary-color);
+}
+
+.logo-t {
+    color: var(--secondary-color);
+}
+
+.logo {
+    font-size: 2rem;
+    font-weight: 500;
+}
+
+.nav-item {
+    margin-left: 2rem;
+}
+
+.hamburger {
+    display: none;
+}
+
+nav {
+    background: var(--background-primary-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    box-shadow: 2px 3px 2px black;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    font-weight: var(--bold-font);
+}
+
+ul {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+/* intro */
+body {
+    font-family: "Roboto", sans-serf;
+}
+
+.hero {
+    text-align: center;
+    padding-bottom: 10rem;
+}
+
+.intro-text h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    margin-top: 10rem;
+}
+
+.intro-text h3 {
+    margin-bottom: 0.5rem;
+}
+
+.hero p {
+    line-height: var(--line-height);
+}
+
+.intro-name {
+    color: var(--secondary-color);
+}
+
+.boast {
+    color: var(--background-primary-color);
+}
+
+.btn {
+    margin-top: 1rem;
+    display: inline-block;
+    padding: 0.8rem 0.6rem;
+    border: none;
+    font-size: 1.4rem;
+    border-radius: 5px;
+    color: #fff;
+}
+
+.red {
+    background-color: var(--secondary-color);
+    margin-right: 1.5rem;
+}
+
+.red:hover {
+    background-color: var(--tertiary-color);
+    color: #fff;
+}
+
+.about {
+    position: relative;
+    background: url("../img/landing_books.jpg") no-repeat top center/cover;
+    /* https://pixabay.com/photos/books-stack-book-store-1163695/ */
+    height: 800px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 2rem 0;
+    color: var(--primary-color)
+}
+
+.about h3 {
+    font-size: 3em;
+    margin-bottom: -20px;
+}
+
+.about p {
+    font-size: 1.5em;
+}
+
+.about h3 {
+    text-shadow: 2px 2px 2px #333;
+}
+
+.about p {
+    text-shadow: 2px 2px 2px #333;
+    font-size: 1.8rem;
+}
+
+/* stat boxes */
+.numbers {
+    background-color: var(--background-primary-color);
+    box-shadow: 2px 3px 2px #f1f1f1;
+    padding-bottom: 1rem;
+}
+
+.numbers-title {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.box {
+    background-color: var(--primary-color);
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-radius: 5px;
+    width: 20vw;
+}
+
+.stat-name {
+    font-size: 2rem;
+    color: var(--secondary-color);
+    text-align: center;
+}
+
+.stat {
+    color: var(--background-primary-color);
+    text-align: center;
+    font-size: 3rem;
+}
+
+.stats-rows-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    place-items: center;
+    row-gap: 2rem;
+}
+
+.stats-rows-secondary {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    row-gap: 2rem;
+}
+
+
+/* devs */
+.people {
+    margin-top: 2rem;
+    padding: 1rem 0;
+}
+
+.devs-title {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    font-size: 1.5rem;
+    color: var(--background-primary-color);
+    text-align: center;
+}
+
+.devs {
+    margin: 2rem auto;
+    max-width: 1100px;
+}
+
+.devs img {
+    border-radius: 0.6rem;
+}
+
+.persons-sec1 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    place-items: center;
+    gap: 0.5rem;
+}
+
+.persons-sec2 {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    gap: 0.5rem;
+}
+
+.name {
+    color: var(--secondary-color);
+    text-align: center;
+}
+
+.role {
+    color: var(--secondary-color);
+    text-align: center;
+    font-size: 0.8rem;
+}
+
+footer {
+    border-top: 1px solid #f1f1f1;
+    box-shadow: 0px -2px 3px #f1f1f1;
+    text-align: center;
+    padding: 2rem;
+    color: var(--primary-color);
+    background-color: var(--background-primary-color);
+}

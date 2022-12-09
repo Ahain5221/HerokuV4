@@ -1,12 +1,50 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
+
     {% if user.is_authenticated %}
-        <p style="text-align:center">Chcesz usunąć dewelopera: <a
-                href="{% url 'developer-delete' developer.id %}">Klik</a></p>
-        <p style="text-align:center">Chcesz zeedytować dewelopera: <a
-                href="{% url 'developer-update' developer.id %}">Klik</a></p>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal_2">EDIT</button>
+            <div class="modal fade" id="exampleModal_2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                {% if developer.added_by == user and not series.Verified or user.is_superuser %}
+                                    <div class="col">
+                                        <a href="{% url 'developer-update' pk=developer.id %}">
+                                            <button class="btn btn-success btn-sm">UPDATE</button>
+                                        </a>
+                                    </div>
+                                {% endif %}
+
+                                {% if user.is_superuser %}
+                                    <div class="col">
+                                        <a href="{% url 'developer-delete' pk=developer.id %}">
+                                            <button class="btn btn-danger btn-sm">DELETE DEVELOPER</button>
+                                        </a>
+                                    </div>
+                                    <div class="col">
+                                        <form action="{% url 'developer-verification' developer.pk %}">
+                                            {% csrf_token %}
+                                            {% if developer.Verified %}
+                                                <button type="submit" value="{{ developer.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+                                            {% else %}
+                                                <button type="submit" value="{{ developer.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
     {% endif %}
+
     <h1>Developer: {{ developer }} </h1>
     <p>{{ developer.date_of_foundation }}</p>
 

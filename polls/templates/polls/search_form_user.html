@@ -1,0 +1,31 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+
+   <!--
+     <form class="d-flex" method="POST" action="{% url 'search-result-game' %}">
+
+    {% csrf_token %}
+
+    <input class = "form-control me-2" type ="search" placeholder="Search things..." aria-label="Search" name="searched">
+    <button type="submit">Search</button>
+    </form>
+!-->
+
+        <form action="{% url 'search-result-user' %}" method="post">
+            {% csrf_token %}
+            <div style="margin-bottom: 2em">
+            {{ form.media }}
+            {{ form }}
+            </div>
+            <input type="submit" value="Submit">
+        </form>
+
+
+
+    {% else %}
+        <p>You are not supposted to be here</p>
+    {% endif %}
+    <a class="d-inline-block"> </a>
+{% endblock %}

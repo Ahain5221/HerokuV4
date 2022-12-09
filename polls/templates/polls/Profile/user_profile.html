@@ -6,7 +6,7 @@
     <hr style="width:auto">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-2">
+            <div class="col-md-2" style="margin-top: 3.25em">
                 {% if page_user.profile_image_url %}
                     <img src="{{ page_user.profile_image_url }} " class="card-img">
                 {% endif %}
@@ -36,12 +36,15 @@
                         <a href="{% url 'profile-watchlist' page_user.name 'all' 'all'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Watchlist</button></a>
                     </div>
                     <div class="col">
-                        <a href="{% url 'profile-game-list' page_user.name %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Game-list</button></a>
+                        <a href="{% url 'profile-game-list' page_user.name 'all' %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Game-list</button></a>
+                    </div>
+                    <div class="col">
+                        <a href="{% url 'profile-book-list' page_user.name 'all' %}" style="padding: 1em"><button class="btn btn-dark btn-sm">Book-list</button></a>
                     </div>
                 </div>
-                <div class="card mb-3">
+                <div class="card mb-3" style="--bs-card-bg: #212529;">
                     <div class="card-body">
-                        <p class="small text-muted">
+                        <p class="text-white" style="font-size: 1.1em">
                             {% if page_user.profile_description %}
                                 Description {{ page_user.profile_description }}
                             {% else %}

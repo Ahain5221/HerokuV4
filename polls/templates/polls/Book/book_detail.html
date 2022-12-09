@@ -1,0 +1,106 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Title: {{ book.title }}</h1>
+
+    {% if user.is_authenticated%}
+
+        <div style="margin-left: 8.5em">
+            <form action="{% url 'add-favorite-book' book.pk%}" method="POST">
+                {% csrf_token %}
+                {% if book in user.profile.favorite_books.all %}
+                    <button type="submit" name="book_id" value="{{ book.pk }}" class="btn btn-secondary btn-sm"><a class="icon solid fa-heart" style="color: #dad0c0"></a>Unfavorite</button>
+                {% else %}
+                    <button type="submit" name="book_id" value="{{ book.pk }}" class="btn btn-danger btn-sm"><a class="icon solid fa-heart" style="color: #710000"></a>Favorite</button>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="col">
+            {% if book_in_user_book_list %}
+                <a onclick="location.href='{% url 'remove-book-from-book-list' book.pk user.pk %}'"><button class="btn btn-primary btn-sm">REMOVE FROM WATCHLIST</button></a>
+            {% else %}
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">Add to My List</button>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <a onclick="location.href='{% url 'add-book-to-book-list' book.pk user.pk 'read'%}'"><button class="btn btn-primary btn-sm">Read</button></a>
+                            <a onclick="location.href='{% url 'add-book-to-book-list' book.pk user.pk 'reading'%}'"><button class="btn btn-primary btn-sm">Reading</button></a>
+                            <a onclick="location.href='{% url 'add-book-to-book-list' book.pk user.pk 'want to read'%}'"><button class="btn btn-primary btn-sm">Want to read</button></a>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary btn-sm">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <p><strong>Authors:</strong>
+    {% for author in book.authors.all %}
+        <p><a href="{{ author.get_absolute_url }}">{{ author }}</a></p>
+    {% endfor %}
+    <p><strong>Authors:</strong> <a href="">{{ book.authors.all|join:", " }}</a></p> <!-- author detail link not yet defined -->
+    <p><strong>Summary:</strong> {{ book.summary }}</p>
+    <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+    <p><strong>Language:</strong> {{ book.languages.all|join:", " }}</p>
+    <p><strong>Genre:</strong> {{ book.genres.all|join:", " }}</p>
+    <p><strong>Added by:</strong> {{ book.added_by}}</p>
+    <p><strong>Users rating:</strong> {{ book.users_rating}}</p>
+
+
+    {% if book.added_by == user and not book.Verified or user.is_superuser %}
+        <a href="{% url 'book-update' pk=book.id %}">
+            <button class="btn btn-success btn-sm">UPDATE</button>
+        </a>
+    {% endif %}
+    <br>
+    {% if user.is_superuser %}
+        <a href="{% url 'book-delete' pk=book.id %}">
+            <button class="btn btn-danger btn-sm">DELETE BOOK</button>
+        </a>
+        <form action="{% url 'book-verification' book.pk %}">
+            {% csrf_token %}
+            {% if book.Verified %}
+                <button type="submit" value="{{ book.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+            {% else %}
+                <button type="submit" value="{{ book.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+            {% endif %}
+        </form>
+    {% endif %}
+
+    <h1 style="padding-bottom: 1em; margin-top: 5em">
+        {% if book_reviews.count > 0 %}
+            Reviews
+        {% endif %}
+
+        {% if user.is_authenticated%}
+            {% if book_read_reading %}
+                {% if book_has_user_review %}
+                    <a href="{% url 'book-review-update' book_pk=book.pk pk=user_review.pk %}">
+                        <button class="btn btn-success btn-sm" style="margin-left: 4em">Update review</button>
+                    </a>
+                {% else %}
+                    <a href="{% url 'create-book-review' book_pk=book.pk %}">
+                        <button class="btn btn-success btn-sm" style="margin-left: 8em">Write review</button>
+                    </a>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </h1>
+
+    {% for review in book_reviews %}
+        <div style="border: 1px solid #262626; width: 50em">
+            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}</div>
+            <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ review.content }} </div>
+        </div>
+    {% endfor %}
+
+{% endblock %}

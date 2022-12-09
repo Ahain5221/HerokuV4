@@ -8,6 +8,10 @@
     <h2 style="text-align: center">Dynamic content</h2>
     <p>The website has the following record counts:</p>
     <ul style="margin-left: 31em">
+        <!--
+        <button data-section="1">Section 1</button>
+        -->
+
         <li><strong>Books:</strong> {{ num_books }}</li>
         <!--
         <li><strong>Copies:</strong> {{ num_instances }}</li>
@@ -15,5 +19,9 @@
         -->
         <li><strong>Authors:</strong> {{ num_authors }}</li>
     </ul>
+    <h2>Dynamic content</h2>
+
+    <p>Newest User: {{ test }} </p>
+
     <p>You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.</p>
 {% endblock %}

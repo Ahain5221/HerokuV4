@@ -48,6 +48,15 @@
             {% endfor %}
         {% endif %}
 
+        {% if books_to_verify %}
+            <h1>Books!:</h1>
+            {% for book in books_to_verify %}
+                <li>
+                <a href="{{ book.get_absolute_url }}">{{ book }}</a>
+                </li>
+            {% endfor %}
+        {% endif %}
+
         {% if actors_to_verify %}
             <h1>Actors!:</h1>
             {% for actor in actors_to_verify %}
@@ -71,6 +80,15 @@
             {% for developer in developers_to_verify %}
                 <li>
                 <a href="{{ developer.get_absolute_url }}">{{ developer }}</a>
+                </li>
+            {% endfor %}
+        {% endif %}
+
+        {% if authors_to_verify %}
+            <h1>Authors!:</h1>
+            {% for author in authors_to_verify %}
+                <li>
+                <a href="{{ author.get_absolute_url }}">{{ author }}</a>
                 </li>
             {% endfor %}
         {% endif %}

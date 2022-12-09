@@ -1,16 +1,71 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <div class="form-group">
         <h1>Create movie</h1>
-        <form action="" method="post">
             {{ form.media }}
+    <div class="form-group">
+        {% if user.is_authenticated %}
+            <!--<form action="" method="post" enctype="multipart/form-data"> -->
+            <form action="" method="post" style="color: black">
+
             {% csrf_token %}
-            <table>
-                {{ form.as_table }}
-            </table>
-            <input type="submit" value="Submit"/>
+            <p class="select2-selection--multiple"> {{ form.as_table }} </p>
+            <div class="control-group" style="margin-top: 3em">
+            <div class="controls">
+                <div class="position-relative">
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                        <input type="submit" value="Submit"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+            <p>You are not supposted to be here</p>
+        {% endif %}
         </form>
     </div>
         <a class="d-inline-block"> </a>
+
+
+    <style>
+
+        .select2-selection__rendered {
+          background-color: #212529;
+          color: white;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+          background-color: rgba(0, 0, 0, 0);
+          border: 0 solid #212529;
+          color: white;
+        }
+
+		.select2-results {
+            background-color: #212529;
+			color: #ffffff;
+		}
+
+        .select2-selection--multiple {
+          background-color: rgba(0, 0, 0, 0);
+          color: white;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: rgba(255, 255, 255, 0.13);
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+          border: solid black 0;
+          outline: 0;
+        }
+
+        .select2-search__field {
+              color: white;
+        }
+        input {
+          color: white;
+          color-scheme: dark;
+        }
+	</style>
 {% endblock %}

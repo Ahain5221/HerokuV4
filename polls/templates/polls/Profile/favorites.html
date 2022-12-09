@@ -31,5 +31,15 @@
     {% else %}
         <p>You don't have any favorite series</p>
     {% endif %}
+    <br>
+    <h1>{{ profile.user }}'s favorite books </h1>
+    {% if profile.favorite_books.all %}
+        {% for book in profile.favorite_books.all%}
+            <a href="{{ book.get_absolute_url }}">{{ book }}</a>
+            <br>
+        {% endfor %}
+    {% else %}
+        <p>You don't have any favorite books</p>
+    {% endif %}
 
 {% endblock %}

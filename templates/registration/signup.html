@@ -1,23 +1,53 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h2>Sign up</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form }}
-      <br>
-    <button type="submit">Sign Up</button>
+
+  <div class="text-center" >
+      <h2 class="text-center">Sign up</h2>
+  <form class="text-center" method="post" style="display: block">
+      {% csrf_token %}
+      {{ form.username.label_tag }}
+      <p data-bs-toggle="tooltip" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Letters, digits and @/./+/-/_ only." data-bs-offset="0,-355">  {{ form.username }} </p>
+       {% for error in form.username.errors %}
+          <p style="color: red">{{ error }}</p>
+       {% endfor %}
+
+        {{ form.email.label_tag }}
+        {{ form.email }}
+        {% for error in form.email.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+
+        {{ form.password1.label_tag }}
+      <p  data-bs-toggle="tooltip" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Your password can’t be too similar to your other personal information. Your password must contain at least 8 characters. Your password can’t be a commonly used password. Your password can’t be entirely numeric." data-bs-offset="0,-355">  {{ form.password1 }} </p>
+        {% for error in form.password1.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+
+        {{ form.password2.label_tag }}
+      <p  data-bs-toggle="tooltip" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="{{ form.password2.help_text }}" data-bs-offset="0,-355">  {{ form.password2 }} </p>
+        {% for error in form.password2.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+
+        {{ form.captcha.label_tag }}
+        {{ form.captcha }}
+        {% for error in form.captcha.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+        <button type="submit" style="margin-top: 2em">Sign up</button>
 
   </form>
-
+</div>
     <script>
-
-    $('.captcha').click(function () {
-    $.getJSON("/captcha/refresh/", function (result) {
-        $('.captcha').attr('src', result['image_url']);
-        $('#id_captcha_0').val(result['key'])
+        $('.captcha').click(function () {
+        $.getJSON("/captcha/refresh/", function (result) {
+            $('.captcha').attr('src', result['image_url']);
+            $('#id_captcha_0').val(result['key'])
+        });
     });
-});
-
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
     </script>
+
 {% endblock %}

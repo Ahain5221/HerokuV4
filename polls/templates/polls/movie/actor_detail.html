@@ -4,13 +4,6 @@
 
     <h1 style="padding-bottom: 1em"> {{ actor }} </h1>
     <ul class="list-inline">
-        <!--
-        <li>Specialisation: {{ actor.specialisation }}</li>
-        <li>Date of birth: {{ actor.date_of_birth }}</li>
-        {% if actor.date_of_death %}
-            <li>Date of death: {{ actor.date_of_death }}</li>
-        {% endif %}
-        -->
         {% if actor.movie_set.all %}
             <li>Movies:
                 <ul class="list-inline">
@@ -30,31 +23,52 @@
                 </ul>
             </li>
         {% endif %}
-    <!--
-        {% if actor.Verified %}
-            <li>Status: verified</li>
-        {% else %}
-            <li>Status: not verified</li>
-        {% endif %}
-    -->
     </ul>
-    {% if user.is_superuser %}
-        <a href="{% url 'actor-delete' pk=actor.id %}">
-            <button class="btn btn-danger btn-sm">DELETE ACTOR</button>
-        </a>
 
-        <form action="{% url 'actor-verification' actor.pk %}">
-            {% csrf_token %}
-            {% if actor.Verified %}
-                <button type="submit" value="{{ actor.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
-            {% else %}
-                <button type="submit" value="{{ actor.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+    {% if user.is_authenticated %}
+        {% if actor.added_by == user and not actor.Verified %}
+            <a href="{% url 'actor-update' pk=actor.id %}">
+                <button class="btn btn-success btn-sm">UPDATE</button>
+            </a>
+        {% else %}
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal_2">EDIT</button>
+            <div class="modal fade" id="exampleModal_2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content bg-dark">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col">
+                                    {% if user.is_superuser %}
+                                            <a href="{% url 'actor-update' pk=actor.id %}">
+                                                <button class="btn btn-success btn-sm">UPDATE</button>
+                                            </a>
+                                </div>
+                                        <div class="col">
+                                            <a href="{% url 'actor-delete' pk=actor.id %}">
+                                                <button class="btn btn-danger btn-sm">DELETE ACTOR</button>
+                                            </a>
+                                        </div>
+                                        <div class="col">
+                                            <form action="{% url 'actor-verification' actor.pk %}">
+                                                {% csrf_token %}
+                                                {% if actor.Verified %}
+                                                    <button type="submit" value="{{ actor.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+                                                {% else %}
+                                                    <button type="submit" value="{{ actor.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+                                                {% endif %}
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endif %}
-        </form>
-
-        <a href="{% url 'actor-update' pk=actor.id %}">
-            <button class="btn btn-success btn-sm">UPDATE</button>
-        </a>
     {% endif %}
 
 {% endblock %}

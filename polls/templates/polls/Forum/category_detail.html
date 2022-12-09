@@ -1,0 +1,42 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <head>
+    {{ form.media }}
+    </head>
+    <h1>Category's name: {{ forumcategory.title }}</h1>
+    <p><strong>Description:</strong> {{ forumcategory.content }}</p>
+
+    <p>Views: {{ num_visits }} </p>
+
+    {% if threads %}
+        {% for thread in threads %}
+            <span>
+                <strong class="text-secondary"> Number of Replies: {{ thread.number_of_posts }} </strong>
+                <p><strong>Title: </strong><a href="{{ thread.get_absolute_url }}">{{ thread.title }}</a></p>
+                <p><strong>Creation Date:</strong>{{ thread.date }}</p>
+            </span>
+
+    {% endfor %}
+
+    {% else %}
+
+        <strong class="text-secondary">No threads yet...</strong>
+        <br>
+
+    {% endif %}
+        <a href="{% url 'thread-create' category_pk=forumcategory.pk %}">
+            <button> Create Thread</button>
+        </a>
+        <br><br>
+    {% if user.is_superuser  %}
+        <a href="{% url 'thread-category-delete' pk=forumcategory.id %}">
+            <button>DELETE CATEGORY</button>
+        </a>
+
+        <a href="{% url 'category-update' pk=forumcategory.id %}">
+            <button>Edit Category</button>
+        </a>
+    {% endif %}
+
+{% endblock %}

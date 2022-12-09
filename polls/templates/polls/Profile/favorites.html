@@ -2,44 +2,86 @@
 
 {% block content %}
 
-    <h1>{{ profile.user }}'s favorite games </h1>
-    {% if profile.favorite_games.all %}
-        {% for game in profile.favorite_games.all%}
-            <a href="{{ game.get_absolute_url }}">{{ game }}</a>
-            <br>
-        {% endfor %}
-    {% else %}
-        <p>You don't have any favorite games</p>
-    {% endif %}
-    <br>
-    <h1>{{ profile.user }}'s favorite movies </h1>
-    {% if profile.favorite_movies.all %}
-        {% for movie in profile.favorite_movies.all%}
-            <a href="{{ movie.get_absolute_url }}">{{ movie }}</a>
-            <br>
-        {% endfor %}
-    {% else %}
-        <p>You don't have any favorite movies</p>
-    {% endif %}
-    <br>
-    <h1>{{ profile.user }}'s favorite series </h1>
-    {% if profile.favorite_series.all %}
-        {% for series in profile.favorite_series.all%}
-            <a href="{{ series.get_absolute_url }}">{{ series }}</a>
-            <br>
-        {% endfor %}
-    {% else %}
-        <p>You don't have any favorite series</p>
-    {% endif %}
-    <br>
-    <h1>{{ profile.user }}'s favorite books </h1>
-    {% if profile.favorite_books.all %}
+    <div class="row" style="margin-bottom: 3em">
+        <div class="col-sm-1">
+            {% if type == 'all' %}
+                <a onclick="location.href='{% url 'my-favorites' profile.user 'all'%}'"><button class="btn btn-success btn-sm">All</button></a>
+            {% else %}
+                <a onclick="location.href='{% url 'my-favorites' profile.user 'all'%}'"><button class="btn btn-dark btn-sm">All</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-1">
+            {% if type == 'books' %}
+                <a onclick="location.href='{% url 'my-favorites' profile.user 'books'%}'"><button class="btn btn-success btn-sm">Books</button></a>
+            {% else %}
+                <a onclick="location.href='{% url 'my-favorites' profile.user 'books'%}'"><button class="btn btn-dark btn-sm">Books</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-1">
+            {% if type == 'games' %}
+                <a onclick="location.href='{% url 'my-favorites' profile.user 'games'%}'"><button class="btn btn-success btn-sm">Games</button></a>
+            {% else %}
+                <a onclick="location.href='{% url 'my-favorites' profile.user 'games'%}'"><button class="btn btn-dark btn-sm">Games</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-1" style="margin-right: 0.75em">
+            {% if type == 'movies' %}
+                <a onclick="location.href='{% url 'my-favorites' profile.user 'movies'%}'"><button class="btn btn-success btn-sm">Movies</button></a>
+            {% else %}
+                <a onclick="location.href='{% url 'my-favorites' profile.user 'movies'%}'"><button class="btn btn-dark btn-sm">Movies</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-1">
+            {% if type == 'series' %}
+                <a onclick="location.href='{% url 'my-favorites' profile.user 'series'%}'"><button class="btn btn-success btn-sm">Series</button></a>
+            {% else %}
+                <a onclick="location.href='{% url 'my-favorites' profile.user 'series'%}'"><button class="btn btn-dark btn-sm">Series</button></a>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <table class="center" style="border: 1px solid;">
+    <tr style="border: 1px solid; background-color: #262626">
+        <th style="color: white">Title</th>
+        <th style="color: white">Type</th>
+    </tr>
+    {% if type == 'all' or type == 'books' %}
         {% for book in profile.favorite_books.all%}
-            <a href="{{ book.get_absolute_url }}">{{ book }}</a>
-            <br>
+        <tr style="border: 1px solid; background-color: #d3d3d3">
+            <th> <a href="{{ book.get_absolute_url }}"><strong>{{ book }}</strong></a></th>
+            <th> Book </th>
+        </tr>
         {% endfor %}
-    {% else %}
-        <p>You don't have any favorite books</p>
     {% endif %}
+    {% if type == 'all' or type == 'games' %}
+        {% for game in profile.favorite_games.all%}
+        <tr style="border: 1px solid; background-color: #d3d3d3">
+            <th> <a href="{{ game.get_absolute_url }}"><strong>{{ game }}</strong></a></th>
+            <th> Game </th>
+        </tr>
+        {% endfor %}
+    {% endif %}
+    {% if type == 'all' or type == 'movies' %}
+        {% for movie in profile.favorite_movies.all%}
+        <tr style="border: 1px solid; background-color: #d3d3d3">
+            <th> <a href="{{ movie.get_absolute_url }}"><strong>{{ movie }}</strong></a></th>
+            <th> Movie </th>
+        </tr>
+        {% endfor %}
+    {% endif %}
+    {% if type == 'all' or type == 'series' %}
+        {% for series in profile.favorite_series.all%}
+        <tr style="border: 1px solid; background-color: #d3d3d3">
+            <th> <a href="{{ series.get_absolute_url }}"><strong>{{ series }}</strong></a></th>
+            <th> Series </th>
+        </tr>
+        {% endfor %}
+    {% endif %}
+    </table>
 
 {% endblock %}

@@ -51,7 +51,7 @@
     <p><strong>Summary:</strong> {{ book.summary }}</p>
     <p><strong>ISBN:</strong> {{ book.isbn }}</p>
     <p><strong>Language:</strong> {{ book.languages.all|join:", " }}</p>
-    <p><strong>Genre:</strong> {{ book.genres.all|join:", " }}</p>
+    <p><strong>Genre:</strong> {{ book.genre.all|join:", " }}</p>
     <p><strong>Added by:</strong> {{ book.added_by}}</p>
     <p><strong>Users rating:</strong> {{ book.users_rating}}</p>
 
@@ -83,12 +83,8 @@
 
         {% if user.is_authenticated%}
             {% if book_read_reading %}
-                {% if book_has_user_review %}
-                    <a href="{% url 'book-review-update' book_pk=book.pk pk=user_review.pk %}">
-                        <button class="btn btn-success btn-sm" style="margin-left: 4em">Update review</button>
-                    </a>
-                {% else %}
-                    <a href="{% url 'create-book-review' book_pk=book.pk %}">
+                {% if not book_has_user_review%}
+                    <a href="{% url 'create-book-review' book_pk=book.pk%}">
                         <button class="btn btn-success btn-sm" style="margin-left: 8em">Write review</button>
                     </a>
                 {% endif %}
@@ -98,9 +94,47 @@
 
     {% for review in book_reviews %}
         <div style="border: 1px solid #262626; width: 50em">
-            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}</div>
+            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}
+                {% if user.is_authenticated%}
+                    {% if book_read_reading %}
+                        {% if review.author == user or user.is_superuser %}
+                            {% if  review.author == user %}
+                                <a href="{% url 'book-review-update' book_pk=book.pk pk=user_review.pk%}">
+                                    <button class="btn btn-success btn-sm" style="margin-left: 4em">Update review</button>
+                                </a>
+                            {% endif %}
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal{{ review.pk }}">DELETE REVIEW</button>
+                            <div class="modal fade" id="exampleModal{{ review.pk }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="POST" action="{% url "book-review-delete" book.pk review.pk %}">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="exampleModalLabel">Delete review</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to delete {{ book }} review?</p>
+                                                {% csrf_token %}
+                                                {% if user.is_superuser %}
+                                                    <textarea id="delete_reason" name="delete_reason" placeholder="Enter any reason, if necessary" maxlength="200" rows="4" cols="30"></textarea>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <input type="submit" value="DELETE">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
             <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ review.content }} </div>
         </div>
+        <br>
     {% endfor %}
 
 {% endblock %}

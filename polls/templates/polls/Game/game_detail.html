@@ -2,133 +2,222 @@
 {% block content %}
 
     <div class="container-fluid">
-        <h1 style="font-size: xxx-large; margin-bottom: 1.5rem"> {{ game.title }} </h1>
-        <a class="page-link" style="font-size: larger; display: inline; margin-right: 6px">
-            Release date: {{ game.date_of_release }}
-            {% if user.is_authenticated %}
-                <div style="margin-left: 10em">
-                    <form action="{% url 'add-favorite-game' game.pk%}" method="POST">
-                        {% csrf_token %}
-                        {% if game in user.profile.favorite_games.all %}
-                            <button type="submit" name="game_id" value="{{ game.pk }}" class="btn btn-secondary btn-sm"><a class="icon solid fa-heart" style="color: #dad0c0"></a>Unfavorite</button>
-                        {% else %}
-                            <button type="submit" name="game_id" value="{{ game.pk }}" class="btn btn-danger btn-sm"><a class="icon solid fa-heart" style="color: #710000"></a>Favorite</button>
-                        {% endif %}
-                    </form>
+    <h1 style="font-size: xxx-large; margin-bottom: 1.5rem"> {{ game.title }} </h1>
+    <a class="page-link" style="font-size: larger; display: inline; margin-right: 6px">
+        &nbsp;&nbsp;&nbsp;
+        Release date: {{ game.date_of_release }}
+    </a>
+    {% if user.is_authenticated %}
+    <div class="container text-center">
+      <div class="row row-cols-auto">
+        <div class="col">
+            <form action="{% url 'add-favorite-game' game.pk%}" method="POST">
+                {% csrf_token %}
+                {% if game in user.profile.favorite_game.all %}
+                    <button type="submit" name="series_id" value="{{ game.pk }}" class="btn btn-secondary btn-sm"><a class="icon solid fa-heart-broken fa-2xl" style="color: #dad0c0"></a>Unfavorite</button>
+                {% else %}
+                    <button type="submit" name="series_id" value="{{ game.pk }}" class="btn btn-danger btn-sm"><a class="icon solid fa-heart fa-2xl" style="color: #710000"></a>Favorite</button>
+                {% endif %}
+            </form>
+        </div>
+        <div class="col">
+            {% if game_in_user_game_list %}
+                <a onclick="location.href='{% url 'remove-game-from-game-list' game.pk user.pk %}'"><button class="btn btn-primary btn-sm">REMOVE FROM GAME LIST</button></a>
+            {% else %}
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#add_to_gamelist">Add to My List</button>
+            <div class="modal fade" id="add_to_gamelist" tabindex="-1" aria-labelledby="gamelistLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-dark">
+                            <h1 class="modal-title fs-5" id="gamelistLabel">Add to My Game List</h1>
+                            <button type="button" class="btn-close btn-close-white" style="opacity: 0.25"  data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body bg-dark">
+                            <a onclick="location.href='{% url 'add-game-to-game-list' game.pk user.pk 'played'%}'"><button class="btn btn-primary btn-sm" style="margin-right: 1em">Played</button></a>
+                            <a onclick="location.href='{% url 'add-game-to-game-list' game.pk user.pk 'playing'%}'"><button class="btn btn-primary btn-sm" style="margin-right: 1em">Playing</button></a>
+                            <a onclick="location.href='{% url 'add-game-to-game-list' game.pk user.pk 'want to play'%}'"><button class="btn btn-primary btn-sm">Want to play</button></a>
+                        </div>
+                    </div>
                 </div>
+            </div>
             {% endif %}
-        </a>
-        <div class="row">
-            <div class="col" style="margin-top: 1em">
-                <img style='height: initial; width: initial' src="{{ game.game_image }}" class="card-img" alt="">
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col" style="margin-top: 1em">
+            <img style='height: initial; width: initial; padding-left: inherit' src="{{ game.game_image }}" class="card-img" alt="">
+            {% if game.genre.all.count == 3 %}
+                <ul style="margin-left: 4em">
+                    {% for genre in game.genre.all %}
+                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                    {% endfor %}
+                </ul>
+            {% elif game.genre.all.count == 2 %}
+                <ul style="margin-left: 7em">
+                    {% for genre in game.genre.all %}
+                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                    {% endfor %}
+                </ul>
+            {% elif series.genre.all.count == 1 %}
+                <ul style="margin-left: 10em">
+                    {% for genre in game.genre.all %}
+                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                    {% endfor %}
+                </ul>
+            {% else %}
                 <ul>
                     {% for genre in game.genre.all %}
                         <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
-            </div>
-            <div class="col" style="padding: 0">
-                <h3> Summary: </h3>
-                <article style="display: inline-block; font-size: initial; margin-bottom: 0.25em"> {{ game.summary }} </article>
-                <ul class="list-inline" style="margin-top: 0.5em">
+            {% endif %}
+        </div>
+        <div class="col" style="padding-top: 25px">
+            <h3> Summary: </h3>
+            <article style="display: inline-block; font-size: initial; margin-bottom: 0.25em"> {{ game.summary }} </article>
+            <ul class="list-inline" style="margin-top: 0.5em">
                     {% for developer in game.developer.all|slice:":1" %}
                         {% if developer != 'N/A' %}
                             <h3> Developers: </h3>
                         {% endif %}
                     {% endfor %}
                     <li>
-                            {% for developer in game.developer.all %}
-                                {% if developer != 'N/A' %}
-                                    <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial" href="{{ developer.get_absolute_url }}"> {{ developer }} </a>
-                                {% endif %}
-                            {% endfor %}
+                        {% for developer in game.developer.all %}
+                            {% if developer != 'N/A' %}
+                                <a style="display: inline; margin-right: 6px; font-size: initial" href="{{ developer.get_absolute_url }}"> {{ developer }} </a>
+                            {% endif %}
+                        {% endfor %}
                     </li>
                         {% for mode in game.mode.all|slice:":1" %}
                             <h3 style="padding-top: 5px"> Tags: </h3>
                         {% endfor %}
                     <li>
                         {% for mode in game.mode.all %}
-                            <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial"> {{ mode }} </a>
+                            <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial">{{ mode }}</a>
                         {% endfor %}
                     </li>
-                    <!--
-                    {% if game.Verified %}
-                        <li>Status: verified</li>
-                    {% else %}
-                        <li>Status: not verified</li>
-                    {% endif %}
-                    -->
                     {% if  game.added_by%}
                         <li>Added by <a href="{% url 'profile-page' user %}">{{ game.added_by }}</a></li>
                     {% else %}
                         <li>Added by API</li>
                     {% endif %}
                 </ul>
-            </div>
+
+            {% if user.is_superuser %}
+             {% if game.added_by == user and not game.Verified%}
+                 <div class="col">
+                     <a href="{% url 'game-update' pk=game.id %}">
+                         <button class="btn btn-success btn-sm">UPDATE</button>
+                     </a>
+                 </div>
+             {% elif user.is_superuser or user.is_staff %}
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit">EDIT</button>
+                <div class="modal fade" id="edit" tabindex="-1" aria-labelledby="editLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-dark">
+                                <h1 class="modal-title fs-5" id="editLabel">Edit</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body bg-dark">
+                                <div class="row">
+                                    {% if game.added_by == user and not game.Verified or user.is_superuser %}
+                                        <div class="col">
+                                            <a href="{% url 'game-update' pk=game.id %}">
+                                                <button class="btn btn-success btn-sm">UPDATE</button>
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                    <div class="col">
+                                        <a href="{% url 'game-delete' pk=game.id %}">
+                                            <button class="btn btn-danger btn-sm">DELETE GAME</button>
+                                        </a>
+                                    </div>
+                                    <div class="col">
+                                        <form action="{% url 'add_verf' game.pk %}">
+                                            {% csrf_token %}
+                                            {% if game.Verified %}
+                                                <button type="submit" value="{{ game.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+                                            {% else %}
+                                                <button type="submit" value="{{ game.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             {% endif %}
+            {% endif %}
+            </ul>
         </div>
+    </div>
     </div>
 
 
-    <ul class="list-inline">
-        {% if game.added_by == user and not game.Verified or user.is_superuser %}
-            <li>
-                <a href="{% url 'game-update' pk=game.id %}">
-                    <button class="btn btn-success btn-sm">UPDATE</button>
-                </a>
-            </li>
+<h1 style="padding-bottom: 1em; margin-top: 5em">
+        {% if game_reviews.count > 0 %}
+            Reviews
         {% endif %}
 
-        <li>
-            {% if user.is_superuser %}
-                <a href="{% url 'game-delete' pk=game.id %}">
-                    <button class="btn btn-danger btn-sm">DELETE GAME</button>
-                </a>
-                <form action="{% url 'add_verf' game.pk %}">
-                    {% csrf_token %}
-                    {% if game.Verified %}
-                        <button type="submit" value="{{ game.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
-                    {% else %}
-                        <button type="submit" value="{{ game.pk }}"   class="btn btn-primary btn-sm">Verify</button>
-                    {% endif %}
-                </form>
-            {% endif %}
-        </li>
-    </ul>
-
-    <br><br>
-    {% if user.is_authenticated%}
-        {% if game_in_user_game_list %}
-            <a onclick="location.href='{% url 'remove-game-from-game-list' game.pk user.pk %}'"><button class="btn btn-primary btn-sm">REMOVE FROM GAME LIST </button></a>
-        {% else %}
-            <strong>ADD TO YOUR GAME LIST</strong>
-            <a onclick="location.href='{% url 'add-game-to-game-list' game.pk user.pk 'played'%}'"><button class="btn btn-primary btn-sm">Played</button></a>
-            <a onclick="location.href='{% url 'add-game-to-game-list' game.pk user.pk 'playing'%}'"><button class="btn btn-primary btn-sm">Playing</button></a>
-            <a onclick="location.href='{% url 'add-game-to-game-list' game.pk user.pk 'want to play'%}'"><button class="btn btn-primary btn-sm">Want to play</button></a>
-
-        {% endif %}
-
-        <a href="{% url 'profile-game-list' user 'all'%}"><button class="btn btn-primary btn-sm">My game list</button></a>
-
-        {% if game_played_playing %}
-            {% if  game_has_user_review%}
-                <strong>You already wrote review</strong>
-                <a href="{% url 'game-review-update' game_pk=game.pk pk=user_review.pk%}">
-                    <button class="btn btn-success btn-sm">Update review</button>
-                </a>
-            {% else %}
-                <a href="{% url 'create-game-review' game_pk=game.pk%}">
-                    <button class="btn btn-success btn-sm">Write review</button>
-                </a>
+        {% if user.is_authenticated%}
+            {% if game_played_playing %}
+                {% if not game_has_user_review %}
+                    <a href="{% url 'create-game-review' game_pk=game.pk%}">
+                        <button class="btn btn-success btn-sm" style="margin-left: 8em">Write review</button>
+                    </a>
+                {% endif %}
             {% endif %}
         {% endif %}
-    {% endif %}
+    </h1>
 
     {% for review in game_reviews %}
-        <div style="border: thin solid black">
-            <div style="border: thin solid black"> <strong>{{ review.author }}</strong> {{ review.review_date }}</div>
-            <div style="border: thin solid black"> {{ review.author }}'s rate {{ review.rate }} </div>
-            <div style="border: thin solid black">{{ review.content }} </div>
+        <div style="border: 1px solid #262626; width: 50em">
+            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}
+                {% if user.is_authenticated%}
+                    {% if game_played_playing %}
+                        {% if review.author == user or user.is_superuser %}
+                            {% if  review.author == user %}
+                                <a href="{% url 'game-review-update' game_pk=game.pk pk=user_review.pk%}">
+                                    <button class="btn btn-success btn-sm" style="margin-left: 4em">Update review</button>
+                                </a>
+                            {% endif %}
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#review{{ review.pk }}">DELETE REVIEW</button>
+                            <div class="modal fade" id="review{{ review.pk }}" tabindex="-1" aria-labelledby="reviewLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="POST" action="{% url "game-review-delete" game.pk review.pk %}">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="reviewLabel">Delete review</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to delete {{ game }} review?</p>
+                                                {% csrf_token %}
+                                                {% if user.is_superuser %}
+                                                    <textarea id="delete_reason" name="delete_reason" placeholder="Enter any reason, if necessary" maxlength="200" rows="4" cols="30"></textarea>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <input type="submit" value="DELETE">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ review.content }} </div>
         </div>
+        <br>
     {% endfor %}
 
 {% endblock %}

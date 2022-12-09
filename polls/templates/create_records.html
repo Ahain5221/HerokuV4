@@ -9,6 +9,8 @@
                 <li><a class="btn" href="{% url 'developer-create' %}">Create developer </a></li>
                 -->
                 <hr style="width:100px">
+                <li><a class="btn btn-close-white" href="{% url 'category-create' %}"> Create thread category </a></li>
+                <hr style="width:100px">
                 <li><a class="btn btn-close-white" href="{% url 'movie-create' %}"> Create movie </a></li>
                 <li><a class="btn btn-close-white" href="{% url 'series-create' %}"> Create series </a></li>
                 <hr style="width:100px">
@@ -22,6 +24,7 @@
                 -->
                 {% if user.is_superuser %}
                     <hr style="width:100px">
+                    <li><a class="btn btn-close-white" href="{% url 'add-books' %}"> book script</a></li>
                     <li><a class="btn btn-close-white" href="{% url 'omdb-api-page' %}"> OMDB API page</a></li>
                     <li><a class="btn btn-close-white" href="{% url 'scrape-games-redirect' %}"> Scrape games </a></li>
                     <li><a class="btn btn-close-white" href="{% url 'series-to-scrape' %}"> Scrape episodes</a></li>

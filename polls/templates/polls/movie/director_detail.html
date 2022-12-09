@@ -2,15 +2,8 @@
 
 {% block content %}
 
-    <h1> {{ director }} </h1>
-    <ul>
-        <!--
-        <li>Specialisation: {{ director.specialisation }}</li>
-        <li>Date of birth: {{ director.date_of_birth }}</li>
-        {% if director.date_of_death %}
-            <li>Date of death: {{ director.date_of_death }}</li>
-        {% endif %}
-        -->
+    <h1 style="padding-bottom: 1em"> {{ director }} </h1>
+    <ul class="list-inline">
         {% if director.movie_set.all %}
             <li>Movies:
                 <ul class="list-inline">
@@ -30,31 +23,52 @@
                 </ul>
             </li>
         {% endif %}
-    <!--
-        {% if director.Verified %}
-            <li>Status: verified</li>
-        {% else %}
-            <li>Status: not verified</li>
-        {% endif %}
-    -->
     </ul>
-    {% if user.is_superuser %}
-        <a href="{% url 'director-delete' pk=director.id %}">
-            <button class="btn btn-danger btn-sm">DELETE DIRECTOR</button>
-        </a>
 
-        <form action="{% url 'director-verification' director.pk %}">
-            {% csrf_token %}
-            {% if director.Verified %}
-                <button type="submit" value="{{ director.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
-            {% else %}
-                <button type="submit" value="{{ director.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+        {% if user.is_authenticated %}
+        {% if director.added_by == user and not director.Verified %}
+            <a href="{% url 'director-update' pk=director %}">
+                <button class="btn btn-success btn-sm">UPDATE</button>
+            </a>
+        {% else %}
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal_2">EDIT</button>
+            <div class="modal fade" id="exampleModal_2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content bg-dark">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col">
+                                    {% if user.is_superuser %}
+                                            <a href="{% url 'director-update' pk=director.id %}">
+                                                <button class="btn btn-success btn-sm">UPDATE</button>
+                                            </a>
+                                </div>
+                                        <div class="col">
+                                            <a href="{% url 'director-delete' pk=director.id %}">
+                                                <button class="btn btn-danger btn-sm">DELETE ACTOR</button>
+                                            </a>
+                                        </div>
+                                        <div class="col">
+                                            <form action="{% url 'director-verification' director.pk %}">
+                                                {% csrf_token %}
+                                                {% if director.Verified %}
+                                                    <button type="submit" value="{{ director.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+                                                {% else %}
+                                                    <button type="submit" value="{{ director.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+                                                {% endif %}
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endif %}
-        </form>
-
-        <a href="{% url 'director-update' pk=director.id %}">
-            <button class="btn btn-success btn-sm">UPDATE</button>
-        </a>
     {% endif %}
 
 {% endblock %}

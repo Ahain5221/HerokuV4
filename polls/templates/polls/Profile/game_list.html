@@ -5,37 +5,39 @@
     <h1 style="padding-bottom: 1em"> {{ profile.user }}'s game list</h1>
 
     <div class="row" style="padding-bottom: 15px">
-        <div class="col-sm-2">
-            {% if status == 'played' %}
-                <a href="{% url 'profile-game-list' profile.user 'played'%}" style="padding: 1em"><button class="btn btn-success btn-sm">Played</button></a>
-            {% else %}
-                <a href="{% url 'profile-game-list' profile.user 'played'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Played</button></a>
-            {% endif %}
-        </div>
 
-        <div class="col-sm-2">
-            {% if status == 'playing' %}
-                <a href="{% url 'profile-game-list' profile.user 'playing'%}" style="padding: 1em"><button class="btn btn-success btn-sm">Playing</button></a>
-            {% else %}
-                <a href="{% url 'profile-game-list' profile.user 'playing'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Playing</button></a>
-            {% endif %}
-        </div>
-
-        <div class="col-sm-2">
-            {% if status == 'want to play' %}
-                <a href="{% url 'profile-game-list' profile.user 'want to play'%}" style="padding: 1em"><button class="btn btn-success btn-sm">Want to play</button></a>
-            {% else %}
-                <a href="{% url 'profile-game-list' profile.user 'want to play'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">Want to play</button></a>
-            {% endif %}
-        </div>
-
-        <div class="col-sm-2">
+        <div class="col-sm-1">
             {% if status == 'all' %}
-                <a href="{% url 'profile-game-list' profile.user 'all'%}" style="padding: 1em"><button class="btn btn-success btn-sm">All</button></a>
+                <a onclick="location.href='{% url 'profile-game-list' profile.user 'all'%}'"><button class="btn btn-success btn-sm">All</button></a>
             {% else %}
-                <a href="{% url 'profile-game-list' profile.user 'all'%}" style="padding: 1em"><button class="btn btn-dark btn-sm">All</button></a>
+                <a onclick="location.href='{% url 'profile-game-list' profile.user 'all'%}'"><button class="btn btn-dark btn-sm">All</button></a>
             {% endif %}
         </div>
+
+        <div class="col-sm-1">
+            {% if status == 'played' %}
+                <a onclick="location.href='{% url 'profile-game-list' profile.user 'played'%}'"><button class="btn btn-success btn-sm">Played</button></a>
+            {% else %}
+                <a onclick="location.href='{% url 'profile-game-list' profile.user 'played'%}'"><button class="btn btn-dark btn-sm">Played</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-1">
+            {% if status == 'playing' %}
+                <a onclick="location.href='{% url 'profile-game-list' profile.user 'playing'%}'"><button class="btn btn-success btn-sm">Playing</button></a>
+            {% else %}
+                <a onclick="location.href='{% url 'profile-game-list' profile.user 'playing'%}'"><button class="btn btn-dark btn-sm">Playing</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-3" style="margin-left: 0.75em">
+            {% if status == 'want to play' %}
+                <a onclick="location.href='{% url 'profile-game-list' profile.user 'want to play'%}'"><button class="btn btn-success btn-sm">Want to play</button></a>
+            {% else %}
+                <a onclick="location.href='{% url 'profile-game-list' profile.user 'want to play'%}'"><button class="btn btn-dark btn-sm">Want to play</button></a>
+            {% endif %}
+        </div>
+
     </div>
 
     <table class="center" style="border: 1px solid;">

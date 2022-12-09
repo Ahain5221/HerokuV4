@@ -4,9 +4,7 @@
     <div class="container-fluid">
     <h1 style="font-size: xxx-large; margin-bottom: 1.5rem"> {{ series.title }} </h1>
     <a class="page-link" style="font-size: larger; display: inline; margin-right: 6px">
-        {% if series.type_of_show == "series" %}
-            TV Series
-        {% endif %}
+        TV Series
         &nbsp;&nbsp;&nbsp;
         {{ series.date_of_release }}
         &nbsp;&nbsp;&nbsp;
@@ -33,21 +31,18 @@
             {% if series_in_user_watchlist %}
                 <a onclick="location.href='{% url 'remove-series-from-watchlist' series.pk user.pk %}'"><button class="btn btn-primary btn-sm">REMOVE FROM WATCHLIST</button></a>
             {% else %}
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">Add to My List</button>
-            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#add_to_watchlist">Add to My List</button>
+            <div class="modal fade" id="add_to_watchlist" tabindex="-1" aria-labelledby="watchlistLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="modal-header bg-dark">
+                            <h1 class="modal-title fs-5" id="watchlistLabel">Add to My Watchlist</h1>
+                            <button type="button" class="btn-close btn-close-white" style="opacity: 0.25"  data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
-                            <a onclick="location.href='{% url 'add-series-to-watchlist' series.pk user.pk 'watched'%}'"><button class="btn btn-primary btn-sm">Watched</button></a>
-                            <a onclick="location.href='{% url 'add-series-to-watchlist' series.pk user.pk 'watching'%}'"><button class="btn btn-primary btn-sm">Watching</button></a>
+                        <div class="modal-body bg-dark">
+                            <a onclick="location.href='{% url 'add-series-to-watchlist' series.pk user.pk 'watched'%}'"><button class="btn btn-primary btn-sm" style="margin-right: 1em">Watched</button></a>
+                            <a onclick="location.href='{% url 'add-series-to-watchlist' series.pk user.pk 'watching'%}'"><button class="btn btn-primary btn-sm" style="margin-right: 1em">Watching</button></a>
                             <a onclick="location.href='{% url 'add-series-to-watchlist' series.pk user.pk 'want to watch'%}'"><button class="btn btn-primary btn-sm">Want to watch</button></a>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary btn-sm">Submit</button>
                         </div>
                     </div>
                 </div>
@@ -154,43 +149,52 @@
                     <li>Added by API</li>
                 {% endif %}
             {% if user.is_superuser %}
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal_2">EDIT</button>
-            <div class="modal fade" id="exampleModal_2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">
-                                {% if series.added_by == user and not series.Verified or user.is_superuser %}
+
+             {% if series.added_by == user and not series.Verified%}
+                 <div class="col">
+                     <a href="{% url 'series-update' pk=series.id %}">
+                         <button class="btn btn-success btn-sm">UPDATE</button>
+                     </a>
+                 </div>
+             {% elif user.is_superuser or user.is_staff %}
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit">EDIT</button>
+                <div class="modal fade" id="edit" tabindex="-1" aria-labelledby="editLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-dark">
+                                <h1 class="modal-title fs-5" id="editLabel">Edit</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body bg-dark">
+                                <div class="row">
+                                    {% if series.added_by == user and not series.Verified or user.is_superuser %}
+                                        <div class="col">
+                                            <a href="{% url 'series-update' pk=series.id %}">
+                                                <button class="btn btn-success btn-sm">UPDATE</button>
+                                            </a>
+                                        </div>
+                                    {% endif %}
                                     <div class="col">
-                                        <a href="{% url 'series-update' pk=series.id %}">
-                                            <button class="btn btn-success btn-sm">UPDATE</button>
+                                        <a href="{% url 'series-delete' pk=series.id %}">
+                                            <button class="btn btn-danger btn-sm">DELETE SERIES</button>
                                         </a>
                                     </div>
-                                {% endif %}
-                                <div class="col">
-                                    <a href="{% url 'series-delete' pk=series.id %}">
-                                        <button class="btn btn-danger btn-sm">DELETE SERIES</button>
-                                    </a>
-                                </div>
-                                <div class="col">
-                                    <form action="{% url 'series-verification' series.pk %}">
-                                        {% csrf_token %}
-                                        {% if series.Verified %}
-                                            <button type="submit" value="{{ series.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
-                                        {% else %}
-                                            <button type="submit" value="{{ series.pk }}"   class="btn btn-primary btn-sm">Verify</button>
-                                        {% endif %}
-                                    </form>
+                                    <div class="col">
+                                        <form action="{% url 'series-verification' series.pk %}">
+                                            {% csrf_token %}
+                                            {% if series.Verified %}
+                                                <button type="submit" value="{{ series.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+                                            {% else %}
+                                                <button type="submit" value="{{ series.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+             {% endif %}
             {% endif %}
             </ul>
         </div>
@@ -204,11 +208,7 @@
 
         {% if user.is_authenticated%}
             {% if series_watched_watching %}
-                {% if  series_has_user_review%}
-                    <a href="{% url 'series-review-update' series_pk=series.pk pk=user_review.pk%}">
-                        <button class="btn btn-success btn-sm" style="margin-left: 4em">Update review</button>
-                    </a>
-                {% else %}
+                {% if not series_has_user_review%}
                     <a href="{% url 'create-series-review' series_pk=series.pk%}">
                         <button class="btn btn-success btn-sm" style="margin-left: 8em">Write review</button>
                     </a>
@@ -216,11 +216,50 @@
             {% endif %}
         {% endif %}
     </h1>
+
     {% for review in series_reviews %}
         <div style="border: 1px solid #262626; width: 50em">
-            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}</div>
+            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}
+                {% if user.is_authenticated%}
+                    {% if series_watched_watching %}
+                        {% if review.author == user or user.is_superuser %}
+                            {% if  review.author == user %}
+                                <a href="{% url 'series-review-update' series_pk=series.pk pk=user_review.pk%}">
+                                    <button class="btn btn-success btn-sm" style="margin-left: 4em">Update review</button>
+                                </a>
+                            {% endif %}
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#review{{ review.pk }}">DELETE REVIEW</button>
+                            <div class="modal fade" id="review{{ review.pk }}" tabindex="-1" aria-labelledby="reviewLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="POST" action="{% url "series-review-delete" series.pk review.pk %}">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="reviewLabel">Delete review</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to delete {{ series }} review?</p>
+                                                {% csrf_token %}
+                                                {% if user.is_superuser %}
+                                                    <textarea id="delete_reason" name="delete_reason" placeholder="Enter any reason, if necessary" maxlength="200" rows="4" cols="30"></textarea>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <input type="submit" value="DELETE">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
             <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ review.content }} </div>
         </div>
+        <br>
     {% endfor %}
 
 {% endblock %}

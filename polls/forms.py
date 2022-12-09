@@ -9,6 +9,10 @@ from captcha.fields import CaptchaField
 from .models import Game, Profile, RequestPermission
 from .models import Movie, Series, Actor, Director, MovieReview, \
     MovieWatchlist, SeriesWatchlist, SeriesReview, GameReview, Book, Author, BookReview
+from .models import Game, Profile
+from .models import Movie, Series, Actor, Director
+from .models import ForumCategory, Post, Thread
+# from tinymce.widgets import TinyMCE
 
 
 class SignUpForm(UserCreationForm):
@@ -370,3 +374,26 @@ class RequestPermissionForm(forms.ModelForm):
         widgets = {
             'Request_Reason': forms.Textarea(attrs={'class': 'form-control'}),
         }
+
+class ThreadForm(forms.ModelForm):
+    class Meta:
+        model = Thread
+        fields = ('title',)
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'title'}),
+        }
+
+class ThreadCategoryForm(forms.ModelForm):
+    class Meta:
+        model = ForumCategory
+        fields = ('title','content')
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'title',}),
+            'content': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'content'}),
+        }
+
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['content']

@@ -1,0 +1,15 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <p><strong>Creation Date:</strong> {{ post.date }}</p>
+    <p><strong>Created by:</strong> {{ post.creator }}</p>
+    <p><strong>Description:</strong> {{ post.content  }}</p>
+
+    {% if user.is_superuser %}
+        <a href="{% url 'post-delete' pk=post.id %}">
+            <button>DELETE POST</button>
+        </a>
+    {% endif %}
+
+{% endblock %}

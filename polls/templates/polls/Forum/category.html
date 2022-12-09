@@ -1,0 +1,236 @@
+{% extends "forum_generic.html" %}
+
+{% block content %}
+    <article class="main container" style="width: available; margin-top: 2em ;margin-bottom: 4em; margin-left: 5em; padding: 0">
+        <span class="breadcrumb bg-dark" style="padding-left: 1em">
+            <span class="breadcrumb-item" style="margin-right: 1em"><a href="{% url 'index' %}">Home</a></span>
+            <span class="icon solid fa-greater-than" style="margin-right: 1em"></span> Forums
+        </span>
+
+            <ol class="list-inline bg-dark" style="list-style-position: inside; padding-left: 0.5em; padding-top: 0.5em; padding-bottom: 0.5em; border-bottom:1px solid #ccc; border-bottom-color: #555555">
+                <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                    <h3>Announcements & Rules</h3>
+                </li>
+                <li>
+                    <ol class="list-inline">
+                        <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>Announcements & Rules</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li style="margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>Suggestions & Bugs</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin: 0; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+
+            <ol class="list-inline bg-dark" style="list-style-position: inside; padding-left: 0.5em; padding-top: 0.5em; padding-bottom: 0.5em; border-bottom:1px solid #ccc; border-bottom-color: #555555">
+                <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                    <h3>Appeals</h3>
+                </li>
+                <li>
+                    <ol class="list-inline">
+                        <li style="margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>Appeals</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin-top: 0; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+
+            <ol class="list-inline bg-dark" style="list-style-position: inside; padding-left: 0.5em; padding-top: 0.5em; padding-bottom: 0.5em; border-bottom:1px solid #ccc; border-bottom-color: #555555">
+                <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                    <h3>Writing</h3>
+                </li>
+                <li>
+                    <ol class="list-inline">
+                        <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>Creative Writing</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>Questing</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li style="margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>Play-by-Post</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin: 0; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+
+            <ol class="list-inline bg-dark" style="list-style-position: inside; padding-left: 0.5em; padding-top: 0.5em; padding-bottom: 0.5em; border-bottom:1px solid #ccc; border-bottom-color: #555555">
+                <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                    <h3>NSFW</h3>
+                </li>
+                <li>
+                    <ol class="list-inline">
+                        <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>NSFW Creative Writing</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>NSFW Questing</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li style="margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>NSFW Play-by-Post</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin: 0; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+
+            <ol class="list-inline bg-dark" style="list-style-position: inside; padding-left: 0.5em; padding-top: 0.5em; padding-bottom: 0.5em; border-bottom:1px solid #ccc; border-bottom-color: #555555">
+                <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                    <h3>Off-Topic</h3>
+                </li>
+                <li>
+                    <ol class="list-inline">
+                        <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>General</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li style="margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>NSFW General</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin: 0; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+
+            <ol class="list-inline bg-dark" style="list-style-position: inside; padding-left: 0.5em; padding-top: 0.5em; padding-bottom: 0.5em; border-bottom:1px solid #ccc; border-bottom-color: #555555">
+                <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                    <h3>Discussions</h3>
+                </li>
+                <li>
+                    <ol class="list-inline">
+                        <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>Books</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>Games</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>Movies</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li style="margin-right: 0.5em">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h3><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>Series</h3>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center" style="margin: 0; font-size: small; color: white"> Latest threads:</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+
+
+            <ul>
+                {% for forum_category in forumcategory_list %}
+                        <li>
+                            <a href="{{ forum_category.get_absolute_url }}">{{ forum_category.title }}</a>
+                            <strong class="text-secondary"> Thread's: {{ forum_category.number_of_threads }} </strong>
+                            <strong class="text-secondary"> Post's: {{ forum_category.number_of_posts}} </strong>
+                        </li>
+                {% endfor %}
+            </ul>
+    </article>
+
+
+
+
+
+{% endblock %}

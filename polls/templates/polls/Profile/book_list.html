@@ -5,37 +5,40 @@
     <h1 style="padding-bottom: 1em"> {{ profile.user }}'s book list</h1>
 
     <div class="row" style="padding-bottom: 15px">
+
+        <div class="col-sm-1">
+            {% if status == 'all' %}
+                <a onclick="location.href='{% url 'profile-book-list' profile.user 'all'%}'"><button class="btn btn-success btn-sm">All</button></a>
+            {% else %}
+                <a onclick="location.href='{% url 'profile-book-list' profile.user 'all'%}'"><button class="btn btn-dark btn-sm">All</button></a>
+            {% endif %}
+        </div>
+
         <div class="col-sm-1">
             {% if status == 'read' %}
-                <a href="{% url 'profile-book-list' profile.user 'read'%}"><button class="btn btn-success btn-sm">Read</button></a>
+                <a onclick="location.href='{% url 'profile-book-list' profile.user 'read'%}'"><button class="btn btn-success btn-sm">Read</button></a>
             {% else %}
-                <a href="{% url 'profile-book-list' profile.user 'read'%}"><button class="btn btn-dark btn-sm">Read</button></a>
+                <a onclick="location.href='{% url 'profile-book-list' profile.user 'read'%}'"><button class="btn btn-dark btn-sm">Read</button></a>
             {% endif %}
         </div>
 
         <div class="col-sm-1">
             {% if status == 'reading' %}
-                <a href="{% url 'profile-book-list' profile.user 'reading'%}"><button class="btn btn-success btn-sm">Reading</button></a>
+                <a onclick="location.href='{% url 'profile-book-list' profile.user 'reading'%}'"><button class="btn btn-success btn-sm">Reading</button></a>
             {% else %}
-                <a href="{% url 'profile-book-list' profile.user 'reading'%}"><button class="btn btn-dark btn-sm">Reading</button></a>
+                <a onclick="location.href='{% url 'profile-book-list' profile.user 'reading'%}'"><button class="btn btn-dark btn-sm">Reading</button></a>
             {% endif %}
         </div>
 
-        <div class="col-sm-1">
+        <div class="col-sm-3" style="margin-left: 2em">
             {% if status == 'want to read' %}
-                <a href="{% url 'profile-book-list' profile.user 'want to read'%}"><button class="btn btn-success btn-sm">Want to read</button></a>
+                <a onclick="location.href='{% url 'profile-book-list' profile.user 'want to read'%}'"><button class="btn btn-success btn-sm">Want to read</button></a>
             {% else %}
-                <a href="{% url 'profile-book-list' profile.user 'want to read'%}"><button class="btn btn-dark btn-sm">Want to read</button></a>
+                <a onclick="location.href='{% url 'profile-book-list' profile.user 'want to read'%}'"><button class="btn btn-dark btn-sm">Want to read</button></a>
             {% endif %}
         </div>
 
-        <div class="col-sm-1">
-            {% if status == 'all' %}
-                <a href="{% url 'profile-book-list' profile.user 'all'%}"><button class="btn btn-success btn-sm">All</button></a>
-            {% else %}
-                <a href="{% url 'profile-book-list' profile.user 'all'%}"><button class="btn btn-dark btn-sm">All</button></a>
-            {% endif %}
-        </div>
+
     </div>
 
     <table class="center" style="border: 1px solid;">

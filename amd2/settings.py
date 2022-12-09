@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '#**+m)#z@l6^z+)ivz8u+36%=i41jd
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
 # Potem można niepotrzebne wywalić, dla mojej wygody dodaje teraz
-ALLOWED_HOSTS = ['young-falls-06895.herokuapp.com', 'amd2-django.herokuapp.com','127.0.0.1','my-pct.me',
+ALLOWED_HOSTS = ['young-falls-06895.herokuapp.com', 'amd2-django.herokuapp.com', '127.0.0.1', 'my-pct.me',
                  'pop-culture-tracker.herokuapp.com']
 CSRF_TRUSTED_ORIGINS = ['https://my-pct.me']
 # Application definition
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'captcha',
     'friendship',
     'isbn_field',
+    'ckeditor'
 
 ]
 
@@ -166,7 +167,13 @@ STATIC_URL = 'static/'
 
 # Simplified static file serving.
 # https://pypi.org/project/whitenoise/
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Ten zakomentowany wywala ciągle błąd po ustawieniu Debug na False
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Z tym poniżej wszystko działa dobrze
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 
 MESSAGE_TAGS = {
         messages.DEBUG: 'alert-secondary',
@@ -183,3 +190,18 @@ PASSWORD_RESET_TIMEOUT = 604800
   #  'group_models': True,
    # 'app_labels': ["polls"]
 #}
+
+CKEDITOR_CONFIGS = {
+   'default': {
+       'toolbar_Full': [
+            ['Styles', 'Format', 'Bold', 'Italic', 'Underline', 'Strike', 'SpellChecker', 'Undo', 'Redo'],
+            ['Link', 'Unlink'],
+            ['Image', 'Flash', 'Table', 'HorizontalRule'],
+            ['TextColor'],
+            ['Smiley', 'SpecialChar'],
+            ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
+            ['NumberedList','BulletedList'],
+        ],
+        'extraPlugins': 'justify,liststyle,indent',
+   },
+}

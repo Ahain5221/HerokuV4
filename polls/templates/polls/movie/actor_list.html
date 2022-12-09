@@ -4,18 +4,20 @@
 
     {% if actor_list %}
         <h1 style="padding-bottom: 1em">Actors list</h1>
-        <div class="row" style="padding-top: 3em">
+            <ul style="margin-bottom: 0.5em">
             {% for actor in actor_list %}
-                {% if actor.Verified %}
-                    <div class="col-md-4">
-                        <a href="{{ actor.get_absolute_url }}">
-                            <p style="display: inline-block; padding-right: 3em; font-size: x-large">{{ actor }}</p>
-                        </a>
-                    </div>
-                {% endif %}
+                <li style="margin-top: 0.5em"></li>
+                <li>
+                    <a href="{{ actor.get_absolute_url }}">{{ actor }}</a>
+                    {% if actor.movie_set.count > 0 %}
+                    | Movies played: {{ actor.movie_set.count }}
+                    {% endif %}
+                    {% if actor.series_set.count > 0 %}
+                    | Series played: {{ actor.series_set.count }}
+                    {% endif %}
+                </li>
             {% endfor %}
-        </div>
-
+        </ul>
     {% else %}
         <p>There are no actors</p>
     {% endif %}

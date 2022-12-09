@@ -1,5 +1,6 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, re_path
+from django.urls import path, include
 
 from . import views
 
@@ -48,9 +49,12 @@ urlpatterns = [
     path('book/<int:pk>/update/', views.BookUpdate.as_view(), name='book-update'),
     path('book/<int:pk>/delete/', views.BookDelete.as_view(), name='book-delete'),
     path('book_verification/<int:pk>', views.book_verification, name='book-verification'),
+    path('book_verification_stuff/', views.book_verification_stuff_page, name='book-verification-stuff'),
+
     path("add_favorite_book/<int:pk>", add_favorite_book, name="add-favorite-book"),
     path('write_book_review/<int:book_pk>', views.CreateBookReview.as_view(), name='create-book-review'),
     path('book/<int:book_pk>/review/<int:pk>/update', views.UpdateBookReview.as_view(), name='book-review-update'),
+    path('book/<book_pk>/review/<int:pk>/delete', views.BookReviewDelete.as_view(), name='book-review-delete'),
     path('add_book_to_book_list/<int:book_pk>/<int:user_pk>/<book_status>', views.add_book_to_book_list,
          name='add-book-to-book-list'),
     path('remove_book_from_book_list/<int:book_pk>/<int:user_pk>', views.remove_book_from_book_list,
@@ -130,7 +134,7 @@ urlpatterns = [
     # re_path(r'^profile/(?P<name>[\w-]+)/watchlist$(?i)',ProfileWatchlist.as_view(), name="profile-watchlist"),
 
 
-    path("profile/<slug:name>/my_favorites", MyFavorites.as_view(), name="my-favorites"),
+    path("profile/<slug:name>/my_favorites/<type>", MyFavorites.as_view(), name="my-favorites"),
     path("profile/<slug:name>/watchlist/<type_of_show>/<status>", ProfileWatchlist.as_view(), name="profile-watchlist"),
     path("profile/<slug:name>/game_list/<status>", ProfileGameList.as_view(), name="profile-game-list"),
     path("profile/<slug:name>/book_list/<status>", ProfileBookList.as_view(), name="profile-book-list"),
@@ -148,6 +152,7 @@ urlpatterns = [
     path("profile/perm-rejected/<int:pk>", reject_autocomplete_permission, name="reject-autocomplete-permission"),
 
     path("addverf/<int:pk>", game_verification, name="add_verf"),
+    path("addverf-stuff/", game_verification_stuff_page, name="add_verf_stuff"),
 
     # path('games/', views.GameListView.as_view(), name='games'),
     re_path(r'^games/$(?i)', views.GameListView.as_view(), name='games'),
@@ -164,6 +169,7 @@ urlpatterns = [
     path('game/create/', views.GameCreate.as_view(), name='game-create'),
     path('write_game_review/<int:game_pk>', views.CreateGameReview.as_view(), name='create-game-review'),
     path('game/<int:game_pk>/review/<int:pk>/update', views.UpdateGameReview.as_view(), name='game-review-update'),
+    path('game/<game_pk>/review/<int:pk>/delete', views.GameReviewDelete.as_view(), name='game-review-delete'),
     path('add_game_to_game_list/<int:game_pk>/<int:user_pk>/<game_status>', views.add_game_to_game_list,
          name='add-game-to-game-list'),
     path('remove_game_from_game_list/<int:game_pk>/<int:user_pk>', views.remove_game_from_game_list,
@@ -191,8 +197,11 @@ urlpatterns = [
     path('movie/create', views.MovieCreate.as_view(), name='movie-create'),
     path('movie/<int:pk>/update', views.MovieUpdate.as_view(), name='movie-update'),
     path('movie_verification/<int:pk>', views.movie_verification, name='movie-verification'),
+    path('movie_verification_stuff/', views.movie_verification_stuff_page, name='movie-verification-stuff'),
+
     path('write_movie_review/<int:movie_pk>', views.CreateMovieReview.as_view(), name='create-movie-review'),
     path('movie/<int:movie_pk>/review/<int:pk>/update', views.UpdateMovieReview.as_view(), name='movie-review-update'),
+    path('movie/<movie_pk>/review/<int:pk>/delete', views.MovieReviewDelete.as_view(), name='movie-review-delete'),
     path('add_movie_to_watchlist/<int:movie_pk>/<int:user_pk>/<movie_status>', views.add_movie_to_watchlist,
          name='add-movie-to-watchlist'),
     path('remove_movie_from_watchlist/<int:movie_pk>/<int:user_pk>', views.remove_movie_from_watchlist,
@@ -207,6 +216,8 @@ urlpatterns = [
     path('series/create', views.SeriesCreate.as_view(), name='series-create'),
     path('series/<int:pk>/update', views.SeriesUpdate.as_view(), name='series-update'),
     path('series_verification/<int:pk>', views.series_verification, name='series-verification'),
+    path('series_verification_stuff/', views.series_verification_stuff_page, name='series-verification-stuff'),
+
     path('add_series_to_watchlist/<int:series_pk>/<int:user_pk>/<series_status>', views.add_series_to_watchlist,
          name='add-series-to-watchlist'),
     path('remove_series_from_watchlist/<int:series_pk>/<int:user_pk>', views.remove_series_from_watchlist,
@@ -215,6 +226,7 @@ urlpatterns = [
     path('series/<int:series_pk>/review/<int:pk>/update', views.UpdateSeriesReview.as_view(),
          name='series-review-update'),
     path('series_review/<int:pk>', views.SeriesReviewDetail.as_view(), name='series-review-detail'),
+    path('series/<series_pk>/review/<int:pk>/delete', views.SeriesReviewDelete.as_view(), name='series-review-delete'),
     path('series_watchlist/<int:pk>/update', views.UpdateSeriesWatchlist.as_view(), name='series-watchlist-update'),
     # path('series/status/<int:pk>/update', views.UpdateSeriesStatus.as_view(), name='series-status-update'),
     path('add_series_to_watched/<int:series_pk>/<int:profile_pk>', views.add_series_to_watched,
@@ -284,6 +296,26 @@ urlpatterns = [
 
     path('test/', views.test, name='test'),
     path('test1/', views.bulk_create, name='test1'),
-    path('carnage/', delete_unverified_users, name='carnage')
+    path('carnage/', delete_unverified_users, name='carnage'),
 
+    path('thread/', views.ThreadListView.as_view(), name='thread'),
+    path('thread/create/<int:category_pk>', views.ThreadCreate.as_view(), name='thread-create'),
+    path('thread/<int:pk>', views.ThreadDetailView.as_view(), name='thread-detail'),
+    path('thread/<int:pk>/delete', views.ThreadDelete.as_view(), name='thread-delete'),
+    path('thread/<int:pk>/update', views.ThreadUpdate.as_view(), name='thread-update'),
+    path('thread-like/<int:pk>', views.ThreadLike, name="thread_like"),
+
+    path('category/', views.ThreadCategoryListView.as_view(), name='category'),
+    path('category/create', views.ThreadCategoryCreate.as_view(), name='category-create'),
+    path('category/<int:pk>', views.ThreadCategoryDetailView.as_view(), name='thread-category-detail'),
+    path('category/<int:pk>/delete', views.ThreadCategoryDelete.as_view(), name='thread-category-delete'),
+    path('category/<int:pk>/update', views.ThreadCategoryUpdate.as_view(), name='category-update'),
+
+    path('post/', views.PostListView.as_view(), name='post'),
+    path('post/create', views.PostCreate.as_view(), name='post-create'),
+    path('post/<int:pk>', views.PostDetailView.as_view(), name='post-detail'),
+    path('post/<int:pk>/update/<thread_pk>', views.PostUpdate.as_view(), name='post-update'),
+    path('post/<int:pk>/delete/<thread_pk>', views.PostDelete.as_view(), name='post-delete'),
+
+    path('add_books/', add_books, name='add-books')
 ]

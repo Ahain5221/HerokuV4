@@ -2,26 +2,47 @@
 
 {% block content %}
 
+    <h1 style="padding-bottom: 1em"> {{ developer }}
+    {% if developer.date_of_foundation is not None %}
+    <p> - {{ developer.date_of_foundation }}</p>
+    {% endif %}
+    </h1>
+
+        <ul class="list-inline">
+        {% if developer.game_set.all %}
+            <li>Games:
+                <ul class="list-inline">
+                    {% for game in developer.game_set.all %}
+                        <li><a href="{{ game.get_absolute_url }}">{{ game.title }}</a> - {{ game.summary }}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endif %}
+    </ul>
+
+    {% if developer.added_by == user and not developer.Verified %}
+        <a href="{% url 'developer-update' pk=developer.id %}">
+            <button class="btn btn-success btn-sm">UPDATE</button>
+        </a>
+    {% else %}
+
     {% if user.is_authenticated %}
             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal_2">EDIT</button>
             <div class="modal fade" id="exampleModal_2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
-                    <div class="modal-content">
+                    <div class="modal-content bg-dark">
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="row">
-                                {% if developer.added_by == user and not series.Verified or user.is_superuser %}
+                                {% if user.is_superuser %}
                                     <div class="col">
                                         <a href="{% url 'developer-update' pk=developer.id %}">
                                             <button class="btn btn-success btn-sm">UPDATE</button>
                                         </a>
                                     </div>
-                                {% endif %}
-
-                                {% if user.is_superuser %}
                                     <div class="col">
                                         <a href="{% url 'developer-delete' pk=developer.id %}">
                                             <button class="btn btn-danger btn-sm">DELETE DEVELOPER</button>
@@ -43,21 +64,8 @@
                     </div>
                 </div>
             </div>
+        {% endif %}
     {% endif %}
 
-    <h1>Developer: {{ developer }} </h1>
-    <p>{{ developer.date_of_foundation }}</p>
 
-    <div style="margin-left:20px;margin-top:20px">
-        <h4>Games</h4>
-
-        <dl>
-            {% for game in developer.game_set.all %}
-                {% if game.Verified %}
-                    <p><a href="{% url 'game-detail' game.pk %}">{{ game }}</a> - {{ game.summary }}</p>
-                {% endif %}
-            {% endfor %}
-        </dl>
-
-    </div>
 {% endblock %}

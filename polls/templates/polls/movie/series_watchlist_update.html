@@ -12,58 +12,24 @@
         <table>
             {{ form.as_table }}
         </table>
-        <input type="submit" value="Submit"/>
+
+        <div class="control-group" style="margin-top: 3em">
+            <div class="controls">
+                <div class="position-relative">
+                    <div class="position-absolute top-50 start-50 translate-middle" style="margin-left: 16em">
+                        <button class="btn btn-dark btn-sm" type="submit" value="Submit">Submit</button>
+                        <a href="{% url 'remove-series-from-watchlist' object.series.pk object.profile.user_id %}">
+                            <button class="btn btn-danger btn-sm" style="margin-left: 1em">Delete</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </form>
 
-    <a href="{% url 'remove-series-from-watchlist' object.series.pk object.profile.user_id %}">
-        <button class="btn btn-danger btn-sm" style="margin-right: 10em">Delete</button>
-    </a>
 
 
-            <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-          Launch demo modal
-        </button>
-
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                  {% if serieswatchlist.series_status == 'want to watch'%}
-                      <h1>Change status</h1>
-                  {% else %}
-                      <h1>Update progress or add to watched</h1>
-                  {% endif %}
-                  <form action="" method="post">
-                      {% csrf_token %}
-                      <table>
-                          {{ form.as_table }}
-                      </table>
-                      <input type="submit" value="Submit"/>
-                  </form>
-                  {% if serieswatchlist.series_status == 'watching'%}
-                      <a href="{% url 'add-series-to-watched' serieswatchlist.series.pk serieswatchlist.profile.pk %}">
-                          <button class="btn btn-success btn-sm">Add series to watched</button>
-                      </a>
-                  {% endif %}
-
-                  <a href="{% url 'remove-series-from-watchlist' serieswatchlist.series.pk serieswatchlist.profile.user_id %}">
-                    <button class="btn btn-danger btn-sm" style="margin-right: 10em">Delete</button>
-                  </a>
-
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-              </div>
-            </div>
-          </div>
-        </div>
 
 
 {% endblock %}

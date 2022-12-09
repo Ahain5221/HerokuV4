@@ -1,19 +1,78 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1 style="padding-bottom: 0.5em; font-size: xx-large"> Edit Profile </h1>
-    <div class="container-fluid">
-        {% if user.profile.profile_image_url %}
+
+    {{ form.media }}
+    <div class="form-group" style="margin-bottom: 2em">
+        {% if user.is_authenticated %}
+            <div class="position-absolute top-0 start-50 translate-middle">
+                <h1 style="margin-top: 2em; margin-left: 1.75em; padding-top: 2em; font-size: xx-large"> Edit Profile </h1>
+            </div>
+            <form method="post">
+
+            {% csrf_token %}
+            <p class="select2-selection--multiple text-center">
+            {% if user.profile.profile_image_url %}
              <img src="{{ user.profile.profile_image_url }}" style="height: 200px; width: 200px">
+            {% endif %}{{ form }}
+            </p>
+            <div class="control-group" style="margin-top: 3em">
+            <div class="controls">
+                <div class="position-relative">
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                        <button type="submit">Update profile</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+            <p>You are not supposted to be here</p>
         {% endif %}
+        </form>
     </div>
+    <div class="position-absolute top-100 start-50 translate-middle">
+        <a href="{% url 'change-password' %}"><button class="btn btn-danger btn-sm" style="margin-left: 4em">Change password</button></a>
+    </div>
+    <style>
 
-    <form method="post" style="margin-bottom: 15px">
-        {% csrf_token %}
-        {{ form }}
-        <br>
-        <button type="submit">Update profile</button>
-    </form>
+        .select2-selection__rendered {
+          background-color: #212529;
+          color: white;
+        }
 
-    <a href="{% url 'change-password' %}"><button class="btn btn-danger btn-sm">Change password</button></a>
+        .select2-container--default .select2-selection--multiple {
+          background-color: rgba(0, 0, 0, 0);
+          border: 0 solid #212529;
+          color: white;
+        }
+
+		.select2-results {
+            background-color: #212529;
+			color: #ffffff;
+		}
+
+        .select2-selection--multiple {
+          background-color: rgba(0, 0, 0, 0);
+          color: white;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: rgba(255, 255, 255, 0.13);
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+          border: solid black 0;
+          outline: 0;
+        }
+
+        .select2-search__field {
+              color: white;
+        }
+        input {
+          color: white;
+          color-scheme: dark;
+        }
+	</style>
+
 {% endblock %}

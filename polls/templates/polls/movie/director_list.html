@@ -10,6 +10,12 @@
                     {% if director.full_name != 'N/A' %}
                         <li>
                             <a href="{{ director.get_absolute_url }}">{{ director }}</a>
+                            {% if director.movie_set.count > 0 %}
+                            | Movies directed: {{ director.movie_set.count }}
+                            {% endif %}
+                            {% if director.series_set.count > 0 %}
+                            | Series directed: {{ director.series_set.count }}
+                            {% endif %}
                         </li>
                     {% endif %}
                 {% endif %}

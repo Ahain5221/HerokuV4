@@ -1,0 +1,119 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    <head>
+        {{ form.media }}
+        <title>
+            <h1>Thread {{ thread.title }}</h1>
+        </title>
+
+    </head>
+
+    <h1>Thread's name: {{ thread.title }}</h1>
+
+    <p><strong>Creation Date:</strong> {{ thread.date }}</p>
+    <p><strong>Created by:</strong> {{ thread.creator }}</p>
+    <p><strong>Category:</strong> {{ thread.category }}</p>
+
+    <input type="button" value="Create Post" onClick="document.getElementById('create_post').scrollIntoView();" />
+
+    {% if user.is_authenticated %}
+        <form action="{% url 'thread_like' object.id %}" method="POST">
+        {% csrf_token %}
+            {% if thread_is_liked %}
+                <button type="submit" name="thread_id" value="{{object.id}}" class="btn btn-info">Unlike</button>
+            {% else %}
+                <button type="submit" name="thread_id" value="{{object.id}}" class="btn btn-info">Like</button>
+            {% endif %}
+        </form>
+    {% else %}
+        <a class="btn btn-outline-info" href="{% url 'login' %}?next={{request.path}}">Log in to like this post!</a><br>
+    {% endif %}
+    <strong class="text-secondary">{{ thread.number_of_likes }} Like{{ thread.number_of_likes|pluralize }}</strong>
+    <br>
+    <strong class="text-secondary">Number of Posts {{ object.number_of_posts }} </strong>
+    <div id="posts">
+    {% if posts %}
+
+        {% for post in posts %}
+                <p><strong>Author:</strong> {{ post.creator }}</p>
+                <p><strong>Creation Date:</strong>{{ post.date }}</p>
+                <strong>Wrote: </strong>{{ post.content|safe }}
+
+
+            <button id="reply{{ forloop.counter }}" value="{{ post.content}} By: {{ post.creator }}" onClick="addText({{ forloop.counter }}); document.getElementById('create_post').scrollIntoView();">
+                Reply
+            </button>
+
+            {% if user.is_authenticated %}
+                {% if user.id == post.creator.id or user.is_superuser %}
+
+                    <a href="{% url 'post-delete' pk=post.id thread_pk=thread.id %}">
+                        <button>Delete Post</button>
+                    </a>
+                     <a href="{% url 'post-update' pk=post.id thread_pk=thread.id %}">
+                        <button>Edit Post</button>
+                     </a>
+
+                {% endif %}
+            {% endif %}
+            <br>
+        {% endfor %}
+
+    {% else %}
+
+        <p><strong class="text-secondary">No posts yet...</strong></p>
+        <br>
+    {% endif %}
+
+    </div>
+    <h1>Create Post</h1>
+    <form action="" method="POST" name="PostForm" id="write_post" class="PostForm" onSubmit="return checkTimer()">
+        {% csrf_token %}
+         <div class="col-md-6">
+             <div class="form-group">
+                 {% csrf_token %}
+                 <label for="create_post"></label>
+                 <textarea id="create_post" name="content" datatype='{{ post_form.content }}'>
+                 </textarea>
+                 <input type="submit" value="Create">
+             </div>
+         </div>
+      </form>
+
+    <script type="text/javascript">
+
+        function addText(number) {
+            var input = document.getElementById('create_post');
+            var button = document.getElementById('reply'+number);
+            var enter = '\n';
+            var lines = '--------------------------------------------------------------------------------------';
+            input.value = input.value +  button.value + enter + lines + enter;
+        }
+        CKEDITOR.replace('create_post');
+        var flag = false;
+        function checkTimer(){
+            if (flag){
+                flag=false;
+                return true;
+            }
+            alert("Stop spamming man!");
+            return false;
+        }
+        //12 seconds, max 5 times per minute
+        setTimeout(function(){flag=true;},12000);
+    </script>
+    {% if user.is_authenticated %}
+        {% if user.id == thread.creator.id or user.is_superuser %}
+
+            <a href="{% url 'thread-delete' pk=thread.id %}">
+                <button>Delete Thread</button>
+            </a>
+            <a href="{% url 'thread-update' pk=thread.id %}">
+                <button>Edit Thread</button>
+            </a>
+        {% endif %}
+    {% endif %}
+
+{% endblock %}

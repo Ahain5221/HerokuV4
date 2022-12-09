@@ -6,7 +6,9 @@ from django.db import models
 from django.urls import reverse  # Used to generate URLs by reversing the URL patterns
 from django.core.validators import MaxValueValidator, MinValueValidator
 from isbn_field import ISBNField
-
+# from tinymce.models import HTMLField
+from django.shortcuts import get_object_or_404
+from ckeditor.fields import RichTextField
 
 # from django.shortcuts import get_object_or_404
 
@@ -98,8 +100,6 @@ class Game(models.Model):
         except ZeroDivisionError:
             users_rating = 'None'
         return users_rating
-
-
 
 
 class Book(models.Model):
@@ -274,6 +274,11 @@ class Profile(models.Model):
         return number
 
     @property
+    def number_of_dropped_series(self):
+        number = SeriesWatchlist.objects.filter(profile=self.pk).filter(series_status='dropped').count()
+        return number
+
+    @property
     def number_of_want_to_play_games(self):
         number = GameList.objects.filter(profile=self.pk).filter(game_status='want to play').count()
         return number
@@ -286,6 +291,31 @@ class Profile(models.Model):
     @property
     def number_of_played_games(self):
         number = GameList.objects.filter(profile=self.pk).filter(game_status='played').count()
+        return number
+
+    @property
+    def number_of_dropped_games(self):
+        number = GameList.objects.filter(profile=self.pk).filter(game_status='dropped').count()
+        return number
+
+    @property
+    def number_of_want_to_read_books(self):
+        number = BookList.objects.filter(profile=self.pk).filter(book_status='want to read').count()
+        return number
+
+    @property
+    def number_of_reading_books(self):
+        number = BookList.objects.filter(profile=self.pk).filter(book_status='reading').count()
+        return number
+
+    @property
+    def number_of_read_books(self):
+        number = BookList.objects.filter(profile=self.pk).filter(book_status='read').count()
+        return number
+
+    @property
+    def number_of_dropped_books(self):
+        number = BookList.objects.filter(profile=self.pk).filter(book_status='dropped').count()
         return number
 
 
@@ -531,3 +561,98 @@ class RequestPermission(models.Model):
         ('None', 'None'),
     )
     status = models.CharField(max_length=10, choices=Choice_Status, default='None')
+
+
+class Forum(models.Model):
+    title = models.CharField(max_length=400)
+    creator = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
+    content = models.TextField(blank=False, null=False)
+    updated = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField(auto_now_add=True)
+    Verified = models.BooleanField(default=False)
+
+    def verified(self, *args, **kwargs):
+        self.Verified = True
+        self.save(update_fields=['Verified'])
+        return self.Verified
+
+    def unverified(self, *args, **kwargs):
+        self.Verified = False
+        self.save(update_fields=['Verified'])
+        return self.Verified
+
+    class Meta:
+        abstract = True
+
+
+class ForumCategory(Forum):
+
+    class Meta:
+        verbose_name_plural = "category"
+
+    def __str__(self):
+        return self.title
+
+    def number_of_threads(self):
+        return Thread.objects.filter(category=self).all().count()
+
+    @property
+    def number_of_posts(self):
+        thread_object = Thread.objects.filter(category_id=self.pk)
+        result = 0
+        for thread in thread_object:
+            pk_thread = thread.pk
+            post = Post.objects.filter(thread_id=pk_thread).count()
+            result += post
+        return result
+
+    def get_absolute_url(self):
+        return reverse('thread-category-detail', args=[str(self.id)])
+
+
+class Thread(Forum):
+    category = models.ForeignKey(ForumCategory, on_delete=models.SET_NULL, related_name='categories', null=True)
+    likes = models.ManyToManyField(Profile, related_name='thread_like')
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse('thread-detail', args=[str(self.id)])
+
+    def number_of_posts(self):
+        return Post.objects.filter(thread=self).all().count()
+
+    def number_of_likes(self):
+        return self.likes.all().count()
+
+
+LIKE_CHOICES = (
+    ('Like', 'Like'),
+    ('Unlike', 'Unlike')
+)
+
+
+class Post(Forum):
+    thread = models.ForeignKey(Thread, on_delete=models.SET_NULL, related_name='posts', null=True)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
+    likes = models.ManyToManyField(Profile, related_name='post_like')
+    content = RichTextField()
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse('post-detail', args=[str(self.id)])
+
+    def number_of_likes(self):
+        return self.likes.all().count()
+
+
+class Like(models.Model):
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    thread = models.ForeignKey(Thread, on_delete=models.SET_NULL, null=True)
+    value = models.CharField(choices=LIKE_CHOICES, default='Thread_Like', max_length=10)
+
+    def __str__(self):
+        return self.thread

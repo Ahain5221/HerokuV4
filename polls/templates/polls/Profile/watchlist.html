@@ -7,25 +7,25 @@
     <div class="row" style="padding-bottom: 5px">
         <div class="col-sm-1">
             {% if type_of_show == 'all' %}
-                <a href="{% url 'profile-watchlist' profile.user 'all' status%}"><button class="btn btn-success btn-sm">All</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user 'all' status%}'"><button class="btn btn-success btn-sm">All</button></a>
             {% else %}
-                <a href="{% url 'profile-watchlist' profile.user 'all' status%}"><button class="btn btn-dark btn-sm">All</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user 'all' status%}'"><button class="btn btn-dark btn-sm">All</button></a>
             {% endif %}
         </div>
 
         <div class="col-sm-1">
             {% if type_of_show == 'movies' %}
-                <a href="{% url 'profile-watchlist' profile.user 'movies' status%}"><button class="btn btn-success btn-sm">Movies</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user 'movies' status%}'"><button class="btn btn-success btn-sm">Movies</button></a>
             {% else %}
-                <a href="{% url 'profile-watchlist' profile.user 'movies' status%}"><button class="btn btn-dark btn-sm">Movies</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user 'movies' status%}'"><button class="btn btn-dark btn-sm">Movies</button></a>
             {% endif %}
         </div>
 
         <div class="col-sm-1">
             {% if type_of_show == 'series' %}
-                <a href="{% url 'profile-watchlist' profile.user 'series' status%}"><button class="btn btn-success btn-sm">Series</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user 'series' status%}'"><button class="btn btn-success btn-sm">Series</button></a>
             {% else %}
-                <a href="{% url 'profile-watchlist' profile.user 'series' status%}"><button class="btn btn-dark btn-sm">Series</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user 'series' status%}'"><button class="btn btn-dark btn-sm">Series</button></a>
             {% endif %}
         </div>
     </div>
@@ -33,33 +33,33 @@
     <div class="row" style="padding-bottom: 15px">
         <div class="col-sm-1">
             {% if status == 'all' %}
-                <a href="{% url 'profile-watchlist' profile.user type_of_show 'all'%}"><button class="btn btn-success btn-sm">All</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user type_of_show 'all'%}'"><button class="btn btn-success btn-sm">All</button></a>
             {% else %}
-                <a href="{% url 'profile-watchlist' profile.user type_of_show 'all'%}"><button class="btn btn-dark btn-sm">All</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user type_of_show 'all'%}'"><button class="btn btn-dark btn-sm">All</button></a>
             {% endif %}
         </div>
 
         <div class="col-sm-1" style="margin-right: 1em">
             {% if status == 'watched' %}
-                <a href="{% url 'profile-watchlist' profile.user type_of_show 'watched'%}"><button class="btn btn-success btn-sm">Watched</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user type_of_show 'watched'%}'"><button class="btn btn-success btn-sm">Watched</button></a>
             {% else %}
-                <a href="{% url 'profile-watchlist' profile.user type_of_show 'watched'%}"><button class="btn btn-dark btn-sm">Watched</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user type_of_show 'watched'%}'"><button class="btn btn-dark btn-sm">Watched</button></a>
             {% endif %}
         </div>
 
         <div class="col-sm-1" style="margin-right: 1.5em">
             {% if status == 'watching' %}
-                <a href="{% url 'profile-watchlist' profile.user type_of_show 'watching'%}"><button class="btn btn-success btn-sm">Watching</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user type_of_show 'watching'%}'"><button class="btn btn-success btn-sm">Watching</button></a>
             {% else %}
-                <a href="{% url 'profile-watchlist' profile.user type_of_show 'watching'%}"><button class="btn btn-dark btn-sm">Watching</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user type_of_show 'watching'%}'"><button class="btn btn-dark btn-sm">Watching</button></a>
             {% endif %}
         </div>
 
         <div class="col-sm-3" style="margin-right: 1em">
             {% if status == 'want to watch' %}
-                <a href="{% url 'profile-watchlist' profile.user type_of_show 'want to watch'%}"><button class="btn btn-success btn-sm">Want to watch</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user type_of_show 'want to watch'%}'"><button class="btn btn-success btn-sm">Want to watch</button></a>
             {% else %}
-                <a href="{% url 'profile-watchlist' profile.user type_of_show 'want to watch'%}"><button class="btn btn-dark btn-sm">Want to watch</button></a>
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user type_of_show 'want to watch'%}'"><button class="btn btn-dark btn-sm">Want to watch</button></a>
             {% endif %}
         </div>
     </div>
@@ -115,7 +115,7 @@
                     <!-- Modal -->
                     <div class="modal fade" id="exampleModal{{ movie_watchlist.movie.pk  }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
-                            <div class="modal-content">
+                            <div class="modal-content bg-dark">
                                 <div class="modal-header">
                                     <h1 class="modal-title fs-5" id="exampleModalLabel">Edit</h1>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

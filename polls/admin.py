@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import Author, Genre, Book, Language, Director, Actor, Movie, Series, MovieSeriesGenre
 from .models import GameGenre, GameMode, Developer, Game, Profile, KnownSteamAppID, RequestPermission
 from .models import Season, Episode, MovieReview, MovieWatchlist, SeriesReview, SeriesWatchlist, GameReview, GameList
-
+from .models import ForumCategory, Post
 # admin.site.register(Author, AuthorAdmin)
 admin.site.register(Book)
 admin.site.register(Author)
@@ -33,6 +33,8 @@ admin.site.register(SeriesReview)
 admin.site.register(GameList)
 admin.site.register(GameReview)
 
+admin.site.register(Post)
+admin.site.register(ForumCategory)
 
 class BooksInline(admin.TabularInline):
     """Defines format of inline book insertion (used in AuthorAdmin)"""

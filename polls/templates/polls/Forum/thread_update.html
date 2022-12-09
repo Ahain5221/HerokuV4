@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <head>
+    {{ form.media }}
+    </head>
+    <h1>Edit thread</h1>
+    <form action="" method="post">
+        {% csrf_token %}
+        <table>
+            {{ form.as_table }}
+        </table>
+        <input type="submit" value="Submit"/>
+    </form>
+    <input type=button value="Cancel" onClick="javascript:history.go(-1);">
+{% endblock %}

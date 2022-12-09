@@ -2,24 +2,27 @@
 
 {% block content %}
 
-    <h1>Developer List</h1>
+    <h1 style="font-size: xx-large">Developer List</h1>
 
     {% if developer_list %}
-        <ul>
-
+        <ul style="margin-bottom: 0.5em">
             {% for developer in developer_list %}
+                <li style="margin-top: 0.5em"></li>
                 <li>
                     <a href="{{ developer.get_absolute_url }}">{{ developer }}</a>
-                    (Released games: {{ developer.game_set.count }})
-
+                    {% if developer.game_set.count > 0 %}
+                    | Released games: {{ developer.game_set.count }}
+                    {% endif %}
                 </li>
             {% endfor %}
-
         </ul>
     {% else %}
         <p>There are no developers available.</p>
     {% endif %}
 
-
+    <script>
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    </script>
 
 {% endblock %}

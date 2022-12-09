@@ -1,7 +1,7 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-        <h1>Create movie</h1>
+    <h1 class="text-center">Create movie</h1>
             {{ form.media }}
     <div class="form-group">
         {% if user.is_authenticated %}
@@ -9,7 +9,7 @@
             <form action="" method="post" style="color: black">
 
             {% csrf_token %}
-            <p class="select2-selection--multiple"> {{ form.as_table }} </p>
+            <p class="select2-selection--multiple text-center"> {{ form.as_table }} </p>
             <div class="control-group" style="margin-top: 3em">
             <div class="controls">
                 <div class="position-relative">

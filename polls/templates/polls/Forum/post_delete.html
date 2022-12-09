@@ -1,0 +1,10 @@
+{% extends 'base_generic.html' %}
+{% block content %}
+        <form method="post">{% csrf_token %}
+            <p>Are you sure you want to delete "{{ object.content.html|safe }}"?</p>
+            <p>Created by: "{{ object.creator }}"?</p>
+            <input type="submit" value="Confirm">
+        </form>
+        <input type=button value="Cancel" onClick="javascript:history.go(-1);">
+
+{% endblock %}

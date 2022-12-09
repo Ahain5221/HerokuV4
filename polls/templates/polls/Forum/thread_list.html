@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Threads List</h1>
+    {% if thread_list %}
+        <ul>
+            {% for thread in thread_list %}
+                    <li>
+                        <a href="{{ thread.get_absolute_url }}">{{ thread.title }}</a> (Created by: {{ thread.creator }})
+                    </li>
+            {% endfor %}
+        </ul>
+        {% if user.is_superuser %}
+            <h1>Threads to verify</h1>
+        {% endif %}
+    {% else %}
+        <p>There are no threads yet.</p>
+    {% endif %}
+{% endblock %}

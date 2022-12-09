@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Posts List</h1>
+    {% if post_list %}
+        <ul>
+            {% for post in post_list %}
+                    <li>
+                        <a href="{{ post.get_absolute_url }}">{{ post.content  }}</a> (Created by: {{ post.creator }})
+                    </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no posts yet.</p>
+    {% endif %}
+{% endblock %}

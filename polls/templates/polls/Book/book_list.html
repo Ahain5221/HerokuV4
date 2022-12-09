@@ -1,8 +1,13 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1>Book List</h1>
+
+    <button class="btn btn-dark">
+        <a class="icon solid fa-search text-white" href="{% url 'search-book' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Search</a>
+    </button>
+
     {% if book_list %}
+        <h1>Book List</h1>
         <ul>
             {% for book in book_list %}
                 <li>

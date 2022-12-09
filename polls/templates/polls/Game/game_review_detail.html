@@ -19,4 +19,30 @@
         <button class="btn btn-success btn-sm">Update review</button>
     </a>
 
+    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal_2">DELETE REVIEW</button>
+    <div class="modal fade" id="exampleModal_2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{% url "game-review-delete" object.game.pk object.pk %}">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Delete review</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete {{ object.game }} review?</p>
+                        {% csrf_token %}
+                        {% if user.is_superuser %}
+                            <textarea id="delete_reason" name="delete_reason" placeholder="Enter any reason, if necessary" maxlength="200" rows="4" cols="30"></textarea>
+                        {% endif %}
+                    </div>
+
+                    <div class="modal-footer">
+                        <input type="submit" value="DELETE">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

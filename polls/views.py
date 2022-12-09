@@ -54,6 +54,11 @@ from .models import Movie, Series, Actor, Director, Language, MovieSeriesGenre, 
     MovieWatchlist, SeriesWatchlist, SeriesReview, GameReview, GameList
 from .models import Movie, Series, Actor, Director, Language, MovieSeriesGenre
 
+from .models import Post, Thread, Like
+from .forms import PostForm, ForumCategory, ThreadCategoryForm, ThreadForm
+from django.views.generic.edit import FormMixin
+from django.utils import timezone
+
 
 # standard library imports
 import csv
@@ -83,6 +88,76 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 import random
 from polls.decorators import *
+import xlrd
+
+
+def add_books(request):
+    link = "polls/static/Books.xls"
+
+    workbook = xlrd.open_workbook(link)
+    sheet = workbook.sheet_by_name('Sheet1')
+
+    for row in range(1, sheet.nrows):
+
+        isbn = str(sheet.cell(row, 3).value)
+        title = sheet.cell(row, 0).value
+
+        if Book.objects.filter(title=title).exists():
+            continue
+
+        authors_pk = []
+        genres_pk = []
+        languages_pk = []
+
+        authors = sheet.cell(row, 1).value
+        summary = sheet.cell(row, 2).value
+        genres = sheet.cell(row, 4).value
+        languages = sheet.cell(row, 5).value
+
+        authors = authors.split(',')
+        genres = genres.split(',')
+        languages = languages.split(',')
+
+        for author_name in authors:
+            author = Author.objects.filter(first_last_name=author_name).first()
+
+            if author:
+                authors_pk.append(author.pk)
+            else:
+                author_object = Author.objects.create(first_last_name=author_name)
+                authors_pk.append(author_object.pk)
+
+        for genre_name in genres:
+            genre = MovieSeriesGenre.objects.filter(name=genre_name).first()
+
+            if genre:
+                genres_pk.append(genre.pk)
+            else:
+                genre_object = MovieSeriesGenre.objects.create(name=genre_name)
+                genres_pk.append(genre_object.pk)
+
+        for language_name in languages:
+            language = Language.objects.filter(name=language_name).first()
+
+            if language:
+                languages_pk.append(language.pk)
+            else:
+                language_object = Language.objects.create(name=language_name)
+                languages_pk.append(language_object.pk)
+
+        book_object = Book.objects.create(
+            title=title,
+            summary=summary,
+            isbn=isbn,
+            Verified=True,
+            added_by=request.user
+        )
+        book_object.authors.set(authors_pk)
+        book_object.genre.set(genres_pk)
+        book_object.languages.set(languages_pk)
+
+    return redirect('index')
+
 
 class cbv_view(generic.ListView):
     model = Developer
@@ -321,16 +396,17 @@ def index(request):
     """View function for home page of site."""
     if request.user.is_authenticated:
 
-        # num_visits = request.session.get('num_visits', 0)
+        num_visits = request.session.get('num_visits', 0)
         last_book = Book.objects.all().last()
         #last_game = Game.objects.all().last()
         #last_series = Series.objects.all().last()
         #last_movie = Movie.objects.all().last()
 
-        # request.session['num_visits'] = num_visits + 1
+        request.session['num_visits'] = num_visits + 1
         # Generate counts of the main objects
 
         index_context = {
+            'num_visits': num_visits,
             'last_book': last_book,
             #'last_game': last_game,
             #'last_series': last_series,
@@ -374,6 +450,12 @@ class MyFavorites(generic.DetailView):
     template_name = "polls/Profile/favorites.html"
     slug_field = 'name'
     slug_url_kwarg = 'name'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(MyFavorites, self).get_context_data(*args, **kwargs)
+        context['type'] = self.kwargs['type']
+        return context
+
 
 
 class SignUpView(SuccessMessageMixin, generic.CreateView):
@@ -747,10 +829,15 @@ class BookDetailView(generic.DetailView):
             context['book_has_user_review'] = BookReview.objects.filter(book_id=self.object).filter(
                 author=self.request.user).exists()
 
-            context['user_review'] = BookReview.objects.filter(book_id=self.object).filter(
-                author=self.request.user).first()
-        context['book_reviews'] = BookReview.objects.filter(book_id=self.object)
+            user_review = BookReview.objects.filter(book_id=self.object).filter(author=self.request.user)
+            context['user_review'] = user_review.first()
 
+            book_reviews = BookReview.objects.filter(book_id=self.object).exclude(author=self.request.user)
+            book_reviews = user_review | book_reviews
+            context['book_reviews'] = book_reviews
+
+        else:
+            context['book_reviews'] = BookReview.objects.filter(book_id=self.object)
         return context
 
 
@@ -809,9 +896,42 @@ def book_verification(request, pk):
         book_object.Verified = False
         book_object.save(update_fields=['Verified'])
     else:
+        book_authors = book_object.authors.get_queryset()
+        for author in book_authors:
+            if not author.Verified:
+                author.Verified = True
+                author.save(update_fields=['Verified'])
         book_object.Verified = True
         book_object.save(update_fields=['Verified'])
     return HttpResponseRedirect(reverse('book-detail', args=[str(pk)]))
+
+
+
+
+def book_verification_stuff_page(request):
+    list_of_books = request.POST.getlist('books-select')
+    if not list_of_books:
+        return redirect("stuff-verification")
+    query_set_of_books = Book.objects.none()
+    for id in list_of_books:
+        get_book_in_query = Book.objects.filter(pk=id)
+        query_set_of_books = query_set_of_books | get_book_in_query
+    list_of_books = query_set_of_books
+    for book_object in list_of_books:
+        if book_object.Verified:
+            book_object.Verified = False
+            book_object.save(update_fields=['Verified'])
+        else:
+            book_authors = book_object.authors.get_queryset()
+            for author in book_authors:
+                if not author.Verified:
+                    author.Verified = True
+                    author.save(update_fields=['Verified'])
+            book_object.Verified = True
+            book_object.save(update_fields=['Verified'])
+    return redirect("stuff-verification")
+
+
 
 
 class CreateBookReview(UserPassesTestMixin, CreateView):
@@ -996,9 +1116,15 @@ class GameDetailView(UserPassesTestMixin, generic.DetailView):
             context['game_has_user_review'] = GameReview.objects.filter(game_id=self.object).filter(
                 author=self.request.user).exists()
 
-            context['user_review'] = GameReview.objects.filter(game_id=self.object).filter(
-                author=self.request.user).first()
-        context['game_reviews'] = GameReview.objects.filter(game_id=self.object)
+            user_review = GameReview.objects.filter(game_id=self.object).filter(author=self.request.user)
+            context['user_review'] = user_review.first()
+
+            game_reviews = GameReview.objects.filter(game_id=self.object).exclude(author=self.request.user)
+            game_reviews = user_review | game_reviews
+            context['game_reviews'] = game_reviews
+
+        else:
+            context['game_reviews'] = GameReview.objects.filter(game_id=self.object)
 
         return context
 
@@ -1052,6 +1178,119 @@ class UpdateGameReview(UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('game-detail', kwargs={'pk': self.kwargs['game_pk']})
+
+
+class SeriesReviewDelete(UserPassesTestMixin, DeleteView):
+    model = SeriesReview
+
+    def test_func(self):
+        author = SeriesReview.objects.filter(id=self.kwargs['pk']).first().author
+        return self.request.user == author and self.request.user.is_authenticated or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
+
+    def form_valid(self, form):
+        if self.object.author is not None and self.request.user.is_superuser:
+            delete_reason_content = form.data['delete_reason']
+            basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.series)
+            mail_notification_review_delete(self.get_object(), basic_message_content, delete_reason_content)
+        messages.success(self.request, "The review has been deleted!")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('series-detail', kwargs={'pk': self.kwargs['series_pk']})
+
+
+def mail_notification_review_delete(thing_object, basic_message_content, additional):
+    user_email = thing_object.author.email
+    if additional:
+        message_content = basic_message_content + "\n" + "Reason for removal: " + additional
+    else:
+        message_content = basic_message_content
+
+    if not thing_object.author.is_superuser:
+        send_mail(
+            'Delete notification from PTC ',
+            message_content,
+            'pct-team@outlook.com',
+            [user_email],
+            fail_silently=False,
+        )
+
+
+class GameReviewDelete(UserPassesTestMixin, DeleteView):
+    model = GameReview
+
+    def test_func(self):
+        author = GameReview.objects.filter(id=self.kwargs['pk']).first().author
+        return self.request.user == author and self.request.user.is_authenticated or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
+
+    def form_valid(self, form):
+        if self.object.author is not None and self.request.user.is_superuser:
+            delete_reason_content = form.data['delete_reason']
+            basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.game)
+            mail_notification_review_delete(self.get_object(), basic_message_content, delete_reason_content)
+        messages.success(self.request, "The review has been deleted!")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('game-detail', kwargs={'pk': self.kwargs['game_pk']})
+
+
+class BookReviewDelete(UserPassesTestMixin, DeleteView):
+    model = BookReview
+
+    def test_func(self):
+        author = BookReview.objects.filter(id=self.kwargs['pk']).first().author
+        return self.request.user == author and self.request.user.is_authenticated or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
+
+    def form_valid(self, form):
+        if self.object.author is not None and self.request.user.is_superuser:
+            delete_reason_content = form.data['delete_reason']
+            basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.book)
+            mail_notification_review_delete(self.get_object(), basic_message_content, delete_reason_content)
+        messages.success(self.request, "The review has been deleted!")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('book-detail', kwargs={'pk': self.kwargs['book_pk']})
+
+
+class MovieReviewDelete(UserPassesTestMixin, DeleteView):
+    model = MovieReview
+
+    def test_func(self):
+        author = MovieReview.objects.filter(id=self.kwargs['pk']).first().author
+        return self.request.user == author and self.request.user.is_authenticated or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
+
+    def form_valid(self, form):
+        if self.object.author is not None and self.request.user.is_superuser:
+            delete_reason_content = form.data['delete_reason']
+            basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.movie)
+            mail_notification_review_delete(self.get_object(), basic_message_content, delete_reason_content)
+        messages.success(self.request, "The review has been deleted!")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('movie-detail', kwargs={'pk': self.kwargs['movie_pk']})
 
 
 def add_game_to_game_list(request, game_pk, user_pk, game_status):
@@ -1491,9 +1730,41 @@ def game_verification(request, pk):
         game.Verified = False
         game.save(update_fields=['Verified'])
     else:
+        game_devs = game.developer.get_queryset()
+        for dev in game_devs:
+            if not dev.Verified:
+                dev.Verified = True
+                dev.save(update_fields=['Verified'])
         game.Verified = True
         game.save(update_fields=['Verified'])
     return HttpResponseRedirect(reverse('game-detail', args=[str(pk)]))
+
+
+@stuff_or_superuser_required
+def game_verification_stuff_page(request):
+
+    list_of_games = request.POST.getlist('games-select')
+    if not list_of_games:
+        return redirect("stuff-verification")
+    query_set_of_games = Game.objects.none()
+    for id in list_of_games:
+        get_game_in_query = Game.objects.filter(pk=id)
+        query_set_of_games = query_set_of_games | get_game_in_query
+    list_of_games = query_set_of_games
+    for game in list_of_games:
+        if game.Verified:
+            game.Verified = False
+            game.save(update_fields=['Verified'])
+        else:
+            game_devs = game.developer.get_queryset()
+            for dev in game_devs:
+                if not dev.Verified:
+                    dev.Verified = True
+                    dev.save(update_fields=['Verified'])
+            game.Verified = True
+            game.save(update_fields=['Verified'])
+
+    return redirect("stuff-verification")
 
 
 def developer_verification(request, pk):
@@ -1588,9 +1859,15 @@ class MovieDetailView(UserPassesTestMixin, generic.DetailView):
             context['movie_has_user_review'] = MovieReview.objects.filter(movie_id=self.object).filter(
                 author=self.request.user).exists()
 
-            context['user_review'] = MovieReview.objects.filter(movie_id=self.object).filter(
-                author=self.request.user).first()
-        context['movie_reviews'] = MovieReview.objects.filter(movie_id=self.object)
+            user_review = MovieReview.objects.filter(movie_id=self.object).filter(author=self.request.user)
+            context['user_review'] = user_review.first()
+
+            movie_reviews = MovieReview.objects.filter(movie_id=self.object).exclude(author=self.request.user)
+            movie_reviews = user_review | movie_reviews
+            context['movie_reviews'] = movie_reviews
+
+        else:
+            context['movie_reviews'] = MovieReview.objects.filter(movie_id=self.object)
 
         return context
 
@@ -1661,9 +1938,53 @@ def movie_verification(request, pk):
         movie_object.Verified = False
         movie_object.save(update_fields=['Verified'])
     else:
+        movie_actors = movie_object.actors.get_queryset()
+        for actor in movie_actors:
+            if not actor.Verified:
+                actor.Verified = True
+                actor.save(update_fields=['Verified'])
+
+        movie_directors = movie_object.director.get_queryset()
+        for director in movie_directors:
+            if not director.Verified:
+                director.Verified = True
+                director.save(update_fields=['Verified'])
         movie_object.Verified = True
         movie_object.save(update_fields=['Verified'])
     return HttpResponseRedirect(reverse('movie-detail', args=[str(pk)]))
+
+@stuff_or_superuser_required
+def movie_verification_stuff_page(request):
+
+    list_of_movies = request.POST.getlist('series-select')
+    if not list_of_movies:
+        return redirect("stuff-verification")
+    query_set_of_movies = Game.objects.none()
+    for id in list_of_movies:
+        get_movie_in_query = Movie.objects.filter(pk=id)
+        query_set_of_movies = query_set_of_movies | get_movie_in_query
+    list_of_movies = query_set_of_movies
+    for movie_object in list_of_movies:
+        if movie_object.Verified:
+            movie_object.Verified = False
+            movie_object.save(update_fields=['Verified'])
+        else:
+            movie_actors = movie_object.actors.get_queryset()
+            for actor in movie_actors:
+                if not actor.Verified:
+                    actor.Verified = True
+                    actor.save(update_fields=['Verified'])
+
+            movie_directors = movie_object.director.get_queryset()
+            for director in movie_directors:
+                if not director.Verified:
+                    director.Verified = True
+                    director.save(update_fields=['Verified'])
+            movie_object.Verified = True
+            movie_object.save(update_fields=['Verified'])
+    return redirect('stuff-verification')
+
+
 
 
 class ProfileWatchlist(generic.DetailView):
@@ -1714,7 +2035,7 @@ class ProfileWatchlist(generic.DetailView):
         type_of_show = self.kwargs['type_of_show']
         status = self.kwargs['status']
 
-        if type_of_show in ['all', 'movies'] and status != 'watching':
+        if type_of_show in ['all', 'movies'] and status != 'watching' and status != 'dropped':
             if status == 'all':
                 movie_watchlist_all = MovieWatchlist.objects.filter(profile=self.object)
                 movie_watchlist_movies = MovieWatchlist.objects.filter(profile=self.object).values_list('movie',
@@ -1908,9 +2229,15 @@ class SeriesDetailView(UserPassesTestMixin, generic.DetailView):
             context['series_has_user_review'] = SeriesReview.objects.filter(series_id=self.object).filter(
                 author=self.request.user).exists()
 
-            context['user_review'] = SeriesReview.objects.filter(series_id=self.object).filter(
-                author=self.request.user).first()
-        context['series_reviews'] = SeriesReview.objects.filter(series_id=self.object)
+            user_review = SeriesReview.objects.filter(series_id=self.object).filter(author=self.request.user)
+            context['user_review'] = user_review.first()
+
+            series_reviews = SeriesReview.objects.filter(series_id=self.object).exclude(author=self.request.user)
+            series_reviews = user_review | series_reviews
+            context['series_reviews'] = series_reviews
+
+        else:
+            context['series_reviews'] = SeriesReview.objects.filter(series_id=self.object)
 
         return context
 
@@ -2087,7 +2414,55 @@ def series_verification(request, pk):
     else:
         series_object.Verified = True
         series_object.save(update_fields=['Verified'])
+
+        series_actors = series_object.actors.get_queryset()
+        for actor in series_actors:
+            if not actor.Verified:
+                actor.Verified = True
+                actor.save(update_fields=['Verified'])
+
+        series_actors = series_object.director.get_queryset()
+        for director in series_actors:
+            if not director.Verified:
+                director.Verified = True
+                director.save(update_fields=['Verified'])
+        series_object.Verified = True
+        series_object.save(update_fields=['Verified'])
     return HttpResponseRedirect(reverse('series-detail', args=[str(pk)]))
+
+@stuff_or_superuser_required
+def series_verification_stuff_page(request):
+    list_of_series = request.POST.getlist('series-select')
+    if not list_of_series:
+        return redirect("stuff-verification")
+    query_set_of_series = Series.objects.none()
+    for id in list_of_series:
+        get_series_in_query = Series.objects.filter(pk=id)
+        query_set_of_series = query_set_of_series | get_series_in_query
+    list_of_series = query_set_of_series
+
+    for series_object in list_of_series:
+        if series_object.Verified:
+            series_object.Verified = False
+            series_object.save(update_fields=['Verified'])
+        else:
+            series_object.Verified = True
+            series_object.save(update_fields=['Verified'])
+            series_actors = series_object.actors.get_queryset()
+            for actor in series_actors:
+                if not actor.Verified:
+                    actor.Verified = True
+                    actor.save(update_fields=['Verified'])
+
+            series_actors = series_object.director.get_queryset()
+            for director in series_actors:
+                if not director.Verified:
+                    director.Verified = True
+                    director.save(update_fields=['Verified'])
+            series_object.Verified = True
+            series_object.save(update_fields=['Verified'])
+        return redirect("stuff-verification")
+
 
 
 class ActorListView(generic.ListView):
@@ -3371,3 +3746,249 @@ def search_result_general(request):
     else:
         return render(request, 'polls/search_result.html')
 
+
+
+class ThreadCreate(UserPassesTestMixin, CreateView):
+    model = Thread
+    form_class = ThreadForm
+    template_name = "polls/Forum/thread_create.html"
+
+    def form_view(self, request, pk):
+        if 'category_id' in request == "POST":
+            category = get_object_or_404(ForumCategory, id=pk)
+            saved_category = Thread(category=category)
+            saved_category.save()
+
+        return render(request, 'polls/Forum/thread_create.html', {'form': ThreadCreate()})
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user.profile
+        form.instance.category_id = self.kwargs['category_pk']
+        return super().form_valid(form)
+
+    def test_func(self):
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        return redirect('login')
+
+
+class ThreadListView(generic.ListView):
+    template_name = "polls/Forum/thread_list.html"
+    model = Thread
+    paginate_by = 10
+
+
+class ThreadDetailView(generic.DetailView, FormMixin):
+    template_name = "polls/Forum/thread_detail.html"
+    model = Thread
+    form_class = PostForm
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+
+        thread_likes_connected = get_object_or_404(Thread, id=self.kwargs['pk'])
+        liked = False
+        if thread_likes_connected.likes.filter(id=self.request.user.id).exists():
+            liked = True
+        data['number_of_likes'] = thread_likes_connected.number_of_likes()
+        data['thread_is_liked'] = liked
+
+        posts_connected = Post.objects.filter(
+            thread=self.get_object()).order_by('-date')
+        data['posts'] = posts_connected
+        if self.request.user.is_authenticated:
+            data['post_form'] = PostForm(instance=self.request.user)
+
+        return data
+
+    def form_view(request):
+        return render(request, 'polls/Forum/thread_detail.html', {'form': ThreadDetailView()})
+
+    def get_success_url(self):
+        return reverse('thread-detail', kwargs={'pk': self.object.id})
+
+    def post(self, request, *args, **kwargs):
+        if self.request.method == 'POST':
+            self.object = self.get_object()
+            form = self.get_form()
+            if form.is_valid():
+                return self.form_valid(form)
+            else:
+                return self.form_invalid(form)
+
+    def form_valid(self, form):
+        new_post = Post(content=form.data['content'],
+                        creator=self.request.user.profile,
+                        thread=self.get_object())
+        new_post.save()
+        return super(ThreadDetailView, self).form_valid(form)
+
+
+class ThreadUpdate(UserPassesTestMixin, UpdateView):
+    model = Thread
+    template_name = "polls/Forum/thread_update.html"
+    fields = ['title']
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        return redirect('index')
+
+
+def ThreadLike(request, pk):
+    thread = get_object_or_404(Thread, id=request.POST.get('thread_id'))
+    if thread.likes.filter(id=request.user.id).exists():
+        thread.likes.remove(request.user.profile)
+    else:
+        thread.likes.add(request.user.profile)
+
+    return HttpResponseRedirect(reverse('thread-detail', args=[str(pk)]))
+
+
+class ThreadCategoryCreate(UserPassesTestMixin, CreateView):
+    model = ForumCategory
+    form_class = ThreadCategoryForm
+    template_name = "polls/Forum/category_create.html"
+
+    def test_func(self):
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        return redirect('login')
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user.profile
+        return super(ThreadCategoryCreate, self).form_valid(form)
+
+
+class ThreadCategoryListView(generic.ListView):
+    template_name = "polls/Forum/category.html"
+    model = ForumCategory
+    paginate_by = 10
+
+
+class ThreadCategoryDetailView(generic.DetailView, FormMixin):
+    template_name = "polls/Forum/category_detail.html"
+    model = ForumCategory
+    form_class = ThreadForm
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        num_visits = self.request.session.get('num_visits', 0)
+        self.request.session['num_visits'] = num_visits + 1
+
+        threads_connected = Thread.objects.filter(
+            category=self.get_object()).order_by('-date')
+        data['threads'] = threads_connected
+        data['num_visits'] = num_visits
+        if self.request.user.is_authenticated:
+            data['thread_form'] = ThreadForm(instance=self.request.user.profile)
+        return data
+
+
+    def get_success_url(self):
+        return reverse('thread-category-detail', kwargs={'pk': self.object.id})
+
+
+class ThreadCategoryUpdate(UserPassesTestMixin, UpdateView):
+    model = ForumCategory
+    template_name = "polls/Forum/category_update.html"
+    fields = ['title', 'content']
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        return redirect('index')
+
+
+class PostCreate(UserPassesTestMixin, CreateView):
+    model = Thread
+    form_class = ThreadForm
+    template_name = "polls/Forum/post_create.html"
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user.profile
+        return super(PostCreate, self).form_valid(form)
+
+    def test_func(self):
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        return redirect('login')
+
+
+class PostDetailView(generic.DetailView):
+    template_name = "polls/Forum/post_detail.html"
+    model = Post
+
+
+class PostListView(generic.ListView):
+    template_name = "polls/Forum/category.html"
+    model = Post
+    paginate_by = 10
+
+
+class PostUpdate(UserPassesTestMixin, UpdateView):
+    model = Post
+    template_name = "polls/Forum/post_update.html"
+    fields = ['content']
+
+    def test_func(self):
+        author = Post.objects.filter(id=self.kwargs['pk']).first().creator
+        return self.request.user == author and self.request.user.is_authenticated or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
+
+    def get_success_url(self):
+        return reverse('thread-detail', kwargs={'pk': self.kwargs['thread_pk']})
+
+
+class ThreadDelete(UserPassesTestMixin, DeleteView):
+    model = Thread
+    template_name = "polls/Forum/thread_delete.html"
+    success_url = reverse_lazy('thread')
+    login_url = reverse_lazy('index')
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        return redirect('index')
+
+
+class ThreadCategoryDelete(UserPassesTestMixin, DeleteView):
+    model = ForumCategory
+    template_name = "polls/Forum/category_delete.html"
+    success_url = reverse_lazy('category')
+    login_url = reverse_lazy('index')
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        return redirect('index')
+
+
+class PostDelete(UserPassesTestMixin, DeleteView):
+    model = Post
+    template_name = "polls/Forum/post_delete.html"
+    # success_url = reverse_lazy('post')
+    login_url = reverse_lazy('index')
+
+    def test_func(self):
+        author = Post.objects.filter(id=self.kwargs['pk']).first().creator.user
+        return (self.request.user == author and self.request.user.is_authenticated) or self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+        return redirect('index')
+
+    def get_success_url(self):
+        return reverse('thread-detail', kwargs={'pk': self.kwargs['thread_pk']})

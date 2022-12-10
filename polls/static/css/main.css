@@ -453,7 +453,8 @@ input, select, textarea {
 		}
 
 			.row > * {
-				padding: 50px 0 0 50px;
+				padding: 0 0 0 50px;
+				margin: 50px 0 0;
 			}
 
 			.row.gtr-uniform {
@@ -2729,4 +2730,3 @@ input, select, textarea {
 				}
 
 	}
-

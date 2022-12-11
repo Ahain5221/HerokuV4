@@ -13,7 +13,7 @@
         <div class="col">
             <form action="{% url 'add-favorite-game' game.pk%}" method="POST">
                 {% csrf_token %}
-                {% if game in user.profile.favorite_game.all %}
+                {% if game in user.profile.favorite_games.all %}
                     <button type="submit" name="series_id" value="{{ game.pk }}" class="btn btn-secondary btn-sm"><a class="icon solid fa-heart-broken fa-2xl" style="color: #dad0c0"></a>Unfavorite</button>
                 {% else %}
                     <button type="submit" name="series_id" value="{{ game.pk }}" class="btn btn-danger btn-sm"><a class="icon solid fa-heart fa-2xl" style="color: #710000"></a>Favorite</button>

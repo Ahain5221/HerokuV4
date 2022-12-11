@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'captcha',
     'friendship',
     'isbn_field',
-    'ckeditor'
+    'ckeditor',
+    'taggit'
 
 ]
 
@@ -205,3 +206,5 @@ CKEDITOR_CONFIGS = {
         'extraPlugins': 'justify,liststyle,indent',
    },
 }
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

@@ -54,11 +54,10 @@ from .models import Movie, Series, Actor, Director, Language, MovieSeriesGenre, 
     MovieWatchlist, SeriesWatchlist, SeriesReview, GameReview, GameList
 from .models import Movie, Series, Actor, Director, Language, MovieSeriesGenre
 
-from .models import Post, Thread, Like
+from .models import Post, Thread
 from .forms import PostForm, ForumCategory, ThreadCategoryForm, ThreadForm
 from django.views.generic.edit import FormMixin
-from django.utils import timezone
-
+from taggit.models import Tag
 
 # standard library imports
 import csv
@@ -66,11 +65,10 @@ import datetime as dt
 import json
 import os
 import statistics
-#import time
+# import time
 
 # third-party imports
 import requests
-
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -113,6 +111,7 @@ def add_books(request):
         summary = sheet.cell(row, 2).value
         genres = sheet.cell(row, 4).value
         languages = sheet.cell(row, 5).value
+        img = sheet.cell(row, 6).value
 
         authors = authors.split(',')
         genres = genres.split(',')
@@ -150,7 +149,8 @@ def add_books(request):
             summary=summary,
             isbn=isbn,
             Verified=True,
-            added_by=request.user
+            added_by=request.user,
+            book_image=img
         )
         book_object.authors.set(authors_pk)
         book_object.genre.set(genres_pk)
@@ -360,7 +360,6 @@ def password_reset_request(request):
                   context={"password_reset_form": password_reset_form})
 
 
-
 def activate(request, uidb64, token):
     user_model = get_user_model()
     try:
@@ -396,21 +395,19 @@ def index(request):
     """View function for home page of site."""
     if request.user.is_authenticated:
 
-        num_visits = request.session.get('num_visits', 0)
-        last_book = Book.objects.all().last()
-        #last_game = Game.objects.all().last()
-        #last_series = Series.objects.all().last()
-        #last_movie = Movie.objects.all().last()
+        # num_visits = request.session.get('num_visits', 0)
+        last_book = Book.objects.filter(Verified=True).last()
+        last_game = Game.objects.filter(Verified=True).last()
+        last_series = Series.objects.filter(Verified=True).last()
+        last_movie = Movie.objects.filter(Verified=True).last()
 
-        request.session['num_visits'] = num_visits + 1
-        # Generate counts of the main objects
+        # request.session['num_visits'] = num_visits + 1
 
         index_context = {
-            'num_visits': num_visits,
             'last_book': last_book,
-            #'last_game': last_game,
-            #'last_series': last_series,
-            #'last_movie': last_movie
+            'last_game': last_game,
+            'last_series': last_series,
+            'last_movie': last_movie
         }
         return render(request, 'index.html', context=index_context)
 
@@ -436,7 +433,7 @@ def index(request):
 
         }
 
-        return render(request, 'landing2.html', context=landing_context)
+        return render(request, 'landing.html', context=landing_context)
 
 
 def news_sections(request, num):
@@ -455,7 +452,6 @@ class MyFavorites(generic.DetailView):
         context = super(MyFavorites, self).get_context_data(*args, **kwargs)
         context['type'] = self.kwargs['type']
         return context
-
 
 
 class SignUpView(SuccessMessageMixin, generic.CreateView):
@@ -484,6 +480,7 @@ def search_user(request):
     else:
         form = SearchForm_User()
     return render(request, 'polls/search_form_user.html', {'form': form})
+
 
 def search_general(request):
     if request.method == 'POST':
@@ -885,7 +882,7 @@ class BookDelete(UserPassesTestMixin, DeleteView):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
             basic_message_content = 'Your book was deleted from PTC, title: ' + str(self.object)
-            mail_notification(self.get_object(), basic_message_content, delete_reason_content)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'added_by')
         messages.success(self.request, "The book has been deleted!")
         return super().form_valid(form)
 
@@ -1196,7 +1193,7 @@ class SeriesReviewDelete(UserPassesTestMixin, DeleteView):
         if self.object.author is not None and self.request.user.is_superuser:
             delete_reason_content = form.data['delete_reason']
             basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.series)
-            mail_notification_review_delete(self.get_object(), basic_message_content, delete_reason_content)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'author')
         messages.success(self.request, "The review has been deleted!")
         return super().form_valid(form)
 
@@ -1204,14 +1201,23 @@ class SeriesReviewDelete(UserPassesTestMixin, DeleteView):
         return reverse('series-detail', kwargs={'pk': self.kwargs['series_pk']})
 
 
-def mail_notification_review_delete(thing_object, basic_message_content, additional):
-    user_email = thing_object.author.email
+def mail_notification(thing_object, basic_message_content, additional, filed_name):
+    if filed_name == 'author':
+        user_email = thing_object.author.email
+        superuser_test = thing_object.author.is_superuser
+    elif filed_name == 'creator':
+        user_email = thing_object.creator.user.email
+        superuser_test = thing_object.creator.user.is_superuser
+    else:
+        user_email = thing_object.added_by.email
+        superuser_test = thing_object.added_by.is_superuser
+
     if additional:
         message_content = basic_message_content + "\n" + "Reason for removal: " + additional
     else:
         message_content = basic_message_content
 
-    if not thing_object.author.is_superuser:
+    if not superuser_test:
         send_mail(
             'Delete notification from PTC ',
             message_content,
@@ -1237,7 +1243,7 @@ class GameReviewDelete(UserPassesTestMixin, DeleteView):
         if self.object.author is not None and self.request.user.is_superuser:
             delete_reason_content = form.data['delete_reason']
             basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.game)
-            mail_notification_review_delete(self.get_object(), basic_message_content, delete_reason_content)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'author')
         messages.success(self.request, "The review has been deleted!")
         return super().form_valid(form)
 
@@ -1261,7 +1267,7 @@ class BookReviewDelete(UserPassesTestMixin, DeleteView):
         if self.object.author is not None and self.request.user.is_superuser:
             delete_reason_content = form.data['delete_reason']
             basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.book)
-            mail_notification_review_delete(self.get_object(), basic_message_content, delete_reason_content)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'author')
         messages.success(self.request, "The review has been deleted!")
         return super().form_valid(form)
 
@@ -1285,7 +1291,7 @@ class MovieReviewDelete(UserPassesTestMixin, DeleteView):
         if self.object.author is not None and self.request.user.is_superuser:
             delete_reason_content = form.data['delete_reason']
             basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.movie)
-            mail_notification_review_delete(self.get_object(), basic_message_content, delete_reason_content)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'author')
         messages.success(self.request, "The review has been deleted!")
         return super().form_valid(form)
 
@@ -1412,11 +1418,11 @@ class GameDelete(UserPassesTestMixin, DeleteView):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
             basic_message_content = 'Your game was deleted from PTC, title: ' + str(self.object)
-            mail_notification(self.get_object(), basic_message_content, delete_reason_content)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'added_by')
         messages.success(self.request, "The game has been deleted!")
         return super().form_valid(form)
 
-
+"""
 def mail_notification(thing_object, basic_message_content, additional):
     user_email = thing_object.added_by.email
     if additional:
@@ -1434,7 +1440,7 @@ def mail_notification(thing_object, basic_message_content, additional):
             [user_email],
             fail_silently=False,
         )
-
+"""
 
 class GameListView(generic.ListView):
     model = Game
@@ -1469,7 +1475,7 @@ class DeveloperDelete(UserPassesTestMixin, DeleteView):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
             basic_message_content = 'Your developer was deleted from PTC, title: ' + str(self.object)
-            mail_notification(self.get_object(), basic_message_content, delete_reason_content)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'added_by')
         messages.success(self.request, "The developer has been deleted!")
         return super().form_valid(form)
 
@@ -1720,7 +1726,7 @@ def like_view(request, pk):
         profile.likes.remove(request.user)
     else:
         profile.likes.add(request.user)
-    return redirect('profile-page',profile.user)
+    return redirect('profile-page', profile.user)
 
 
 @stuff_or_superuser_required
@@ -1885,7 +1891,7 @@ class MovieDelete(UserPassesTestMixin, DeleteView):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
             basic_message_content = 'Your movie was deleted from PTC, title: ' + str(self.object)
-            mail_notification(self.get_object(), basic_message_content, delete_reason_content)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'added_by')
         messages.success(self.request, "The movie has been deleted!")
         return super().form_valid(form)
 
@@ -2359,7 +2365,7 @@ class SeriesDelete(UserPassesTestMixin, DeleteView):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
             basic_message_content = 'Your series were deleted from PTC, title: ' + str(self.object)
-            mail_notification(self.get_object(), basic_message_content, delete_reason_content)
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'added_by')
         messages.success(self.request, "The series has been deleted!")
         return super().form_valid(form)
 
@@ -2627,7 +2633,7 @@ def scrape_games_redirect(request):
 
 def scrape_steam_ids(page, start):
     steam_ids = []
-    url = 'https://store.steampowered.com/search/?page='+str(page)
+    url = 'https://store.steampowered.com/search/?page=' + str(page)
     print(page)
     print(url)
     response = requests.get(url)
@@ -2728,7 +2734,7 @@ def scrape_games(request):
                     game_object.developer.set(game_developer_pk)
                     game_object.genre.set(game_genre_pk)
 
-                    print(game_name, added_games, time()-start)
+                    print(game_name, added_games, time() - start)
                     added_games += 1
 
     return render(request, "polls/Game/scrape_games.html", {'addedGames': added_games})
@@ -3091,8 +3097,10 @@ def scraping_shows_script(request, type_of_show, update):
               "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"}
     api_key = os.environ.get('API_KEY')
     api = omdb.OMDBClient(apikey=api_key)
-    genres = ['action', 'adventure', 'comedy', 'crime', 'drama', 'fantasy', 'horror', 'sci_fi', 'romance', 'war']
-    services = ['netflix', 'amc_plus', 'amazon_prime', 'disney_plus', 'hbo_max']
+    genres = ['action', 'adventure', 'comedy', 'crime', 'drama', 'fantasy', 'horror', 'sci_fi', 'romance', 'war',
+              'history', 'mystery_and_thriller']
+    services = ['netflix', 'amc_plus', 'amazon_prime', 'disney_plus', 'hbo_max', 'apple_tv', 'apple_tv_plus', 'hulu',
+                'paramount_plus', 'peacock', 'showtime', 'vudu']
     random.shuffle(genres)
     random.shuffle(services)
 
@@ -3361,8 +3369,8 @@ def episodes_scraping_script(request):
     for series_pk in series_pks:
         print(series_pk)
         episodes_scraping(series_pk, api, start)
-        print(time()-start)
-        if time()-start > 25:
+        print(time() - start)
+        if time() - start > 25:
             print('timeout')
             return redirect('index')
     return redirect('index')
@@ -3453,16 +3461,16 @@ def episode_scraping(series, episode_imdb_id, season_object, months, api, action
         )
         """
         episode = Episode(
-                            imdb_id=imdb_id,
-                            title=title,
-                            release_date=release_date,
-                            episode_number=episode_number,
-                            runtime=runtime,
-                            plot=plot,
-                            imdb_rating=imdb_rating,
-                            poster=poster,
-                            season=season_object
-                            )
+            imdb_id=imdb_id,
+            title=title,
+            release_date=release_date,
+            episode_number=episode_number,
+            runtime=runtime,
+            plot=plot,
+            imdb_rating=imdb_rating,
+            poster=poster,
+            season=season_object
+        )
 
         episodes.append(episode)
 
@@ -3484,7 +3492,6 @@ def enter_api_key(request):
 
 @permission_required('catalog.can_mark_returned', raise_exception=True)
 def series_to_scrape(request):
-
     series_set = Series.objects.filter(Verified=True).order_by('episodes_update_date', 'title')
 
     context = {
@@ -3747,7 +3754,6 @@ def search_result_general(request):
         return render(request, 'polls/search_result.html')
 
 
-
 class ThreadCreate(UserPassesTestMixin, CreateView):
     model = Thread
     form_class = ThreadForm
@@ -3783,22 +3789,30 @@ class ThreadDetailView(generic.DetailView, FormMixin):
     template_name = "polls/Forum/thread_detail.html"
     model = Thread
     form_class = PostForm
+    count_hit = True
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-
-        thread_likes_connected = get_object_or_404(Thread, id=self.kwargs['pk'])
-        liked = False
-        if thread_likes_connected.likes.filter(id=self.request.user.id).exists():
-            liked = True
-        data['number_of_likes'] = thread_likes_connected.number_of_likes()
-        data['thread_is_liked'] = liked
 
         posts_connected = Post.objects.filter(
             thread=self.get_object()).order_by('-date')
         data['posts'] = posts_connected
         if self.request.user.is_authenticated:
             data['post_form'] = PostForm(instance=self.request.user)
+        try:
+            read_likes_connected = get_object_or_404(Thread, slug=self.kwargs['slug'])
+
+            post_likes_connected = get_object_or_404(Post, id=self.kwargs['pk'])
+            liked = False
+
+            # todo
+            if post_likes_connected.likes.filter(post__likes__user_id__in=self.request.user.id).exists():
+                liked = True
+            data['number_of_likes'] = post_likes_connected.number_of_likes()
+            data['thread_is_liked'] = liked
+
+        except:
+            return data
 
         return data
 
@@ -3806,7 +3820,7 @@ class ThreadDetailView(generic.DetailView, FormMixin):
         return render(request, 'polls/Forum/thread_detail.html', {'form': ThreadDetailView()})
 
     def get_success_url(self):
-        return reverse('thread-detail', kwargs={'pk': self.object.id})
+        return reverse('thread-detail', kwargs={'slug_category': self.object.slug_category, 'slug': self.object.slug})
 
     def post(self, request, *args, **kwargs):
         if self.request.method == 'POST':
@@ -3823,6 +3837,21 @@ class ThreadDetailView(generic.DetailView, FormMixin):
                         thread=self.get_object())
         new_post.save()
         return super(ThreadDetailView, self).form_valid(form)
+
+
+def post_like_view(request, pk, thread_pk):
+    post = get_object_or_404(Post, id=pk)
+    if post.likes.filter(id=request.user.id).exists():
+        post.likes.remove(request.user.profile)
+    else:
+        post.likes.add(request.user.profile)
+
+    get_thread_object_slug = Thread.objects.get(pk=thread_pk).slug
+    get_thread_object_slug_category = Thread.objects.get(pk=thread_pk).slug_category
+    #return reverse('thread-detail',
+                   #kwargs={'slug_category': get_thread_object_slug_category, 'slug': get_thread_object_slug})
+
+    return HttpResponseRedirect(reverse('thread-detail', args=[get_thread_object_slug_category, get_thread_object_slug]))
 
 
 class ThreadUpdate(UserPassesTestMixin, UpdateView):
@@ -3844,7 +3873,7 @@ def ThreadLike(request, pk):
     else:
         thread.likes.add(request.user.profile)
 
-    return HttpResponseRedirect(reverse('thread-detail', args=[str(pk)]))
+    return HttpResponseRedirect(reverse('thread-detail', args=[str(thread.slug_category),str(thread.slug)]))
 
 
 class ThreadCategoryCreate(UserPassesTestMixin, CreateView):
@@ -3868,28 +3897,35 @@ class ThreadCategoryListView(generic.ListView):
     model = ForumCategory
     paginate_by = 10
 
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        profile = Profile.objects.filter(user=self.request.user).first()
+        data['profile'] = profile
+        return data
 
 class ThreadCategoryDetailView(generic.DetailView, FormMixin):
     template_name = "polls/Forum/category_detail.html"
     model = ForumCategory
+    paginate_by = 20
     form_class = ThreadForm
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
+        profile = Profile.objects.filter(user=self.request.user).first()
         num_visits = self.request.session.get('num_visits', 0)
         self.request.session['num_visits'] = num_visits + 1
 
         threads_connected = Thread.objects.filter(
             category=self.get_object()).order_by('-date')
+        data['profile'] = profile
         data['threads'] = threads_connected
         data['num_visits'] = num_visits
         if self.request.user.is_authenticated:
             data['thread_form'] = ThreadForm(instance=self.request.user.profile)
         return data
 
-
     def get_success_url(self):
-        return reverse('thread-category-detail', kwargs={'pk': self.object.id})
+        return reverse('thread-category-detail', kwargs={'slug': self.object.slug})
 
 
 class ThreadCategoryUpdate(UserPassesTestMixin, UpdateView):
@@ -3937,7 +3973,7 @@ class PostUpdate(UserPassesTestMixin, UpdateView):
     fields = ['content']
 
     def test_func(self):
-        author = Post.objects.filter(id=self.kwargs['pk']).first().creator
+        author = Post.objects.filter(id=self.kwargs['pk']).first().creator.user
         return self.request.user == author and self.request.user.is_authenticated or self.request.user.is_superuser
 
     def handle_no_permission(self):
@@ -3946,7 +3982,10 @@ class PostUpdate(UserPassesTestMixin, UpdateView):
         return redirect('index')
 
     def get_success_url(self):
-        return reverse('thread-detail', kwargs={'pk': self.kwargs['thread_pk']})
+        get_thread_object_slug = Thread.objects.get(pk=self.kwargs['thread_pk']).slug
+        get_thread_object_slug_category = Thread.objects.get(pk=self.kwargs['thread_pk']).slug_category
+
+        return reverse('thread-detail', kwargs={'slug_category': get_thread_object_slug_category,'slug': get_thread_object_slug})
 
 
 class ThreadDelete(UserPassesTestMixin, DeleteView):
@@ -3990,5 +4029,27 @@ class PostDelete(UserPassesTestMixin, DeleteView):
             return redirect('login')
         return redirect('index')
 
+    def form_valid(self, form):
+        if self.object.creator is not None and self.request.user.is_superuser:
+            delete_reason_content = form.data['delete_reason']
+            basic_message_content = 'Your post was deleted from PTC'
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'creator')
+        messages.success(self.request, "The post has been deleted!")
+        return super().form_valid(form)
+
     def get_success_url(self):
-        return reverse('thread-detail', kwargs={'pk': self.kwargs['thread_pk']})
+        get_thread_object_slug = Thread.objects.get(pk=self.kwargs['thread_pk']).slug
+        get_thread_object_slug_category = Thread.objects.get(pk=self.kwargs['thread_pk']).slug_category
+        return reverse('thread-detail',
+                       kwargs={'slug_category': get_thread_object_slug_category, 'slug': get_thread_object_slug})
+
+
+def tagged(request, slug):
+    tag = get_object_or_404(Tag, slug=slug)
+    # Filter posts by tag name
+    threads = Thread.objects.filter(tags=tag)
+    context = {
+        'tag': tag,
+        'threads': threads,
+    }
+    return render(request, 'index.html', context)

@@ -1687,7 +1687,6 @@ input, select, textarea {
 		transition: background-color 0.25s ease-in-out;
 		-webkit-appearance: none;
 		margin: 0 auto;
-		display: block;
 		border: 0;
 		background: #212529;
 		color: white;
@@ -2730,3 +2729,4 @@ input, select, textarea {
 				}
 
 	}
+

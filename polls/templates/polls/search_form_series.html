@@ -9,14 +9,8 @@
             {% csrf_token %}
             <p class="select2-selection--multiple"> {{ form.as_table }} </p>
             <div class="control-group" style="margin-top: 3em">
-            <div class="controls">
-                <div class="position-relative">
-                    <div class="position-absolute top-50 start-50 translate-middle">
-                        <input type="submit" value="Submit"/>
-                    </div>
-                </div>
+                 <button class="btn btn-dark" type="submit" style="">Search</button>
             </div>
-        </div>
             </form>
         {% else %}
             <p>You are not supposted to be here</p>

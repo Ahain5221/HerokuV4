@@ -3,7 +3,7 @@
 {% block content %}
     <div class="container-fluid">
     <h1 style="font-size: xxx-large; margin-bottom: 1.5rem"> {{ movie.title }} </h1>
-        <a class="page-link" style="font-size: larger; display: inline; margin-right: 6px"></a>
+        <a class="page-link" style="font-size: larger; display: inline; margin-right: 6px">
         Movie
         &nbsp;&nbsp;&nbsp;
         {{ movie.date_of_release }}
@@ -11,6 +11,7 @@
         IMDB rating: {{ movie.imdb_rating }}
         &nbsp;&nbsp;&nbsp;
         {{ movie.running_time}}m
+        </a>
     {% if user.is_authenticated %}
     <div class="container text-center">
       <div class="row row-cols-auto">
@@ -51,7 +52,7 @@
 
 
     <div class="row">
-        <div class="col" style="margin-top: 1em">
+        <div class="col" style="margin-top: 5em">
             <img style='height: initial; width: initial; padding-left: inherit' src="{{ movie.poster }}" class="card-img" alt="">
             {% if movie.genre.all.count == 3 %}
                 <ul style="margin-left: 4em">

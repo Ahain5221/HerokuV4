@@ -35,10 +35,25 @@
         {% for error in form.captcha.errors %}
           <p style="color: red">{{ error }}</p>
         {% endfor %}
-        <button type="submit" style="margin-top: 2em">Sign up</button>
-
+      <div class="control-group" style="margin-top: 2em">
+            <div class="controls">
+                <div class="position-relative">
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                        <button class="btn btn-dark btn-sm" type="submit" style="">Sign up</button>
+                    </div>
+                </div>
+            </div>
+      </div>
   </form>
 </div>
+
+    <style>
+
+    form input[type="text"], form input[type="email"], form input[type="password"], form select, form textarea {
+		display: block;
+	}
+
+    </style>
     <script>
         $('.captcha').click(function () {
         $.getJSON("/captcha/refresh/", function (result) {

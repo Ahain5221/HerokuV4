@@ -1,14 +1,33 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1>Create post's category</h1>
-    <form action="" method="post">
-        {% csrf_token %}
-        <table>
-            {{ form.as_table }}
-        </table>
-        <input type="submit" value="Submit"/>
 
-    </form>
-    <input type=button value="Cancel" onClick="javascript:history.go(-1);">
+    <h1 class="text-center">Create category</h1>
+    {{ form.media }}
+    <div class="form-group" style="margin-bottom: 2em">
+        <form action="" method="post" style="color: black">
+            {% csrf_token %}
+            <p class="select2-selection--multiple text-center">
+                {{ form.as_table }} </p>
+            <div class="control-group" style="margin-top: 3em">
+                <div class="controls">
+                    <div class="position-relative">
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <input type="submit" value="Submit"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="control-group" style="margin-top: 6em">
+                <div class="controls">
+                    <div class="position-relative">
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <input type=button value="Cancel" onClick="javascript:history.go(-1);">
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
 {% endblock %}

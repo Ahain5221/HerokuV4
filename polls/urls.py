@@ -298,24 +298,31 @@ urlpatterns = [
     path('test1/', views.bulk_create, name='test1'),
     path('carnage/', delete_unverified_users, name='carnage'),
 
-    path('thread/', views.ThreadListView.as_view(), name='thread'),
-    path('thread/create/<int:category_pk>', views.ThreadCreate.as_view(), name='thread-create'),
-    path('thread/<int:pk>', views.ThreadDetailView.as_view(), name='thread-detail'),
-    path('thread/<int:pk>/delete', views.ThreadDelete.as_view(), name='thread-delete'),
-    path('thread/<int:pk>/update', views.ThreadUpdate.as_view(), name='thread-update'),
+    path('forum/thread/', views.ThreadListView.as_view(), name='thread'),
+    path('forum/thread/create/<int:category_pk>', views.ThreadCreate.as_view(), name='thread-create'),
+    path('forum/thread/<int:pk>/delete', views.ThreadDelete.as_view(), name='thread-delete'),
+    path('forum/thread/<int:pk>/update', views.ThreadUpdate.as_view(), name='thread-update'),
     path('thread-like/<int:pk>', views.ThreadLike, name="thread_like"),
 
-    path('category/', views.ThreadCategoryListView.as_view(), name='category'),
-    path('category/create', views.ThreadCategoryCreate.as_view(), name='category-create'),
-    path('category/<int:pk>', views.ThreadCategoryDetailView.as_view(), name='thread-category-detail'),
-    path('category/<int:pk>/delete', views.ThreadCategoryDelete.as_view(), name='thread-category-delete'),
-    path('category/<int:pk>/update', views.ThreadCategoryUpdate.as_view(), name='category-update'),
+    path('forum/', views.ThreadCategoryListView.as_view(), name='category'),
+    path('forum/category/create', views.ThreadCategoryCreate.as_view(), name='category-create'),
+    path('forum/category/<int:pk>/delete', views.ThreadCategoryDelete.as_view(), name='thread-category-delete'),
+    path('forum/category/<int:pk>/update', views.ThreadCategoryUpdate.as_view(), name='category-update'),
 
+    # Trzymać je na dole, bo narobią zamętu...
+    path('forum/category/<slug:slug>', views.ThreadCategoryDetailView.as_view(), name='thread-category-detail'),
+    path('forum/<slug:slug_category>/<slug:slug>', views.ThreadDetailView.as_view(), name='thread-detail'),
+
+
+    # Ruszę to najwyżej jeśli będzie to miało jakikolwiek sens
     path('post/', views.PostListView.as_view(), name='post'),
     path('post/create', views.PostCreate.as_view(), name='post-create'),
     path('post/<int:pk>', views.PostDetailView.as_view(), name='post-detail'),
-    path('post/<int:pk>/update/<thread_pk>', views.PostUpdate.as_view(), name='post-update'),
-    path('post/<int:pk>/delete/<thread_pk>', views.PostDelete.as_view(), name='post-delete'),
+    # Te dwa niby trzeba ruszyć, eh.
 
-    path('add_books/', add_books, name='add-books')
+    path('forum/post/update/<int:pk>/<thread_pk>', views.PostUpdate.as_view(), name='post-update'),
+    path('forum/post/delete/<int:pk>/<thread_pk>', views.PostDelete.as_view(), name='post-delete'),
+
+    path('add_books/', add_books, name='add-books'),
+    path("postlike/<int:pk>/<int:thread_pk>", post_like_view, name="like_post")
 ]

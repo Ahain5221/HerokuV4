@@ -55,7 +55,15 @@
             {% endif %}
         </div>
 
-        <div class="col-sm-3" style="margin-right: 1em">
+        <div class="col-sm-1" style="margin-right: 1em">
+            {% if status == 'dropped' %}
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user type_of_show 'dropped'%}'"><button class="btn btn-success btn-sm">Dropped</button></a>
+            {% else %}
+                <a onclick="location.href='{% url 'profile-watchlist' profile.user type_of_show 'dropped'%}'"><button class="btn btn-dark btn-sm">Dropped</button></a>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-3">
             {% if status == 'want to watch' %}
                 <a onclick="location.href='{% url 'profile-watchlist' profile.user type_of_show 'want to watch'%}'"><button class="btn btn-success btn-sm">Want to watch</button></a>
             {% else %}
@@ -176,7 +184,12 @@
 
             <th>{{ series_watchlist.series.type_of_show }}</th>
 
-            <th> {{ series_watchlist.series_status }} </th>
+            <th>
+                {{ series_watchlist.series_status }}
+                {% if series_watchlist.progress %}
+                    ({{ series_watchlist.progress }})
+                {% endif %}
+            </th>
 
             {% if user.is_authenticated %}
                 {% if user == profile.user %}

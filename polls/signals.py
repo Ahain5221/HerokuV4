@@ -4,8 +4,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_out, user_logged_in
+from django.utils.text import slugify
 
 from .models import Profile
+
+from polls.models import *
 
 
 @receiver(post_save, sender=User)
@@ -38,5 +41,15 @@ def login_set_name(sender, request, user, **kwargs):
     print()
 
 
+@receiver(post_save, sender=Thread)
+def add_id_to_thread(sender, instance, created, **kwargs):
+    if created:
+        instance.slug = slugify(instance.title) + "-" + str(instance.pk)
+        get_category_object = ForumCategory.objects.get(pk=instance.category_id)
+        instance.slug_category = get_category_object.slug
+        instance.save()
+
+
 user_logged_out.connect(logout_notifier)
 user_logged_in.connect(login_set_name)
+

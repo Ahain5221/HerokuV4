@@ -6,16 +6,28 @@
         <a class="icon solid fa-search text-white" href="{% url 'search-book' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Search</a>
     </button>
 
-    {% if book_list %}
-        <h1>Book List</h1>
-        <ul>
-            {% for book in book_list %}
-                <li>
-                    <a href="{{ book.get_absolute_url }}">{{ book.title }}</a> ({{ book.authors.all|join:", " }})
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>There are no books in the library.</p>
-    {% endif %}
+
+    <h1 style="font-size: 250%; text-align: center;">Book List</h1>
+    <hr style="width:auto">
+    <div class="row" style="padding-top: 3em">
+        {% for book in book_list %}
+             {% if book.Verified %}
+                 <div class="col-md-3">
+                     <a href="{{ book.get_absolute_url }}">
+                        <div class="col">
+                            <div class="row">
+                                <img style='max-width: 300px; height: 300px;' src="{{ book.book_image }}" class="card-img" alt="">
+                            </div>
+                            <div class="row" style="margin-top: auto">
+                                <p class="text-center">{{ book.title }}</p>
+                            </div>
+                        </div>
+                     </a>
+                 </div>
+             {% endif %}
+        {% endfor %}
+    </div>
+
+
+
 {% endblock %}

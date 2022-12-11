@@ -1,65 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% block title %}<title>Welcome to Pop tracker!</title>{% endblock %}
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!-- Web page CSS -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/landing.css' %}">
-    <!--
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}" >
-    -->
+
+    <title>Welcome to PCT</title>
 </head>
+
 <body>
-
-<div class="main-container">
-
-    <div class="top-logo-and-login">
-        <div class="tll-left-side">
-            <h2>Pop Tracker</h2>
-        </div>
-        <div class="tll-right-side">
-            <a href="{% url 'login2' %}">Login</a>
-            <a href="{% url 'signup' %}">Register</a>
-        </div>
-    </div>
-
-    <div class="splash-screen">
-        <h1>
-            Your whole digital Pop culture
-            <br>
-            in one place
-        </h1>
-    </div>
-
-    {% block content %}
-    <div class="statistics-container">
-        <div class="icon-text">
-            <p class="text-descr">{{ num_movies }} Movies</p>
-        </div>
-        <div class="icon-text">
-            <p class="text-descr">{{ num_series }} Series</p>
-        </div>
-        <div class="icon-text">
-            <p class="text-descr">{{ num_games}} Games</p>
-        </div>
-        <div class="icon-text">
-            <p class="text-descr">{{ num_directors }} Directors</p>
-        </div>
-        <div class="icon-text">
-            <p class="text-descr">{{ num_actors }} Actors</p>
-        </div>
-        <div class="icon-text">
-            <p class="text-descr">{{ num_users }} User Profiles</p>
-        </div>
-    </div>
-    {% endblock %}
-
-    <div class="hanger-container">
-
-    </div>
+<div class="message">
+    {% include 'polls/messages.html' %}
 </div>
+
+<!-- Navbar -->
+<nav>
+    <a href="#" class="logo">
+        <h1>
+            <span class="logo-graphic">&#x1F4DA;</span>
+            <span class="logo-p">P</span><span class="logo-c">C</span><span class="logo-t">T</span>
+        </h1>
+    </a>
+    <ul>
+        <li class="nav-item">
+            <a href="{% url 'login' %}" class="nav-link" id="nav-link">Login</a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'signup' %}" class="nav-link" id="nav-link">Register</a>
+        </li>
+    </ul>
+
+</nav>
+
+<!-- Bars -->
+<div class="hamburger" id="hamburger">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+</div>
+
+<!-- Hero section -->
+<section class="hero">
+    <div class="intro-text">
+        <h1>
+            <span class="intro-name"> Pop Culture Tracker </span> <br/>
+            <span class="boast">Your whole digital pop culture</span> <br/>
+            <span class="boast">In one place</span>
+        </h1>
+        <a class="btn red" href="#">Learn More</a>
+    </div>
+</section>
+
+<!-- About section -->
+<section class="about" id="about">
+    <h3>Give a review or find pop culture fans like yourself</h3>
+    <p>
+        Our objective is to help you travel through the depths of pop culture hobbies
+    </p>
+
+    <h3>Search for new, rediscover the old</h3>
+    <p>
+        Our database contains newest items as well as classics you love
+    </p>
+</section>
+
+<!-- numbers section -->
+<section class="numbers" id="stats">
+    <div class="numbers-title">
+        <h2>
+            <span class="numbers-title-text">What can you track:</span>
+        </h2>
+    </div>
+    <div class="stats-box">
+        <div class="stats-rows-main">
+            <div class="box">
+                <p class="stat-name">Movies</p>
+                <p class="stat"><span class="counter">{{ num_movies }}</span></p>
+            </div>
+            <div class="box">
+                <p class="stat-name">Series</p>
+                <p class="stat"><span class="counter">{{ num_series }}</span></p>
+            </div>
+            <div class="box">
+                <p class="stat-name">Games</p>
+                <p class="stat"><span class="counter">{{ num_games }}</span></p>
+            </div>
+            <div class="box">
+                <p class="stat-name">Directors</p>
+                <p class="stat"><span class="counter">{{ num_directors }}</span></p>
+            </div>
+            <div class="box">
+                <p class="stat-name">Actors</p>
+                <p class="stat"><span class="counter">{{ num_actors }}</span></p>
+            </div>
+            <div class="box">
+                <p class="stat-name">Books</p>
+                <p class="stat"><span class="counter">{{ num_books }}</span></p>
+            </div>
+        </div>
+        <div class="stats-rows-secondary">
+            <div class="box">
+                <p class="stat-name">Game Devs</p>
+                <p class="stat"><span class="counter">{{ num_developers }}</span></p>
+            </div>
+            <div class="box">
+                <p class="stat-name">User Profiles</p>
+                <p class="stat"><span class="counter">{{ num_users }}</span></p>
+            </div>
+        </div>
+        <div class="numbers-title">
+        <h2>
+            <span class="numbers-title-text">And more</span>
+        </h2>
+    </div>
+    </div>
+</section>
+
+<!-- devs -->
+<section class="people" id="devs">
+    <div class="devs-title">
+        <h2>
+            <span class="devs-title-text">The team:</span>
+        </h2>
+    </div>
+    <div class="devs">
+        <div class="persons-sec1">
+            <div class="person-1">
+                <img src="#" alt="Ahain img"/>
+                <p class="name">Ahain</p>
+                <p class="role">Back-end + DevOps</p>
+            </div>
+            <div class="person-2">
+                <img src="#" alt="David_99 img"/>
+                <p class="name">David_99</p>
+                <p class="role">Back-end</p>
+            </div>
+            <div class="person-3">
+                <img src="#" alt="Athame img"/>
+                <p class="name">Athame</p>
+                <p class="role">Front-end</p>
+            </div>
+        </div>
+        <div class="persons-sec2">
+            <div class="person-4">
+                <img src="#" alt="Elortex img"/>
+                <p class="name">Elortex</p>
+                <p class="role">Front-end + DevOps</p>
+            </div>
+            <div class="person-5">
+                <img src="#" alt="Majmad img"/>
+                <p class="name">Majmad</p>
+                <p class="role">Forum</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--Todo Social icons -->
+
+<!-- Scroll to top button -->
+
+<!-- Web page scripts-->
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+<script src="{% static 'js/jquery.countup.js' %}"></script>
+<script>
+$('.counter').countUp({
+    delay: 10,
+    time: 2000
+});
+</script>
+<script>
+    setTimeout(function(){
+      if ($('#msg').length > 0) {
+        $('#msg').remove();
+      }
+    }, 5000)
+  </script>
 </body>
+
 <footer>
+    &copy;2022. AMD2 TEAM<br/>
+    All Rights Reserved
 </footer>
 </html>

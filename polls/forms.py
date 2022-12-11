@@ -359,7 +359,7 @@ class OmdbApiForm(forms.Form):
                                          widget=forms.CheckboxSelectMultiple())
     sort = forms.ChoiceField(choices=sort_CHOICES)
     pages = forms.IntegerField(min_value=1, required=False, help_text="One page contains 30 movies or series",
-                               widget=forms.NumberInput(attrs={'class': 'form-control'}))
+                               widget=forms.NumberInput(attrs={'class': 'custom-form-control'}))
     multi_search = forms.ChoiceField(required=True, choices=CHOICES, help_text='Search for similar titles')
 
 
@@ -372,24 +372,26 @@ class RequestPermissionForm(forms.ModelForm):
         model = RequestPermission
         fields = ('Request_Reason',)
         widgets = {
-            'Request_Reason': forms.Textarea(attrs={'class': 'form-control'}),
+            'Request_Reason': forms.Textarea(attrs={'class': 'custom-form-control'}),
         }
+
 
 class ThreadForm(forms.ModelForm):
     class Meta:
         model = Thread
-        fields = ('title',)
+        fields = ('title', 'tags')
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'title'}),
+            'title': forms.TextInput(attrs={'class': 'custom-form-control', 'placeholder': 'title'}),
         }
+
 
 class ThreadCategoryForm(forms.ModelForm):
     class Meta:
         model = ForumCategory
-        fields = ('title','content')
+        fields = ('title', 'content')
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'title',}),
-            'content': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'content'}),
+            'title': forms.TextInput(attrs={'class': 'custom-form-control', 'placeholder': 'title'}),
+            'content': forms.TextInput(attrs={'class': 'custom-form-control', 'placeholder': 'content'}),
         }
 
 

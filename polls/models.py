@@ -9,7 +9,9 @@ from isbn_field import ISBNField
 # from tinymce.models import HTMLField
 from django.shortcuts import get_object_or_404
 from ckeditor.fields import RichTextField
-
+from django.contrib.contenttypes.fields import GenericRelation
+from taggit.managers import TaggableManager
+from django.utils.text import slugify
 # from django.shortcuts import get_object_or_404
 
 
@@ -105,8 +107,11 @@ class Game(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=200)
     authors = models.ManyToManyField('Author')
+    book_image = models.TextField(max_length=100, null=True, blank=True,
+                                  default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400"
+                                          ".jpg")
 
-    summary = models.TextField(max_length=1000, help_text='Enter a brief description of the book')
+    summary = models.TextField(max_length=2000, help_text='Enter a brief description of the book')
     isbn = ISBNField('ISBN', unique=True,
                      help_text='13 Character <a href="https://www.isbn-international.org/content/what-isbn'
                                '">ISBN number</a>')
@@ -586,6 +591,7 @@ class Forum(models.Model):
 
 
 class ForumCategory(Forum):
+    slug = models.SlugField(unique=True, null=True)
 
     class Meta:
         verbose_name_plural = "category"
@@ -595,6 +601,15 @@ class ForumCategory(Forum):
 
     def number_of_threads(self):
         return Thread.objects.filter(category=self).all().count()
+
+    @property
+    def last_post(self):
+        thread_object = Thread.objects.filter(category_id=self.pk)
+        post = datetime
+        for thread in thread_object:
+            pk_thread = thread.pk
+            post = Post.objects.filter(date='date').latest('date')
+        return post
 
     @property
     def number_of_posts(self):
@@ -607,24 +622,55 @@ class ForumCategory(Forum):
         return result
 
     def get_absolute_url(self):
-        return reverse('thread-category-detail', args=[str(self.id)])
+        return reverse('thread-category-detail', args=[str(self.slug)])
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        super(Forum, self).save(*args, **kwargs)
+
+    @property
+    def get_last_post(self):
+        posts = []
+        threads = Thread.objects.filter(category_id=self.pk)
+
+        for thread in threads:
+            post = Post.objects.filter(thread_id=thread.pk).last()
+            posts.append(post)
+
+        last_post = posts[0]
+
+        for post in posts:
+            if int(post.pk) > last_post.pk:
+                last_post = post
+
+        return last_post
 
 
 class Thread(Forum):
     category = models.ForeignKey(ForumCategory, on_delete=models.SET_NULL, related_name='categories', null=True)
     likes = models.ManyToManyField(Profile, related_name='thread_like')
+    slug = models.SlugField(unique=True, null=True)
+    slug_category = models.SlugField(null=True)
+    tags = TaggableManager()
 
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('thread-detail', args=[str(self.id)])
+        return reverse('thread-detail', args=[str(self.slug_category), str(self.slug)])
 
     def number_of_posts(self):
         return Post.objects.filter(thread=self).all().count()
 
     def number_of_likes(self):
         return self.likes.all().count()
+
+    @property
+    def get_last_post(self):
+        post = Post.objects.filter(thread_id=self.pk).last()
+        return post
+
+
 
 
 LIKE_CHOICES = (
@@ -637,7 +683,7 @@ class Post(Forum):
     thread = models.ForeignKey(Thread, on_delete=models.SET_NULL, related_name='posts', null=True)
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
     likes = models.ManyToManyField(Profile, related_name='post_like')
-    content = RichTextField()
+    content = RichTextField(null=False)
 
     def __str__(self):
         return self.title
@@ -651,8 +697,8 @@ class Post(Forum):
 
 class Like(models.Model):
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    thread = models.ForeignKey(Thread, on_delete=models.SET_NULL, null=True)
-    value = models.CharField(choices=LIKE_CHOICES, default='Thread_Like', max_length=10)
+    post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True)
+    value = models.CharField(choices=LIKE_CHOICES, default='Post_Like', max_length=10)
 
     def __str__(self):
-        return self.thread
+        return self.post

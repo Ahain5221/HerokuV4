@@ -1,26 +1,41 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <!--
-    <h1>Pop Culture Tracker</h1>
-    <p>Welcome to Pop Culture Tracker, a website developed by <em>A(MD)^2 Team</em>!</p>
-    -->
-    <h2 style="text-align: center">Dynamic content</h2>
-    <p>The website has the following record counts:</p>
-    <ul style="margin-left: 31em">
-        <!--
-        <button data-section="1">Section 1</button>
-        -->
 
-        <li><strong>Books:</strong> {{ num_books }}</li>
-        <!--
-        <li><strong>Copies:</strong> {{ num_instances }}</li>
-        <li><strong>Copies available:</strong> {{ num_instances_available }}</li>
-        -->
-        <li><strong>Authors:</strong> {{ num_authors }}</li>
-    </ul>
 
-    <p>Newest User: {{ test }} </p>
+    <div class="new-banner-column" style="float: left">
+        <p style="max-width: 50%; font-weight: bold">Newest additions:</p><br/>
 
-    <p>You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.</p>
+            <div class="last-serie" style="max-width: 50%">
+                <a href="{{ last_series.get_absolute_url }}">
+                    <img src="{{ last_series.poster }}" class="card-img" alt="">
+                    <p>{{ last_series.title }}</p>
+                </a><br/><br/>
+            </div>
+
+            <!-- Todo book covers?
+            <div class="last-book" style="max-width: 50%">
+                <a href="{{ last_book.get_absolute_url }}">
+                    <img style='' src="{{ last_book }}" class="card-img" alt="">
+                    <p>{{ last_book.title }}</p>
+                </a><br/><br/>
+            </div>
+            -->
+
+            <div class="last-movie" style="max-width: 50%">
+                <a href="{{ last_movie.get_absolute_url }}">
+                    <img src="{{ last_movie.poster }}" class="card-img" alt="">
+                    <p>{{ last_movie.title }}</p>
+                </a><br/><br/>
+            </div>
+
+            <div class="last-game" style="max-width: 50%">
+                <a href="{{ last_game.get_absolute_url }}">
+                    <img src="{{ last_game.game_image }}" class="card-img" alt="">
+                    <p>{{ last_game.title }}</p>
+                </a><br/><br/>
+            </div>
+        </div>
+
+
 {% endblock %}

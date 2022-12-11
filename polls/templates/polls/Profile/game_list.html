@@ -30,6 +30,14 @@
             {% endif %}
         </div>
 
+        <div class="col-sm-1" style="margin-left: 0.5em">
+            {% if status == 'dropped' %}
+                <a onclick="location.href='{% url 'profile-game-list' profile.user 'dropped'%}'"><button class="btn btn-success btn-sm">Dropped</button></a>
+            {% else %}
+                <a onclick="location.href='{% url 'profile-game-list' profile.user 'dropped'%}'"><button class="btn btn-dark btn-sm">Dropped</button></a>
+            {% endif %}
+        </div>
+
         <div class="col-sm-3" style="margin-left: 0.75em">
             {% if status == 'want to play' %}
                 <a onclick="location.href='{% url 'profile-game-list' profile.user 'want to play'%}'"><button class="btn btn-success btn-sm">Want to play</button></a>

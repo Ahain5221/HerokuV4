@@ -6,11 +6,11 @@
     {% if friend_list %}
         <ul>
 
-            {% for friend in friend_list %}
+            {% for avatar, friend in friend_list %}
                 <li class="list-inline">
                 <div class="col-md-1">
                     <div>
-                        <a href="{% url 'profile-page' friend.pk %}">
+                        <a href="{% url 'profile-page' friend %}">
                             <img src="{{ avatar }}" class="card-img">
                             <p style="font-size: medium; margin-top: 0"> {{ friend }} </p>
                         </a>

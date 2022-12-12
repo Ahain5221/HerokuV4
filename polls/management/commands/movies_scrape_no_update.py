@@ -19,8 +19,11 @@ class Command(BaseCommand):
                   "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"}
         api_key = os.environ.get('API_KEY')
         api = omdb.OMDBClient(apikey=api_key)
-        genres = ['action', 'adventure', 'comedy', 'crime', 'drama', 'fantasy', 'horror', 'sci_fi', 'romance', 'war']
-        services = ['netflix', 'amc_plus', 'amazon_prime', 'disney_plus', 'hbo_max']
+        genres = ['action', 'adventure', 'comedy', 'crime', 'drama', 'fantasy', 'horror', 'sci_fi', 'romance', 'war',
+                  'history', 'mystery_and_thriller']
+        services = ['netflix', 'amc_plus', 'amazon_prime', 'disney_plus', 'hbo_max', 'apple_tv', 'apple_tv_plus',
+                    'hulu',
+                    'paramount_plus', 'peacock', 'showtime', 'vudu']
         random.shuffle(genres)
         random.shuffle(services)
 

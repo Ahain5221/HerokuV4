@@ -693,6 +693,17 @@ class Post(Forum):
 
     def number_of_likes(self):
         return self.likes.all().count()
+    
+    def number_of_posts(self):
+        return Post.objects.filter(creator=self.creator).count()
+
+    def all_my_likes(self):
+        count = 0
+        all_my_posts = Post.objects.filter(creator=self.creator) 
+        for post in all_my_posts:
+            check = post.likes.all().count()
+            count += check
+        return count
 
 
 class Like(models.Model):

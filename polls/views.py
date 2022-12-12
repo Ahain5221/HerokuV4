@@ -1628,13 +1628,15 @@ def delete_friendship(request, pk):
 def friend_list(request, pk):
     get_user = User.objects.get(id=pk)
     friends = Friend.objects.friends(get_user)
-    avatar = get_user.profile.profile_image_url
+    avatars = []
+    for friend in friends:
+        avatars.append(friend.profile.profile_image_url)
     request_list = Friend.objects.unread_requests(get_user)
 
     context = {
-        'friend_list': friends,
+        'friend_list': zip(avatars, friends),
         'friend_request_list': request_list,
-        'avatar': avatar
+        'avatars': avatars
     }
     return render(request, 'FriendList.html', context=context)
 

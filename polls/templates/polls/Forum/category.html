@@ -447,15 +447,7 @@
     </div>
     </div>
 
-            <ul>
-                {% for forum_category in forumcategory_list %}
-                        <li>
-                            <a href="{{ forum_category.get_absolute_url }}">{{ forum_category.title }}</a>
-                            <strong class="text-secondary"> Thread's: {{ forum_category.number_of_threads }} </strong>
-                            <strong class="text-secondary"> Post's: {{ forum_category.number_of_posts}} </strong>
-                        </li>
-                {% endfor %}
-            </ul>
+
     </article>
 
 

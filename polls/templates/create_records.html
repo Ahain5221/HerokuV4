@@ -24,6 +24,7 @@
                 -->
                 {% if user.is_superuser %}
                     <hr style="width:100px">
+                    <li><a class="btn btn-close-white" href="{% url 'add-categories' %}"> add categories</a></li>
                     <li><a class="btn btn-close-white" href="{% url 'add-books' %}"> book script</a></li>
                     <li><a class="btn btn-close-white" href="{% url 'omdb-api-page' %}"> OMDB API page</a></li>
                     <li><a class="btn btn-close-white" href="{% url 'scrape-games-redirect' %}"> Scrape games </a></li>

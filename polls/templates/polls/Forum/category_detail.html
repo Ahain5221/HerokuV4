@@ -86,12 +86,12 @@
                                         <p style="margin-top: 0; margin-bottom: 0 "><span style="margin-right: 1em"><a href="{{ thread.creator.get_absolute_url }}"><img src="{{ thread.creator.profile_image_url }}" class="card-img" style="padding: 0.15em 1em 0.1em 1em"></a></span></p>
                                     </div>
                                     <div class="col-7" style="margin-top: 4.5em">
-                                        <h3><a href="{{ thread.get_absolute_url }}"> {{ thread.title }} </a></h3>
+                                        <h3><a href="{{ thread.get_absolute_url }}" > {{ thread.title }}</a></h3>
                                         <a href="{{ thread.creator.get_absolute_url }}"> {{ thread.creator }} </a>, {{ thread.date }}
                                     </div>
                                     <div class="col-1" style="margin-left: 5em">
                                         <p style="margin: 0; font-size: small; color: white"> Replies: {{ thread.number_of_posts }} </p>
-                                        <p style="margin: 0; font-size: small; color: white"> Views: 200000 </p>
+                                        <p style="margin: 0; font-size: small; color: white"> Views: {{ thread.views }} </p>
                                     </div>
                                     <div class="col-2" style="margin-left: 5em">
                                         <a href="{{ thread.get_last_post.creator.user.profile.get_absolute_url }}"><p style="margin: 0; font-size: small"> {{ thread.get_last_post.creator.user}} </p></a>

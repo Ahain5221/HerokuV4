@@ -323,6 +323,8 @@ urlpatterns = [
     path('forum/post/update/<int:pk>/<thread_pk>', views.PostUpdate.as_view(), name='post-update'),
     path('forum/post/delete/<int:pk>/<thread_pk>', views.PostDelete.as_view(), name='post-delete'),
 
+    path("postlike/<int:pk>/<int:thread_pk>", post_like_view, name="like_post"),
+
     path('add_books/', add_books, name='add-books'),
-    path("postlike/<int:pk>/<int:thread_pk>", post_like_view, name="like_post")
+    path('add_categories/', add_categories, name='add-categories'),
 ]

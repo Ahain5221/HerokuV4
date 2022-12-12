@@ -20,25 +20,38 @@
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="https://my-pct.me/polls/forum/category/announcements-rules">Announcements & Rules</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' announcements_and_rules.slug %}">Announcements & Rules</a>
+                                    </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:</p>
-
-                                    <!-- todo
-                                    <strong>Last post:</strong>{{ forumcategory.get_last_post.creator.user}} {{forumcategory.get_last_post.date }}
-                                    -->
-
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if announcements_and_rules.get_last_post %}
+                                            {{ announcements_and_rules.get_last_post.creator.user}} {{announcements_and_rules.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
                         <li style="margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">Suggestions & Bugs</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' suggestions_and_bugs.slug %}">Suggestions & Bugs</a>
+                                    </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin: 0; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if suggestions_and_bugs.get_last_post %}
+                                            {{ suggestions_and_bugs.get_last_post.creator.user}} {{suggestions_and_bugs.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
@@ -55,10 +68,19 @@
                         <li style="margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">Appeals</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' appeals.slug %}">Appeals</a>
+                                    </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if appeals.get_last_post %}
+                                            {{ appeals.get_last_post.creator.user}} {{appeals.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
@@ -75,40 +97,76 @@
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">Books</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' books.slug %}">Books</a>
+                                    </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if books.get_last_post %}
+                                            {{ books.get_last_post.creator.user}} {{books.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">Games</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' games.slug %}">Games</a>
+                                    </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if games.get_last_post %}
+                                            {{ games.get_last_post.creator.user}} {{games.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">Movies</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' movies.slug %}">Movies</a>
+                                    </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if movies.get_last_post %}
+                                            {{ movies.get_last_post.creator.user}} {{movies.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
                         <li style="margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">Series</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' series.slug %}">Series</a>
+                                    </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin: 0; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if series.get_last_post %}
+                                            {{ series.get_last_post.creator.user}} {{series.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
@@ -125,30 +183,56 @@
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">Creative Writing</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' creative_writing.slug %}">Creative Writing</a>
+                                    </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if creative_writing.get_last_post %}
+                                            {{ creative_writing.get_last_post.creator.user}} {{creative_writing.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">Questing</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' questing.slug %}">Questing</a>
+                                    </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if questing.get_last_post %}
+                                            {{ questing.get_last_post.creator.user}} {{questing.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
                         <li style="margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">Play-by-Post</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' play_by_post.slug %}">Play-by-Post</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin: 0; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if play_by_post.get_last_post %}
+                                            {{ play_by_post.get_last_post.creator.user}} {{play_by_post.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
@@ -165,30 +249,54 @@
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">NSFW Creative Writing</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' nswf_creative_writing.slug %}">NSFW Creative Writing</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if nswf_creative_writing.get_last_post %}
+                                            {{ nswf_creative_writing.get_last_post.creator.user}} {{nswf_creative_writing.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">NSFW Questing</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' nswf_questing.slug %}">NSFW Questing</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if nswf_questing.get_last_post %}
+                                            {{ nswf_questing.get_last_post.creator.user}} {{nswf_questing.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
                         <li style="margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">NSFW Play-by-Post</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' nswf_play_by_post.slug %}">NSFW Play-by-Post</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin: 0; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if nswf_play_by_post.get_last_post %}
+                                            {{ nswf_play_by_post.get_last_post.creator.user}} {{nswf_play_by_post.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
@@ -205,20 +313,36 @@
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">General</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' general.slug %}">General</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if general.get_last_post %}
+                                            {{ general.get_last_post.creator.user}} {{general.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
                         <li style="margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-7">
-                                    <h3 style="padding: 0.5em"><span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span><a href="#">NSFW General</a></h3>
+                                    <h3 style="padding: 0.5em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                        <a href="{% url 'thread-category-detail' nswf_general.slug %}">NSFW General</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin: 0; font-size: small; color: white"> Latest threads:</p>
+                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                        {% if nswf_general.get_last_post %}
+                                            {{ nswf_general.get_last_post.creator.user}} {{nswf_general.get_last_post.date }}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
@@ -276,7 +400,9 @@
                     <h3>Members Online Now</h3>
                 </li>
                 <li>
-                    Username1, Username2, Username3, Username4, Username5, Username6, Username7, Username8, Username9, Username10
+                    {% for user in logged_users %}
+                        <a href="{{ user.profile.get_absolute_url }}">{{ user }}</a>,
+                    {% endfor %}
                 </li>
         </ol>
         <ol class="list-inline bg-dark" style="list-style-position: inside; padding-left: 0.5em; padding-top: 0.5em; border-bottom:1px solid #ccc; border-bottom-color: #555555">

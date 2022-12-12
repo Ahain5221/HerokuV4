@@ -633,17 +633,23 @@ class ForumCategory(Forum):
         posts = []
         threads = Thread.objects.filter(category_id=self.pk)
 
-        for thread in threads:
-            post = Post.objects.filter(thread_id=thread.pk).last()
-            posts.append(post)
+        if threads:
+            for thread in threads:
+                post = Post.objects.filter(thread_id=thread.pk).last()
+                if post:
+                    posts.append(post)
 
-        last_post = posts[0]
+            if not posts:
+                return None
 
-        for post in posts:
-            if int(post.pk) > last_post.pk:
-                last_post = post
+            last_post = posts[0]
 
-        return last_post
+            for post in posts:
+                if int(post.pk) > last_post.pk:
+                    last_post = post
+
+            return last_post
+        return None
 
 
 class Thread(Forum):
@@ -652,6 +658,7 @@ class Thread(Forum):
     slug = models.SlugField(unique=True, null=True)
     slug_category = models.SlugField(null=True)
     tags = TaggableManager()
+    views = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
@@ -684,6 +691,7 @@ class Post(Forum):
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
     likes = models.ManyToManyField(Profile, related_name='post_like')
     content = RichTextField(null=False)
+    likes_number = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
@@ -693,17 +701,18 @@ class Post(Forum):
 
     def number_of_likes(self):
         return self.likes.all().count()
-    
+
     def number_of_posts(self):
         return Post.objects.filter(creator=self.creator).count()
 
     def all_my_likes(self):
         count = 0
-        all_my_posts = Post.objects.filter(creator=self.creator) 
+        all_my_posts = Post.objects.filter(creator=self.creator)
         for post in all_my_posts:
             check = post.likes.all().count()
             count += check
         return count
+            #check = all_likes.filter(post_id=post.pk)
 
 
 class Like(models.Model):

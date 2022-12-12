@@ -87,6 +87,8 @@ from django.contrib.contenttypes.models import ContentType
 import random
 from polls.decorators import *
 import xlrd
+from django.contrib.sessions.models import Session
+from django.utils import timezone
 
 
 def add_books(request):
@@ -155,6 +157,28 @@ def add_books(request):
         book_object.authors.set(authors_pk)
         book_object.genre.set(genres_pk)
         book_object.languages.set(languages_pk)
+
+    return redirect('index')
+
+
+def add_categories(request):
+    link = "polls/static/category.xls"
+
+    workbook = xlrd.open_workbook(link)
+    sheet = workbook.sheet_by_name('Sheet1')
+
+    for row in range(1, sheet.nrows):
+
+        name = str(sheet.cell(row, 0).value)
+        summary = sheet.cell(row, 1).value
+
+        ForumCategory.objects.update_or_create(
+            title=name,
+            defaults=
+            {
+                'content': summary
+            }
+        )
 
     return redirect('index')
 
@@ -1991,8 +2015,6 @@ def movie_verification_stuff_page(request):
     return redirect('stuff-verification')
 
 
-
-
 class ProfileWatchlist(generic.DetailView):
     model = Profile
     template_name = "polls/Profile/watchlist.html"
@@ -3794,25 +3816,28 @@ class ThreadDetailView(generic.DetailView, FormMixin):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
 
+        thread = self.get_object()
+        thread.views += 1
+        thread.save()
+
         posts_connected = Post.objects.filter(
             thread=self.get_object()).order_by('-date')
         data['posts'] = posts_connected
+
         if self.request.user.is_authenticated:
+            posts_liked = []
+            profile = Profile.objects.filter(user_id=self.request.user.pk).first()
             data['post_form'] = PostForm(instance=self.request.user)
-        try:
-            read_likes_connected = get_object_or_404(Thread, slug=self.kwargs['slug'])
 
-            post_likes_connected = get_object_or_404(Post, id=self.kwargs['pk'])
-            liked = False
-
-            # todo
-            if post_likes_connected.likes.filter(post__likes__user_id__in=self.request.user.id).exists():
-                liked = True
-            data['number_of_likes'] = post_likes_connected.number_of_likes()
-            data['thread_is_liked'] = liked
-
-        except:
-            return data
+            posts = list(posts_connected.values_list('id', flat=True))
+            for post_pk in posts:
+                # test1111 = profile.post_like.values_list('id', flat=True)
+                if profile.post_like.filter(id=post_pk).exists():
+                    posts_liked.append(True)
+                else:
+                    posts_liked.append(False)
+            print(posts_liked)
+            data['posts'] = zip(posts_liked, posts_connected)
 
         return data
 
@@ -3841,15 +3866,18 @@ class ThreadDetailView(generic.DetailView, FormMixin):
 
 def post_like_view(request, pk, thread_pk):
     post = get_object_or_404(Post, id=pk)
+    number_of_likes = post.likes_number
     if post.likes.filter(id=request.user.id).exists():
         post.likes.remove(request.user.profile)
+        number_of_likes -= 1
     else:
         post.likes.add(request.user.profile)
+        number_of_likes += 1
+    post.likes_number = number_of_likes
+    post.save()
 
     get_thread_object_slug = Thread.objects.get(pk=thread_pk).slug
     get_thread_object_slug_category = Thread.objects.get(pk=thread_pk).slug_category
-    #return reverse('thread-detail',
-                   #kwargs={'slug_category': get_thread_object_slug_category, 'slug': get_thread_object_slug})
 
     return HttpResponseRedirect(reverse('thread-detail', args=[get_thread_object_slug_category, get_thread_object_slug]))
 
@@ -3899,9 +3927,37 @@ class ThreadCategoryListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
+
+        sessions = Session.objects.filter(expire_date__gte=timezone.now())
+        users_list = []
+
+        for session in sessions:
+            data = session.get_decoded()
+            users_list.append(data.get('_auth_user_id', None))
+
         profile = Profile.objects.filter(user=self.request.user).first()
         data['profile'] = profile
+
+        data['announcements_and_rules'] = ForumCategory.objects.filter(title='announcements & rules').first()
+        data['suggestions_and_bugs'] = ForumCategory.objects.filter(title='suggestions & bugs').first()
+        data['appeals'] = ForumCategory.objects.filter(title='appeals').first()
+        data['books'] = ForumCategory.objects.filter(title='books').first()
+        data['games'] = ForumCategory.objects.filter(title='games').first()
+        data['movies'] = ForumCategory.objects.filter(title='movies').first()
+        data['series'] = ForumCategory.objects.filter(title='series').first()
+        data['creative_writing'] = ForumCategory.objects.filter(title='creative writing').first()
+        data['questing'] = ForumCategory.objects.filter(title='questing').first()
+        data['play_by_post'] = ForumCategory.objects.filter(title='play by post').first()
+        data['nswf_creative_writing'] = ForumCategory.objects.filter(title='nswf creative writing').first()
+        data['nswf_questing'] = ForumCategory.objects.filter(title='nswf questing').first()
+        data['nswf_play_by_post'] = ForumCategory.objects.filter(title='nswf play by post').first()
+        data['general'] = ForumCategory.objects.filter(title='general').first()
+        data['nswf_general'] = ForumCategory.objects.filter(title='nswf general').first()
+
+        data['logged_users'] = User.objects.filter(id__in=users_list)
+
         return data
+
 
 class ThreadCategoryDetailView(generic.DetailView, FormMixin):
     template_name = "polls/Forum/category_detail.html"

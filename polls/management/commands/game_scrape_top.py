@@ -14,7 +14,7 @@ class Command(BaseCommand):
         added_games = 0
         # error_counter = 0
 
-        for i in range(1, 20):
+        for i in range(1, 40):
             steams_ids, end = scrape_steam_ids(i, start)
             if end:
                 exit()

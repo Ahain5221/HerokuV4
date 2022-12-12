@@ -70,8 +70,8 @@
                         <p style="font-size: smaller; margin: 0 0 0 0.5em">Title</p>
                         <p style="font-size: 0.5vw; margin: 0 0 0 0.5em">
                             Joined: {{ post.creator.user.date_joined.date }} </p>
-                        <p style="font-size: 0.5vw; margin: 0 0 0 0.5em"> Posts: </p>
-                        <p style="font-size: 0.5vw; margin: 0 0 0 0.5em">Likes received:</p>
+                        <p style="font-size: 0.5vw; margin: 0 0 0 0.5em"> Posts: {{ post.number_of_posts }} </p>
+                        <p style="font-size: 0.5vw; margin: 0 0 0 0.5em">Likes received:{{ post.all_my_likes }}</p>
                     </div>
                     <div class="col-10 bg-dark"
                          style="padding: 0 1em 0 1.25em; margin-left: 1em; height: auto; width: 90.66667%;">

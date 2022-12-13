@@ -186,7 +186,7 @@
 
             <th>
                 {{ series_watchlist.series_status }}
-                {% if series_watchlist.progress %}
+                {% if series_watchlist.progress and series_watchlist.progress != 'None' %}
                     ({{ series_watchlist.progress }})
                 {% endif %}
             </th>

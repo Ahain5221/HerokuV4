@@ -172,13 +172,16 @@ def add_categories(request):
         name = str(sheet.cell(row, 0).value)
         summary = sheet.cell(row, 1).value
 
-        ForumCategory.objects.update_or_create(
+        category_object, created = ForumCategory.objects.update_or_create(
             title=name,
             defaults=
             {
                 'content': summary
-            }
-        )
+            })
+
+        category_pk = category_object.pk
+        thread_object = Thread(title='Q&A', tags='q&a', category_id=category_pk, creator=request.user.profile)
+        thread_object.save()
 
     return redirect('index')
 
@@ -3781,80 +3784,59 @@ def search_result_general(request):
         return render(request, 'polls/search_result.html')
 
 
-class ThreadCreate(UserPassesTestMixin, CreateView):
-    model = Thread
-    form_class = ThreadForm
-    template_name = "polls/Forum/thread_create.html"
-
-    def form_view(self, request, pk):
-        if 'category_id' in request == "POST":
-            category = get_object_or_404(ForumCategory, id=pk)
-            saved_category = Thread(category=category)
-            saved_category.save()
-
-        return render(request, 'polls/Forum/thread_create.html', {'form': ThreadCreate()})
-
-    def form_valid(self, form):
-        form.instance.creator = self.request.user.profile
-        form.instance.category_id = self.kwargs['category_pk']
-        return super().form_valid(form)
-
-    def test_func(self):
-        return self.request.user.is_authenticated
-
-    def handle_no_permission(self):
-        return redirect('login')
-
-
-class ThreadListView(generic.ListView):
-    template_name = "polls/Forum/thread_list.html"
-    model = Thread
-    paginate_by = 10
-
-
-class ThreadDetailView(generic.DetailView, FormMixin):
-    template_name = "polls/Forum/thread_detail.html"
-    model = Thread
+class PostListView(FormMixin, generic.ListView):
+    template_name = "polls/Forum/post_list.html"
+    model = Post
     form_class = PostForm
-    count_hit = True
+    # count_hit = True
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
 
-        thread = self.get_object()
+        category_slug = self.kwargs['slug_category']
+        thread_slug = self.kwargs['slug']
+
+        thread = Thread.objects.filter(slug=thread_slug).first()
+        category = ForumCategory.objects.filter(slug=category_slug).first()
+
         thread.views += 1
         thread.save()
 
-        posts_connected = Post.objects.filter(
-            thread=self.get_object()).order_by('-date')
-        data['posts'] = posts_connected
+        posts = Post.objects.filter(thread=thread).order_by('-date')
+        data['posts'] = posts
+        data['thread'] = thread
+        data['category'] = category
 
         if self.request.user.is_authenticated:
             posts_liked = []
             profile = Profile.objects.filter(user_id=self.request.user.pk).first()
             data['post_form'] = PostForm(instance=self.request.user)
 
-            posts = list(posts_connected.values_list('id', flat=True))
-            for post_pk in posts:
+            # posts_pk = list(posts.values_list('id', flat=True))
+            for post in posts:
                 # test1111 = profile.post_like.values_list('id', flat=True)
-                if profile.post_like.filter(id=post_pk).exists():
+                if profile.post_like.filter(id=post.pk).exists():
                     posts_liked.append(True)
                 else:
                     posts_liked.append(False)
+                test123 = post.likes.all()
             print(posts_liked)
-            data['posts'] = zip(posts_liked, posts_connected)
+            data['posts'] = zip(posts_liked, posts)
 
         return data
 
-    def form_view(request):
-        return render(request, 'polls/Forum/thread_detail.html', {'form': ThreadDetailView()})
+    def form_view(self):
+        return render(self.request, 'polls/Forum/post_list.html', {'form': PostListView()})
 
     def get_success_url(self):
-        return reverse('thread-detail', kwargs={'slug_category': self.object.slug_category, 'slug': self.object.slug})
+        return reverse('post-list', kwargs={'slug_category': self.kwargs['slug_category'],
+                                            'slug': self.kwargs['slug']})
 
     def post(self, request, *args, **kwargs):
         if self.request.method == 'POST':
-            self.object = self.get_object()
+            # thread_slug = self.kwargs['slug']
+            # thread = Thread.objects.filter(slug=thread_slug).first()
+            # self.object = thread
             form = self.get_form()
             if form.is_valid():
                 return self.form_valid(form)
@@ -3862,11 +3844,14 @@ class ThreadDetailView(generic.DetailView, FormMixin):
                 return self.form_invalid(form)
 
     def form_valid(self, form):
+        thread_slug = self.kwargs['slug']
+        thread = Thread.objects.filter(slug=thread_slug).first()
+
         new_post = Post(content=form.data['content'],
                         creator=self.request.user.profile,
-                        thread=self.get_object())
+                        thread=thread)
         new_post.save()
-        return super(ThreadDetailView, self).form_valid(form)
+        return super(PostListView, self).form_valid(form)
 
 
 def post_like_view(request, pk, thread_pk):
@@ -3884,7 +3869,7 @@ def post_like_view(request, pk, thread_pk):
     get_thread_object_slug = Thread.objects.get(pk=thread_pk).slug
     get_thread_object_slug_category = Thread.objects.get(pk=thread_pk).slug_category
 
-    return HttpResponseRedirect(reverse('thread-detail', args=[get_thread_object_slug_category, get_thread_object_slug]))
+    return HttpResponseRedirect(reverse('post-list', args=[get_thread_object_slug_category, get_thread_object_slug]))
 
 
 class ThreadUpdate(UserPassesTestMixin, UpdateView):
@@ -3909,7 +3894,7 @@ def ThreadLike(request, pk):
     return HttpResponseRedirect(reverse('thread-detail', args=[str(thread.slug_category),str(thread.slug)]))
 
 
-class ThreadCategoryCreate(UserPassesTestMixin, CreateView):
+class CategoryCreate(UserPassesTestMixin, CreateView):
     model = ForumCategory
     form_class = ThreadCategoryForm
     template_name = "polls/Forum/category_create.html"
@@ -3922,10 +3907,10 @@ class ThreadCategoryCreate(UserPassesTestMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.creator = self.request.user.profile
-        return super(ThreadCategoryCreate, self).form_valid(form)
+        return super(CategoryCreate, self).form_valid(form)
 
 
-class ThreadCategoryListView(generic.ListView):
+class CategoryListView(generic.ListView):
     template_name = "polls/Forum/category.html"
     model = ForumCategory
     paginate_by = 10
@@ -3964,29 +3949,51 @@ class ThreadCategoryListView(generic.ListView):
         return data
 
 
-class ThreadCategoryDetailView(generic.DetailView, FormMixin):
-    template_name = "polls/Forum/category_detail.html"
-    model = ForumCategory
+class ThreadListView(generic.ListView):
+    template_name = "polls/Forum/thread_list.html"
+    # model = Thread
     paginate_by = 20
-    form_class = ThreadForm
+    # ordering = 'date'
 
     def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        profile = Profile.objects.filter(user=self.request.user).first()
-        num_visits = self.request.session.get('num_visits', 0)
-        self.request.session['num_visits'] = num_visits + 1
+        context = super().get_context_data()
+        category = ForumCategory.objects.filter(slug=self.kwargs['slug']).first()
+        context['category'] = category
+        return context
 
-        threads_connected = Thread.objects.filter(
-            category=self.get_object()).order_by('-date')
-        data['profile'] = profile
-        data['threads'] = threads_connected
-        data['num_visits'] = num_visits
-        if self.request.user.is_authenticated:
-            data['thread_form'] = ThreadForm(instance=self.request.user.profile)
-        return data
+    def get_queryset(self):
+        queryset = Thread.objects.filter(slug_category=self.kwargs['slug']).order_by('-date')
+        return queryset
+
+
+class ThreadCreate(UserPassesTestMixin, CreateView):
+    model = Thread
+    form_class = ThreadForm
+    template_name = "polls/Forum/thread_create.html"
+
+    #def form_view(self, request, pk):
+     #   if 'category_id' in request == "POST":
+      #       category = get_object_or_404(ForumCategory, id=pk)
+       #      saved_category = Thread(category=category)
+        #     saved_category.save()
+
+         #return render(request, 'polls/Forum/thread_create.html', {'form': ThreadCreate()})
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user.profile
+        form.instance.category_id = self.kwargs['category_pk']
+        return super().form_valid(form)
+
+    def test_func(self):
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        return redirect('login')
 
     def get_success_url(self):
-        return reverse('thread-category-detail', kwargs={'slug': self.object.slug})
+        category_slug = ForumCategory.objects.get(pk=self.kwargs['category_pk']).slug
+        thread_slug = Thread.objects.get(pk=self.object.id).slug
+        return reverse('post-list', kwargs={'slug_category': category_slug, 'slug': thread_slug})
 
 
 class ThreadCategoryUpdate(UserPassesTestMixin, UpdateView):
@@ -4001,6 +4008,7 @@ class ThreadCategoryUpdate(UserPassesTestMixin, UpdateView):
         return redirect('index')
 
 
+"""
 class PostCreate(UserPassesTestMixin, CreateView):
     model = Thread
     form_class = ThreadForm
@@ -4015,17 +4023,7 @@ class PostCreate(UserPassesTestMixin, CreateView):
 
     def handle_no_permission(self):
         return redirect('login')
-
-
-class PostDetailView(generic.DetailView):
-    template_name = "polls/Forum/post_detail.html"
-    model = Post
-
-
-class PostListView(generic.ListView):
-    template_name = "polls/Forum/category.html"
-    model = Post
-    paginate_by = 10
+"""
 
 
 class PostUpdate(UserPassesTestMixin, UpdateView):
@@ -4046,7 +4044,8 @@ class PostUpdate(UserPassesTestMixin, UpdateView):
         get_thread_object_slug = Thread.objects.get(pk=self.kwargs['thread_pk']).slug
         get_thread_object_slug_category = Thread.objects.get(pk=self.kwargs['thread_pk']).slug_category
 
-        return reverse('thread-detail', kwargs={'slug_category': get_thread_object_slug_category,'slug': get_thread_object_slug})
+        return reverse('post-list', kwargs={'slug_category': get_thread_object_slug_category,
+                                            'slug': get_thread_object_slug})
 
 
 class ThreadDelete(UserPassesTestMixin, DeleteView):
@@ -4062,6 +4061,7 @@ class ThreadDelete(UserPassesTestMixin, DeleteView):
         return redirect('index')
 
 
+"""
 class ThreadCategoryDelete(UserPassesTestMixin, DeleteView):
     model = ForumCategory
     template_name = "polls/Forum/category_delete.html"
@@ -4073,6 +4073,7 @@ class ThreadCategoryDelete(UserPassesTestMixin, DeleteView):
 
     def handle_no_permission(self):
         return redirect('index')
+"""
 
 
 class PostDelete(UserPassesTestMixin, DeleteView):
@@ -4101,7 +4102,7 @@ class PostDelete(UserPassesTestMixin, DeleteView):
     def get_success_url(self):
         get_thread_object_slug = Thread.objects.get(pk=self.kwargs['thread_pk']).slug
         get_thread_object_slug_category = Thread.objects.get(pk=self.kwargs['thread_pk']).slug_category
-        return reverse('thread-detail',
+        return reverse('post-list',
                        kwargs={'slug_category': get_thread_object_slug_category, 'slug': get_thread_object_slug})
 
 

@@ -520,6 +520,8 @@ class SeriesWatchlist(models.Model):
                 choices.append(
                     ('S' + str(season_number) + 'E' + str(episode), 'S' + str(season_number) + 'E' + str(episode)))
 
+        if not choices:
+            return [None]
         return choices
 
 

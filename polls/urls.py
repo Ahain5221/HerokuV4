@@ -298,26 +298,26 @@ urlpatterns = [
     path('test1/', views.bulk_create, name='test1'),
     path('carnage/', delete_unverified_users, name='carnage'),
 
-    path('forum/thread/', views.ThreadListView.as_view(), name='thread'),
+    # path('forum/thread/', views.ThreadListView.as_view(), name='thread'),
     path('forum/thread/create/<int:category_pk>', views.ThreadCreate.as_view(), name='thread-create'),
     path('forum/thread/<int:pk>/delete', views.ThreadDelete.as_view(), name='thread-delete'),
     path('forum/thread/<int:pk>/update', views.ThreadUpdate.as_view(), name='thread-update'),
     path('thread-like/<int:pk>', views.ThreadLike, name="thread_like"),
 
-    path('forum/', views.ThreadCategoryListView.as_view(), name='category'),
-    path('forum/category/create', views.ThreadCategoryCreate.as_view(), name='category-create'),
-    path('forum/category/<int:pk>/delete', views.ThreadCategoryDelete.as_view(), name='thread-category-delete'),
+    path('forum/', views.CategoryListView.as_view(), name='category'),
+    path('forum/category/create', views.CategoryCreate.as_view(), name='category-create'),
+    # path('forum/category/<int:pk>/delete', views.ThreadCategoryDelete.as_view(), name='thread-category-delete'),
     path('forum/category/<int:pk>/update', views.ThreadCategoryUpdate.as_view(), name='category-update'),
 
     # Trzymać je na dole, bo narobią zamętu...
-    path('forum/category/<slug:slug>', views.ThreadCategoryDetailView.as_view(), name='thread-category-detail'),
-    path('forum/<slug:slug_category>/<slug:slug>', views.ThreadDetailView.as_view(), name='thread-detail'),
+    path('forum/category/<slug:slug>', views.ThreadListView.as_view(), name='thread-list'),
+    path('forum/<slug:slug_category>/<slug:slug>', views.PostListView.as_view(), name='post-list'),
 
 
     # Ruszę to najwyżej jeśli będzie to miało jakikolwiek sens
     path('post/', views.PostListView.as_view(), name='post'),
-    path('post/create', views.PostCreate.as_view(), name='post-create'),
-    path('post/<int:pk>', views.PostDetailView.as_view(), name='post-detail'),
+    # path('post/create', views.PostCreate.as_view(), name='post-create'),
+    # path('post/<int:pk>', views.PostDetailView.as_view(), name='post-detail'),
     # Te dwa niby trzeba ruszyć, eh.
 
     path('forum/post/update/<int:pk>/<thread_pk>', views.PostUpdate.as_view(), name='post-update'),

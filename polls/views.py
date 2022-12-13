@@ -2665,7 +2665,10 @@ def scrape_steam_ids(page, start):
     table = BeautifulSoup(response.content, 'lxml', parse_only=only_item_cells)
     games = table.find_all("a")
     for game in games:
-        steam_ids.append(game['data-ds-appid'])
+        try:
+            steam_ids.append(game['data-ds-appid'])
+        except KeyError:
+            pass
         if time() - start > 25:
             return steam_ids, True
 

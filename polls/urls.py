@@ -301,7 +301,7 @@ urlpatterns = [
     # path('forum/thread/', views.ThreadListView.as_view(), name='thread'),
     path('forum/thread/create/<int:category_pk>', views.ThreadCreate.as_view(), name='thread-create'),
     path('forum/thread/<int:pk>/delete', views.ThreadDelete.as_view(), name='thread-delete'),
-    path('forum/thread/<int:pk>/update', views.ThreadUpdate.as_view(), name='thread-update'),
+    path('forum/thread/<int:pk>/update/<category_slug>', views.ThreadUpdate.as_view(), name='thread-update'),
     path('thread-like/<int:pk>', views.ThreadLike, name="thread_like"),
 
     path('forum/', views.CategoryListView.as_view(), name='category'),
@@ -310,7 +310,7 @@ urlpatterns = [
     path('forum/category/<int:pk>/update', views.ThreadCategoryUpdate.as_view(), name='category-update'),
 
     # Trzymać je na dole, bo narobią zamętu...
-    path('forum/category/<slug:slug>', views.ThreadListView.as_view(), name='thread-list'),
+    path('forum/category/<slug:slug>/<order_by>', views.ThreadListView.as_view(), name='thread-list'),
     path('forum/<slug:slug_category>/<slug:slug>', views.PostListView.as_view(), name='post-list'),
 
 
@@ -326,5 +326,8 @@ urlpatterns = [
     path("postlike/<int:pk>/<int:thread_pk>", post_like_view, name="like_post"),
 
     path('add_books/', add_books, name='add-books'),
+    path('book_test/', test_books_scrap, name='test'),
     path('add_categories/', add_categories, name='add-categories'),
+
+    path('tweet_list/', views.tweet_list, name='tweet_list')
 ]

@@ -31,6 +31,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 
@@ -89,6 +90,11 @@ from polls.decorators import *
 import xlrd
 from django.contrib.sessions.models import Session
 from django.utils import timezone
+
+# twitter imports
+import tweepy
+from tweepy.auth import OAuthHandler
+from .models import Tweet
 
 
 def add_books(request):
@@ -423,18 +429,21 @@ def index(request):
     if request.user.is_authenticated:
 
         # num_visits = request.session.get('num_visits', 0)
-        last_book = Book.objects.filter(Verified=True).last()
+        #last_book = Book.objects.filter(Verified=True).last()
         last_game = Game.objects.filter(Verified=True).last()
         last_series = Series.objects.filter(Verified=True).last()
         last_movie = Movie.objects.filter(Verified=True).last()
 
+        tweets = Tweet.objects.order_by('-published_date')[:10]
+
         # request.session['num_visits'] = num_visits + 1
 
         index_context = {
-            'last_book': last_book,
+            # 'last_book': last_book,
             'last_game': last_game,
             'last_series': last_series,
-            'last_movie': last_movie
+            'last_movie': last_movie,
+            'tweets': tweets
         }
         return render(request, 'index.html', context=index_context)
 
@@ -930,15 +939,13 @@ def book_verification(request, pk):
     return HttpResponseRedirect(reverse('book-detail', args=[str(pk)]))
 
 
-
-
 def book_verification_stuff_page(request):
     list_of_books = request.POST.getlist('books-select')
     if not list_of_books:
         return redirect("stuff-verification")
     query_set_of_books = Book.objects.none()
-    for id in list_of_books:
-        get_book_in_query = Book.objects.filter(pk=id)
+    for book_id in list_of_books:
+        get_book_in_query = Book.objects.filter(pk=book_id)
         query_set_of_books = query_set_of_books | get_book_in_query
     list_of_books = query_set_of_books
     for book_object in list_of_books:
@@ -954,8 +961,6 @@ def book_verification_stuff_page(request):
             book_object.Verified = True
             book_object.save(update_fields=['Verified'])
     return redirect("stuff-verification")
-
-
 
 
 class CreateBookReview(UserPassesTestMixin, CreateView):
@@ -1449,6 +1454,7 @@ class GameDelete(UserPassesTestMixin, DeleteView):
         messages.success(self.request, "The game has been deleted!")
         return super().form_valid(form)
 
+
 """
 def mail_notification(thing_object, basic_message_content, additional):
     user_email = thing_object.added_by.email
@@ -1558,7 +1564,6 @@ class UserEditView(UserPassesTestMixin, generic.UpdateView):
 class UserProfileEditView(UserPassesTestMixin, generic.UpdateView):
     model = Profile
     form_class = UserProfileEditForm
-    success_url = reverse_lazy("index")
     template_name = "polls/Game/edit_profile.html"
 
     def get_object(self):
@@ -1569,6 +1574,9 @@ class UserProfileEditView(UserPassesTestMixin, generic.UpdateView):
 
     def handle_no_permission(self):
         return redirect('index')
+
+    def get_success_url(self):
+        return reverse('profile-page', args=[str(self.object.user)])
 
 
 @login_required(login_url='/polls/login/')
@@ -1782,8 +1790,8 @@ def game_verification_stuff_page(request):
     if not list_of_games:
         return redirect("stuff-verification")
     query_set_of_games = Game.objects.none()
-    for id in list_of_games:
-        get_game_in_query = Game.objects.filter(pk=id)
+    for game_id in list_of_games:
+        get_game_in_query = Game.objects.filter(pk=game_id)
         query_set_of_games = query_set_of_games | get_game_in_query
     list_of_games = query_set_of_games
     for game in list_of_games:
@@ -1988,6 +1996,7 @@ def movie_verification(request, pk):
         movie_object.save(update_fields=['Verified'])
     return HttpResponseRedirect(reverse('movie-detail', args=[str(pk)]))
 
+
 @stuff_or_superuser_required
 def movie_verification_stuff_page(request):
 
@@ -1995,8 +2004,8 @@ def movie_verification_stuff_page(request):
     if not list_of_movies:
         return redirect("stuff-verification")
     query_set_of_movies = Game.objects.none()
-    for id in list_of_movies:
-        get_movie_in_query = Movie.objects.filter(pk=id)
+    for movie_id in list_of_movies:
+        get_movie_in_query = Movie.objects.filter(pk=movie_id)
         query_set_of_movies = query_set_of_movies | get_movie_in_query
     list_of_movies = query_set_of_movies
     for movie_object in list_of_movies:
@@ -2463,14 +2472,15 @@ def series_verification(request, pk):
         series_object.save(update_fields=['Verified'])
     return HttpResponseRedirect(reverse('series-detail', args=[str(pk)]))
 
+
 @stuff_or_superuser_required
 def series_verification_stuff_page(request):
     list_of_series = request.POST.getlist('series-select')
     if not list_of_series:
         return redirect("stuff-verification")
     query_set_of_series = Series.objects.none()
-    for id in list_of_series:
-        get_series_in_query = Series.objects.filter(pk=id)
+    for series_id in list_of_series:
+        get_series_in_query = Series.objects.filter(pk=series_id)
         query_set_of_series = query_set_of_series | get_series_in_query
     list_of_series = query_set_of_series
 
@@ -2495,7 +2505,6 @@ def series_verification_stuff_page(request):
             series_object.Verified = True
             series_object.save(update_fields=['Verified'])
         return redirect("stuff-verification")
-
 
 
 class ActorListView(generic.ListView):
@@ -3772,6 +3781,7 @@ def search_result_general(request):
             searched_movies = Movie.objects.none()
             searched_series = Series.objects.none()
             searched_books = Book.objects.none()
+
             searched_actors = Actor.objects.none()
         return render(request, 'polls/search_result.html',
                       {'searched_profiles': searched_profiles,
@@ -3784,14 +3794,23 @@ def search_result_general(request):
         return render(request, 'polls/search_result.html')
 
 
-class PostListView(FormMixin, generic.ListView):
+class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
     template_name = "polls/Forum/post_list.html"
     model = Post
     form_class = PostForm
+    paginate_by = 30
     # count_hit = True
+
+    def test_func(self):
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        return redirect('login')
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
+        page_number = data['page_obj'].number
+        pagi_by = PostListView.paginate_by
 
         category_slug = self.kwargs['slug_category']
         thread_slug = self.kwargs['slug']
@@ -3802,7 +3821,7 @@ class PostListView(FormMixin, generic.ListView):
         thread.views += 1
         thread.save()
 
-        posts = Post.objects.filter(thread=thread).order_by('-date')
+        posts = Post.objects.filter(thread=thread).order_by('date')
         data['posts'] = posts
         data['thread'] = thread
         data['category'] = category
@@ -3812,18 +3831,43 @@ class PostListView(FormMixin, generic.ListView):
             profile = Profile.objects.filter(user_id=self.request.user.pk).first()
             data['post_form'] = PostForm(instance=self.request.user)
 
+            paginator_posts = Paginator(posts, pagi_by)
+            try:
+                paginator_posts = paginator_posts.page(page_number)
+            except PageNotAnInteger:
+                paginator_posts = paginator_posts.page(page_number)
+            except EmptyPage:
+                paginator_posts = paginator_posts.page(paginator_posts.num_pages)
+
             # posts_pk = list(posts.values_list('id', flat=True))
-            for post in posts:
+            for post in paginator_posts.object_list:
                 # test1111 = profile.post_like.values_list('id', flat=True)
                 if profile.post_like.filter(id=post.pk).exists():
                     posts_liked.append(True)
                 else:
                     posts_liked.append(False)
                 test123 = post.likes.all()
+
+            paginator_like = Paginator(posts_liked, pagi_by)
+            try:
+                pagi_like = paginator_like.page(page_number)
+            except PageNotAnInteger:
+                pagi_like = paginator_like.page(page_number)
+            except EmptyPage:
+                pagi_like = paginator_like.page(paginator_like.num_pages)
+
             print(posts_liked)
-            data['posts'] = zip(posts_liked, posts)
+            data['posts'] = zip(pagi_like.object_list, paginator_posts.object_list)
 
         return data
+
+    def get_queryset(self, *args, **kwargs):
+        thread_slug = self.kwargs['slug']
+
+        thread = Thread.objects.filter(slug=thread_slug).first()
+        thread_pk = thread.pk
+
+        return super().get_queryset(*args, **kwargs).filter(thread_id=thread_pk).order_by('-date')
 
     def form_view(self):
         return render(self.request, 'polls/Forum/post_list.html', {'form': PostListView()})
@@ -3851,6 +3895,10 @@ class PostListView(FormMixin, generic.ListView):
                         creator=self.request.user.profile,
                         thread=thread)
         new_post.save()
+        thread.number_of_posts += 1
+        thread.last_post_date = datetime.datetime.now()
+        thread.views -= 1
+        thread.save()
         return super(PostListView, self).form_valid(form)
 
 
@@ -3866,7 +3914,10 @@ def post_like_view(request, pk, thread_pk):
     post.likes_number = number_of_likes
     post.save()
 
-    get_thread_object_slug = Thread.objects.get(pk=thread_pk).slug
+    thread = Thread.objects.get(pk=thread_pk)
+    thread.views -= 1
+    thread.save()
+    get_thread_object_slug = thread.slug
     get_thread_object_slug_category = Thread.objects.get(pk=thread_pk).slug_category
 
     return HttpResponseRedirect(reverse('post-list', args=[get_thread_object_slug_category, get_thread_object_slug]))
@@ -3882,6 +3933,15 @@ class ThreadUpdate(UserPassesTestMixin, UpdateView):
 
     def handle_no_permission(self):
         return redirect('index')
+
+    def get_success_url(self):
+        category_slug = self.kwargs['category_slug']
+        thread = Thread.objects.get(pk=self.object.id)
+        thread.views -= 1
+        thread.save()
+        thread_slug = thread.slug
+
+        return reverse('post-list', kwargs={'slug_category': category_slug, 'slug': thread_slug})
 
 
 def ThreadLike(request, pk):
@@ -3910,10 +3970,16 @@ class CategoryCreate(UserPassesTestMixin, CreateView):
         return super(CategoryCreate, self).form_valid(form)
 
 
-class CategoryListView(generic.ListView):
+class CategoryListView(UserPassesTestMixin, generic.ListView):
     template_name = "polls/Forum/category.html"
     model = ForumCategory
     paginate_by = 10
+
+    def test_func(self):
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        return redirect('login')
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -3924,6 +3990,8 @@ class CategoryListView(generic.ListView):
         for session in sessions:
             data = session.get_decoded()
             users_list.append(data.get('_auth_user_id', None))
+
+        last_posts = Post.objects.order_by('-id')[:3]
 
         profile = Profile.objects.filter(user=self.request.user).first()
         data['profile'] = profile
@@ -3945,24 +4013,37 @@ class CategoryListView(generic.ListView):
         data['nswf_general'] = ForumCategory.objects.filter(title='nswf general').first()
 
         data['logged_users'] = User.objects.filter(id__in=users_list)
+        data['last_posts'] = last_posts
 
         return data
 
 
-class ThreadListView(generic.ListView):
+class ThreadListView(UserPassesTestMixin, generic.ListView):
     template_name = "polls/Forum/thread_list.html"
     # model = Thread
     paginate_by = 20
     # ordering = 'date'
 
+    def test_func(self):
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        return redirect('login')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         category = ForumCategory.objects.filter(slug=self.kwargs['slug']).first()
+        order_by = self.kwargs['order_by']
+        context['order_by'] = order_by
         context['category'] = category
+        context['sticky'] = Thread.objects.filter(category=category).first()
         return context
 
     def get_queryset(self):
-        queryset = Thread.objects.filter(slug_category=self.kwargs['slug']).order_by('-date')
+        order_by = self.kwargs['order_by']
+        category = ForumCategory.objects.filter(slug=self.kwargs['slug']).first()
+        sticky = Thread.objects.filter(category=category).first()
+        queryset = Thread.objects.filter(slug_category=self.kwargs['slug']).exclude(id=sticky.pk).order_by(order_by)
         return queryset
 
 
@@ -4041,7 +4122,12 @@ class PostUpdate(UserPassesTestMixin, UpdateView):
         return redirect('index')
 
     def get_success_url(self):
-        get_thread_object_slug = Thread.objects.get(pk=self.kwargs['thread_pk']).slug
+        thread = Thread.objects.get(pk=self.kwargs['thread_pk'])
+
+        thread.views -= 1
+        thread.save()
+
+        get_thread_object_slug = thread.slug
         get_thread_object_slug_category = Thread.objects.get(pk=self.kwargs['thread_pk']).slug_category
 
         return reverse('post-list', kwargs={'slug_category': get_thread_object_slug_category,
@@ -4097,6 +4183,12 @@ class PostDelete(UserPassesTestMixin, DeleteView):
             basic_message_content = 'Your post was deleted from PTC'
             mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'creator')
         messages.success(self.request, "The post has been deleted!")
+
+        thread = Thread.objects.get(pk=self.kwargs['thread_pk'])
+        thread.number_of_posts -= 1
+        thread.views -= 1
+        thread.save()
+
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -4115,3 +4207,84 @@ def tagged(request, slug):
         'threads': threads,
     }
     return render(request, 'index.html', context)
+
+
+@stuff_or_superuser_required
+def test_books_scrap(request):
+    isbn = '9781486219506'
+    direct_url = 'https://openlibrary.org/isbn/'+isbn
+    basic_url_api = 'https://openlibrary.org/api/books?bibkeys=ISBN:'+isbn+'&jscmd=data&format=json'
+
+    response = requests.get(basic_url_api)
+    response2 = response
+    jsoned_data_from_response = response2.json()
+
+    # Getting title
+    title = jsoned_data_from_response['ISBN:9781486219506']['title']
+
+    # Getting authors
+    authors = []
+
+    author = jsoned_data_from_response['ISBN:9781486219506']['authors']
+    for auth in author:
+        author_name = auth['name']
+        authors.append(author_name)
+
+    # Getting poster
+
+    poster_url = jsoned_data_from_response['ISBN:9781486219506']['cover']['large']
+
+    # Getting genres if possible - Not really possible : D
+
+    genres = jsoned_data_from_response['ISBN:9781486219506']['subjects']
+    get_all_genres = MovieSeriesGenre.objects.all()
+    for genre in get_all_genres:
+        texx = genre
+    for genre in genres:
+        test = genre['name'].lower()
+        test2 = MovieSeriesGenre.objects.filter(name__iexact=test)
+        if test2:
+            print("OKKK")
+        else:
+            print("meh")
+    # Getting description
+    response = requests.get(direct_url)
+
+    only_item_cells = SoupStrainer("div", attrs={'class': 'book-description'})
+    table = BeautifulSoup(response.content, 'lxml', parse_only=only_item_cells)
+    games = table.find_all("p")
+    description = games[0]
+    test = description.next
+    final_description = str(test)
+    return redirect('index')
+
+
+def api_user_tweets():
+    client = tweepy.Client(bearer_token=os.environ['TWITTER_API'])
+    query = 'from:PopCultureTrack'
+    tweets = client.search_recent_tweets(query=query, max_results=10, tweet_fields=['created_at', 'author_id'])
+    return tweets
+
+
+def tweet_save_to_db():
+    original_tweets = api_user_tweets()
+    for original_tweet in original_tweets.data:
+        if not Tweet.objects.filter(tweet_id=original_tweet.id):
+            new_tweet = Tweet(tweet_id=original_tweet.id,
+                              author_id=original_tweet.author_id,
+                              tweet_text=original_tweet.text,
+                              published_date=original_tweet.created_at)
+            new_tweet.save()
+
+
+def tweet_list(request):
+    #expand
+    tweet_fetch(request)
+    tweets = Tweet.objects.order_by('-published_date')[:10]
+
+    return render(request, 'tweet_list.html', {'tweets': tweets})
+
+
+def tweet_fetch(request):
+    tweet_save_to_db()
+    return redirect('tweet_list')

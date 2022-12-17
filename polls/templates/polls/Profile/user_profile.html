@@ -6,9 +6,9 @@
     <hr style="width:auto">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-2" style="margin-top: 3.25em">
+            <div class="col-md-2" style="margin-top: 4.25em">
                 {% if page_user.profile_image_url %}
-                    <img src="{{ page_user.profile_image_url }} " class="card-img">
+                    <img src="{{ page_user.profile_image_url }}" class="card-img" width="150" height="150" style="aspect-ratio: 1/1">
                 {% endif %}
             {% if user.is_authenticated and page_user.user != user %}
             <form action="{% url 'like_profile' profile.pk%}" method="POST" style="margin-left: 1.25em; margin-bottom: 1em">
@@ -106,32 +106,32 @@
     <div class="row">
         <div class="col">
             <ul class="list-inline" style="font-size: x-large; color: #f7f7f7">Book statistics
-                <li style="font-size: large; margin: 1em 0 0">Books read: {{ profile.number_of_read_books }}</li>
-                <li style="font-size: large; margin: 0">Books to read: {{ profile.number_of_want_to_read_books }}</li>
-                <li style="font-size: large; margin: 0"> Books reading: {{ profile.number_of_reading_books }}</li>
-                <li style="font-size: large; margin: 0"> Books dropped: {{ profile.number_of_dropped_books }}</li>
+                <li style="font-size: large; margin: 1em 0 0">Books read: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ profile.number_of_read_books }}</li>
+                <li style="font-size: large; margin: 0">Books to read: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ profile.number_of_want_to_read_books }}</li>
+                <li style="font-size: large; margin: 0"> Books reading: &nbsp;&nbsp;&nbsp;&nbsp;{{ profile.number_of_reading_books }}</li>
+                <li style="font-size: large; margin: 0"> Books dropped: &nbsp;&nbsp;{{ profile.number_of_dropped_books }}</li>
             </ul>
         </div>
         <div class="col">
             <ul class="list-inline" style="font-size: x-large; color: #f7f7f7">Games statistics
-                <li style="font-size: large; margin: 1em 0 0"> Games played: {{ profile.number_of_played_games }}</li>
-                <li style="font-size: large; margin: 0"> Games to play: {{ profile.number_of_want_to_play_games }}</li>
-                <li style="font-size: large; margin: 0"> Games playing: {{ profile.number_of_playing_games }}</li>
-                <li style="font-size: large; margin: 0"> Games dropped: {{ profile.number_of_dropped_games }}</li>
+                <li style="font-size: large; margin: 1em 0 0"> Games played: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ profile.number_of_played_games }}</li>
+                <li style="font-size: large; margin: 0"> Games to play: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ profile.number_of_want_to_play_games }}</li>
+                <li style="font-size: large; margin: 0"> Games playing: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ profile.number_of_playing_games }}</li>
+                <li style="font-size: large; margin: 0"> Games dropped: &nbsp;&nbsp;{{ profile.number_of_dropped_games }}</li>
             </ul>
         </div>
         <div class="col">
             <ul class="list-inline" style="font-size: x-large; color: #f7f7f7">Series statistics
-                <li style="font-size: large; margin: 1em 0 0"> Series watched: {{ profile.number_of_watched_series }}</li>
-                <li style="font-size: large; margin: 0"> Series to watch: {{ profile.number_of_want_to_watch_series }}</li>
-                <li style="font-size: large; margin: 0"> Series watching: {{ profile.number_of_watching_series }}</li>
-                <li style="font-size: large; margin: 0"> Series dropped: {{ profile.number_of_dropped_series }}</li>
+                <li style="font-size: large; margin: 1em 0 0"> Series watched: &nbsp;&nbsp;&nbsp;{{ profile.number_of_watched_series }}</li>
+                <li style="font-size: large; margin: 0"> Series to watch: &nbsp;&nbsp;&nbsp;{{ profile.number_of_want_to_watch_series }}</li>
+                <li style="font-size: large; margin: 0"> Series watching: &nbsp;&nbsp;{{ profile.number_of_watching_series }}</li>
+                <li style="font-size: large; margin: 0"> Series dropped: &nbsp;&nbsp;&nbsp;{{ profile.number_of_dropped_series }}</li>
             </ul>
         </div>
         <div class="col">
             <ul class="list-inline" style="font-size: x-large; color: #f7f7f7">Movie statistics
-                <li style="font-size: large; margin: 1em 0 0">Movies watched: {{ profile.number_of_watched_movies }}</li>
-                <li style="font-size: large; margin: 0">Movies to watch: {{ profile.number_of_want_to_watch_movies }}</li>
+                <li style="font-size: large; margin: 1em 0 0">Movies watched: &nbsp;&nbsp;{{ profile.number_of_watched_movies }}</li>
+                <li style="font-size: large; margin: 0">Movies to watch: &nbsp;&nbsp;{{ profile.number_of_want_to_watch_movies }}</li>
             </ul>
         </div>
     </div>

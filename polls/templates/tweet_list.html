@@ -1,0 +1,12 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+    {% for tweet in tweets %}
+    <tr>
+      <th scope="row">{{ tweet.tweet_text }} </th>
+      <td style="white-space:nowrap;">{{ tweet.published_date }}</td>
+    </tr><br/>
+    {% endfor %}
+
+{% endblock %}

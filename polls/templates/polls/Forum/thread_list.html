@@ -41,11 +41,35 @@
 
             <ul class="list-inline bg-dark" style="list-style-position: inside; margin-bottom: 0; padding-left: 0.5em; padding-top: 0.5em; border-bottom:1px solid #ccc;  border-bottom-color: #555555; display: inline-flex; width: 100%">
                 <li style="margin: 0.75em 5em 0.75em 0"></li>
-                <li style="margin: 0.75em 36.5em 0.75em 5em">Title</li>
-                <li style="margin: 0.75em 5.5em 0.75em 26em">Start date</li>
-                <li style="margin: 0.75em 2em 0.75em 0">Replies</li>
-                <li style="margin: 0.75em 2em 0.75em 0">Views</li>
-                <li style="margin: 0.75em 11.55em 0.75em 5em">Last message</li>
+                {% if order_by == 'title' %}
+                    <li style="margin: 0.75em 31.5em 0.75em 5em"><a href="{% url 'thread-list' category.slug '-title' %}">Title ↑</a></li>
+                {% else %}
+                    <li style="margin: 0.75em 31.5em 0.75em 5em"><a href="{% url 'thread-list' category.slug 'title' %}">Title ↓</a></li>
+                {% endif %}
+
+                {% if order_by == 'date' %}
+                    <li style="margin: 0.75em 5.5em 0.75em 22.75em"><a href="{% url 'thread-list' category.slug '-date' %}">Start date ↑</a></li>
+                {% else %}
+                    <li style="margin: 0.75em 5.5em 0.75em 22.75em"><a href="{% url 'thread-list' category.slug 'date' %}">Start date ↓</a></li>
+                {% endif %}
+
+                {% if order_by == 'number_of_posts' %}
+                    <li style="margin: 0.75em 2em 0.75em 0"><a href="{% url 'thread-list' category.slug '-number_of_posts' %}">Replies ↑</a></li>
+                {% else %}
+                    <li style="margin: 0.75em 2em 0.75em 0"><a href="{% url 'thread-list' category.slug 'number_of_posts' %}">Replies ↓</a></li>
+                {% endif %}
+
+                {% if order_by == 'views' %}
+                    <li style="margin: 0.75em 2em 0.75em 0"><a href="{% url 'thread-list' category.slug '-views' %}">Views ↑</a></li>
+                {% else %}
+                    <li style="margin: 0.75em 2em 0.75em 0"><a href="{% url 'thread-list' category.slug 'views' %}">Views ↓</a></li>
+                {% endif %}
+
+                {% if order_by == 'last_post_date' %}
+                    <li style="margin: 0.75em 11.55em 0.75em 5em"><a href="{% url 'thread-list' category.slug '-last_post_date' %}">Last message ↑</a></li>
+                {% else %}
+                    <li style="margin: 0.75em 11.55em 0.75em 5em"><a href="{% url 'thread-list' category.slug 'last_post_date' %}">Last message ↓</a></li>
+                {% endif %}
             </ul>
 
             <ol class="list-inline bg-dark" style="list-style-position: inside; margin-bottom: 0; padding-left: 0.5em; padding-top: 0.5em; border-bottom:1px solid #ccc; border-bottom-color: #555555">
@@ -55,19 +79,20 @@
                         <li style="margin-right: 0.5em">
                             <div class="row">
                                 <div class="col-1">
-                                    <p style="margin-top: 0; margin-bottom: 0 "><span class="icon solid fa-square" style="margin-right: 1em"></span></p>
+                                    <p style="margin-top: 0; margin-bottom: 0 "><span style="margin-right: 1em"><a href="{{ sticky.creator.get_absolute_url }}">
+                                        <img src="{{ sticky.creator.profile_image_url }}" class="card-img" height="70" width="70" style="padding: 0.15em 1em 0.1em 1em; aspect-ratio: 1/1"></a></span></p>
                                 </div>
                                 <div class="col-7" style="margin-top: 4.5em">
-                                    <h3><a href="{% url 'index' %}">Q&A</a></h3>
-                                    Author, Date
+                                    <h3><a href="{% url 'post-list' category.slug sticky.slug %}">Q&A</a></h3>
+                                    <a href="{{ sticky.creator.get_absolute_url }}"> {{ sticky.creator }} </a>, {{ sticky.date }}
                                 </div>
                                 <div class="col-1" style="margin-left: 5em">
-                                    <p style="margin: 0; font-size: small; color: white"> Replies: 205 </p>
-                                    <p style="margin: 0; font-size: small; color: white"> Views: 200000 </p>
+                                    <p style="margin: 0; font-size: small; color: white"> Replies: {{ sticky.number_of_posts }} </p>
+                                    <p style="margin: 0; font-size: small; color: white"> Views: {{ sticky.views }} </p>
                                 </div>
                                 <div class="col-2" style="margin-left: 5em">
-                                    <p style="margin: 0; font-size: small; color: white"> DollMakerBaddu </p>
-                                    <p style="margin: 0; font-size: small; color: white"> Nov 20, 2022 </p>
+                                    <a href="{{ sticky.get_last_post.creator.user.profile.get_absolute_url }}"><p style="margin: 0; font-size: small"> {{ sticky.get_last_post.creator.user}} </p></a>
+                                    <p style="margin: 0; font-size: small; color: white"> {{sticky.get_last_post.date }} </p>
                                 </div>
                             </div>
                         </li>
@@ -83,7 +108,8 @@
                             <li style="margin-right: 0.5em">
                                 <div class="row">
                                     <div class="col-1">
-                                        <p style="margin-top: 0; margin-bottom: 0 "><span style="margin-right: 1em"><a href="{{ thread.creator.get_absolute_url }}"><img src="{{ thread.creator.profile_image_url }}" class="card-img" style="padding: 0.15em 1em 0.1em 1em"></a></span></p>
+                                        <p style="margin-top: 0; margin-bottom: 0 "><span style="margin-right: 1em"><a href="{{ thread.creator.get_absolute_url }}">
+                                            <img src="{{ thread.creator.profile_image_url }}" class="card-img" height="70" width="70" style="padding: 0.15em 1em 0.1em 1em; aspect-ratio: 1/1"></a></span></p>
                                     </div>
                                     <div class="col-7" style="margin-top: 4.5em">
                                         <h3><a href="{% url 'post-list' category.slug thread.slug %}" > {{ thread.title }}</a></h3>
@@ -131,8 +157,6 @@
                         </li>
                 {% endfor %}
             </ul>
-
-        <p>Views: {{ num_visits }} </p>
 
         {% if user.is_superuser  %}
             <a href="{% url 'category-update' pk=category.id %}">

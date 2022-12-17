@@ -19,14 +19,14 @@
                     <ol class="list-inline">
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' announcements_and_rules.slug %}">Announcements & Rules</a>
+                                        <a href="{% url 'thread-list' announcements_and_rules.slug '-last_post_date' %}">Announcements & Rules</a>
                                     </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if announcements_and_rules.get_last_post %}
                                             {{ announcements_and_rules.get_last_post.creator.user}} {{announcements_and_rules.get_last_post.date }}
                                         {% else %}
@@ -38,14 +38,14 @@
                         </li>
                         <li style="margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' suggestions_and_bugs.slug %}">Suggestions & Bugs</a>
+                                        <a href="{% url 'thread-list' suggestions_and_bugs.slug '-last_post_date' %}">Suggestions & Bugs</a>
                                     </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if suggestions_and_bugs.get_last_post %}
                                             {{ suggestions_and_bugs.get_last_post.creator.user}} {{suggestions_and_bugs.get_last_post.date }}
                                         {% else %}
@@ -67,14 +67,14 @@
                     <ol class="list-inline">
                         <li style="margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' appeals.slug %}">Appeals</a>
+                                        <a href="{% url 'thread-list' appeals.slug '-last_post_date' %}">Appeals</a>
                                     </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if appeals.get_last_post %}
                                             {{ appeals.get_last_post.creator.user}} {{appeals.get_last_post.date }}
                                         {% else %}
@@ -96,14 +96,14 @@
                     <ol class="list-inline">
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' books.slug %}">Books</a>
+                                        <a href="{% url 'thread-list' books.slug '-last_post_date' %}">Books</a>
                                     </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if books.get_last_post %}
                                             {{ books.get_last_post.creator.user}} {{books.get_last_post.date }}
                                         {% else %}
@@ -115,14 +115,14 @@
                         </li>
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' games.slug %}">Games</a>
+                                        <a href="{% url 'thread-list' games.slug '-last_post_date' %}">Games</a>
                                     </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if games.get_last_post %}
                                             {{ games.get_last_post.creator.user}} {{games.get_last_post.date }}
                                         {% else %}
@@ -134,14 +134,14 @@
                         </li>
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' movies.slug %}">Movies</a>
+                                        <a href="{% url 'thread-list' movies.slug '-last_post_date' %}">Movies</a>
                                     </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if movies.get_last_post %}
                                             {{ movies.get_last_post.creator.user}} {{movies.get_last_post.date }}
                                         {% else %}
@@ -153,14 +153,14 @@
                         </li>
                         <li style="margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' series.slug %}">Series</a>
+                                        <a href="{% url 'thread-list' series.slug '-last_post_date' %}">Series</a>
                                     </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if series.get_last_post %}
                                             {{ series.get_last_post.creator.user}} {{series.get_last_post.date }}
                                         {% else %}
@@ -182,14 +182,14 @@
                     <ol class="list-inline">
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' creative_writing.slug %}">Creative Writing</a>
+                                        <a href="{% url 'thread-list' creative_writing.slug '-last_post_date' %}">Creative Writing</a>
                                     </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if creative_writing.get_last_post %}
                                             {{ creative_writing.get_last_post.creator.user}} {{creative_writing.get_last_post.date }}
                                         {% else %}
@@ -201,14 +201,14 @@
                         </li>
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' questing.slug %}">Questing</a>
+                                        <a href="{% url 'thread-list' questing.slug '-last_post_date' %}">Questing</a>
                                     </h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if questing.get_last_post %}
                                             {{ questing.get_last_post.creator.user}} {{questing.get_last_post.date }}
                                         {% else %}
@@ -220,13 +220,13 @@
                         </li>
                         <li style="margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' play_by_post.slug %}">Play-by-Post</a></h3>
+                                        <a href="{% url 'thread-list' play_by_post.slug '-last_post_date' %}">Play-by-Post</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if play_by_post.get_last_post %}
                                             {{ play_by_post.get_last_post.creator.user}} {{play_by_post.get_last_post.date }}
                                         {% else %}
@@ -248,13 +248,13 @@
                     <ol class="list-inline">
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' nswf_creative_writing.slug %}">NSFW Creative Writing</a></h3>
+                                        <a href="{% url 'thread-list' nswf_creative_writing.slug '-last_post_date' %}">NSFW Creative Writing</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if nswf_creative_writing.get_last_post %}
                                             {{ nswf_creative_writing.get_last_post.creator.user}} {{nswf_creative_writing.get_last_post.date }}
                                         {% else %}
@@ -266,13 +266,13 @@
                         </li>
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' nswf_questing.slug %}">NSFW Questing</a></h3>
+                                        <a href="{% url 'thread-list' nswf_questing.slug '-last_post_date' %}">NSFW Questing</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if nswf_questing.get_last_post %}
                                             {{ nswf_questing.get_last_post.creator.user}} {{nswf_questing.get_last_post.date }}
                                         {% else %}
@@ -284,13 +284,13 @@
                         </li>
                         <li style="margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' nswf_play_by_post.slug %}">NSFW Play-by-Post</a></h3>
+                                        <a href="{% url 'thread-list' nswf_play_by_post.slug '-last_post_date' %}">NSFW Play-by-Post</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if nswf_play_by_post.get_last_post %}
                                             {{ nswf_play_by_post.get_last_post.creator.user}} {{nswf_play_by_post.get_last_post.date }}
                                         {% else %}
@@ -312,17 +312,17 @@
                     <ol class="list-inline">
                         <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' general.slug %}">General</a></h3>
+                                        <a href="{% url 'thread-list' general.slug '-last_post_date' %}">General</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white">
                                         {% if general.get_last_post %}
-                                            {{ general.get_last_post.creator.user}} {{general.get_last_post.date }}
+                                            Latest posts: {{ general.get_last_post.creator.user}} {{general.get_last_post.date }}
                                         {% else %}
-                                            None
+                                            Latest posts: None
                                         {% endif %}
                                     </p>
                                 </div>
@@ -330,13 +330,13 @@
                         </li>
                         <li style="margin-right: 0.5em">
                             <div class="row">
-                                <div class="col-7">
+                                <div class="col-8">
                                     <h3 style="padding: 0.5em">
                                         <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                        <a href="{% url 'thread-list' nswf_general.slug %}">NSFW General</a></h3>
+                                        <a href="{% url 'thread-list' nswf_general.slug '-last_post_date' %}">NSFW General</a></h3>
                                 </div>
                                 <div class="col-3">
-                                    <p class="text-center" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
+                                    <p class="text-start" style="margin-top: 0; padding-bottom: 0.5em; font-size: small; color: white"> Latest posts:
                                         {% if nswf_general.get_last_post %}
                                             {{ nswf_general.get_last_post.creator.user}} {{nswf_general.get_last_post.date }}
                                         {% else %}
@@ -355,46 +355,15 @@
                 <li style="margin-right: 0.5em">
                     <div class="row">
                         <div class="col">
-                            <a href="{{ profile.get_absolute_url }}"><img src="{{ profile.profile_image_url }}" class="card-img" style="padding: 0.15em 1em 0.1em 1em"></a>
+                            <a href="{{ profile.get_absolute_url }}"><img src="{{ profile.profile_image_url }}" class="card-img" height="90" width="100" style="padding: 0.25em 1em 0.1em 1em; aspect-ratio: 1/1"></a>
                         </div>
                         <div class="col">
-                            <a href="{{ profile.get_absolute_url }}"> {{ user }} </a> <br>
-                              Likes:
+                            <a href="{{ profile.get_absolute_url }}"> <p style="margin: 1.5em 0 0 -0.75em; font-size: larger"> {{ user }} </p> </a> <br>
                         </div>
                     </div>
                 </li>
         </ol>
-        <ol class="list-inline bg-dark" style="list-style-position: inside; padding-left: 0.5em; padding-top: 0.5em">
-                <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
-                    <h3>Staff Online Now</h3>
-                </li>
-                <li>
-                    <ol class="list-inline">
-                        <li style="">
-                            <div class="row">
-                                <div class="col-4" style="margin-top: 6em">
-                                    <span class="icon solid fa-circle-arrow-right" style="margin: 0; padding: 0"></span>
-                                </div>
-                                <div class="col-6">
-                                    <p style="margin: 0; padding: 0; font-size: small; color: white"> Username:</p>
-                                    <p style="margin: 0; padding: 0; font-size: small; color: white"> User title:</p>
-                                </div>
-                            </div>
-                        </li>
-                        <li style="padding-bottom: 0.5em">
-                            <div class="row">
-                                <div class="col-4" style="margin-top: 6em">
-                                    <span class="icon solid fa-circle-arrow-right" style="margin: 0; padding: 0"></span>
-                                </div>
-                                <div class="col-6">
-                                    <p style="margin: 0; padding: 0; font-size: small; color: white"> Username:</p>
-                                    <p style="margin: 0; padding: 0; font-size: small; color: white"> User title:</p>
-                                </div>
-                            </div>
-                        </li>
-                    </ol>
-                </li>
-        </ol>
+
         <ol class="list-inline bg-dark" style="list-style-position: inside; padding-left: 0.5em; padding-top: 0.5em">
                 <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                     <h3>Members Online Now</h3>
@@ -411,36 +380,20 @@
                 </li>
                 <li>
                     <ol class="list-inline">
-                        <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
-                            <div class="row">
-                                <div class="col-1" style="margin-top: 4em">
-                                    <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                        {% for post in last_posts %}
+                            <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
+                                <div class="row">
+                                    <div class="col-1" style="margin-top: 4em">
+                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
+                                    </div>
+                                    <div class="col" style="margin-bottom: 0.5em">
+                                        <a href="{% url 'thread-list' post.thread.slug_category '-last_post_date' %}" style="font-size: 0.6vw; padding: 0; margin: 0">{{ post.thread.category }}</a>
+                                        <a href="{% url 'post-list' post.thread.slug_category post.thread.slug %}" style="font-size: 0.6vw; padding: 0; margin: 0">{{ post.thread.title }}</a> |
+                                        <a href="{% url 'profile-page' post.thread.creator.user %}" style="font-size: 0.6vw; padding: 0; margin: 0">{{ post.thread.creator }}</a> {{ post.date }}
+                                    </div>
                                 </div>
-                                <div class="col" style="margin-bottom: 0.5em">
-                                    <a href="#" style="font-size: 0.6vw; padding: 0; margin: 0">Latest post</a>
-                                </div>
-                            </div>
-                        </li>
-                        <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
-                            <div class="row">
-                                <div class="col-1" style="margin-top: 4em">
-                                    <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                </div>
-                                <div class="col" style="margin-bottom: 0.5em">
-                                    <a href="#" style="font-size: 0.6vw; padding: 0; margin: 0">Latest post</a>
-                                </div>
-                            </div>
-                        </li>
-                        <li style="margin-right: 0.5em">
-                            <div class="row">
-                                <div class="col-1" style="margin-top: 4em">
-                                    <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                </div>
-                                <div class="col" style="margin-bottom: 0.5em">
-                                    <a href="#" style="font-size: 0.6vw; padding: 0; margin: 0">Latest post</a>
-                                </div>
-                            </div>
-                        </li>
+                            </li>
+                        {% endfor %}
                     </ol>
                 </li>
         </ol>

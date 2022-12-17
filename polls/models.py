@@ -661,15 +661,17 @@ class Thread(Forum):
     slug_category = models.SlugField(null=True)
     tags = TaggableManager()
     views = models.IntegerField(default=0)
+    last_post_date = models.DateTimeField(null=True)
+    number_of_posts = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('thread-detail', args=[str(self.slug_category), str(self.slug)])
+        return reverse('thread-list', args=[str(self.slug_category), str(self.slug)])
 
-    def number_of_posts(self):
-        return Post.objects.filter(thread=self).all().count()
+    # def number_of_posts(self):
+        # return Post.objects.filter(thread=self).all().count()
 
     def number_of_likes(self):
         return self.likes.all().count()
@@ -724,3 +726,13 @@ class Like(models.Model):
 
     def __str__(self):
         return self.post
+
+
+class Tweet(models.Model):
+    tweet_id = models.CharField(max_length=250, null=True, blank=True)
+    author_id = models.CharField(max_length=250, null=True, blank=True)
+    tweet_text = models.TextField()
+    published_date = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return self.tweet_text

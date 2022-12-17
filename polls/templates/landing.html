@@ -9,11 +9,18 @@
     <link rel="stylesheet" href="{% static 'css/landing.css' %}">
 
     <title>Welcome to PCT</title>
-</head>
 
+</head>
 <body>
-<div class="message">
-    {% include 'polls/messages.html' %}
+
+<!-- alert popup -->
+<div id="popup1" class="overlay">
+    <div class="popup">
+        <a id='closing' class="close" href="#">&times;</a>
+        <div id='alert-message' class="content">
+            {% include 'polls/messages.html' %}
+        </div>
+    </div>
 </div>
 
 <!-- Navbar -->
@@ -50,7 +57,7 @@
             <span class="boast">Your whole digital pop culture</span> <br/>
             <span class="boast">In one place</span>
         </h1>
-        <a class="btn red" href="#">Learn More</a>
+        <a class="btn red" href="#" onclick='scrollToStats()'>Learn More</a>
     </div>
 </section>
 
@@ -69,7 +76,7 @@
 
 <!-- numbers section -->
 <section class="numbers" id="stats">
-    <div class="numbers-title">
+    <div class="numbers-title" id='numbers-scroll-point'>
         <h2>
             <span class="numbers-title-text">What can you track:</span>
         </h2>
@@ -112,10 +119,10 @@
             </div>
         </div>
         <div class="numbers-title">
-        <h2>
-            <span class="numbers-title-text">And more</span>
-        </h2>
-    </div>
+            <h2>
+                <span class="numbers-title-text">And more</span>
+            </h2>
+        </div>
     </div>
 </section>
 
@@ -168,18 +175,31 @@
 <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
 <script src="{% static 'js/jquery.countup.js' %}"></script>
 <script>
-$('.counter').countUp({
-    delay: 10,
-    time: 2000
-});
+    $('.counter').countUp({
+        delay: 10,
+        time: 2000
+    });
 </script>
+
+<!-- message show and hide script -->
 <script>
-    setTimeout(function(){
-      if ($('#msg').length > 0) {
-        $('#msg').remove();
-      }
-    }, 5000)
-  </script>
+    const box = document.getElementById('alert-message');
+    if (box.textContent.trim() !== '') {
+        window.location.href = "#popup1";
+        setTimeout(function () {
+            window.location.href = "#closing";
+        }, 5000)
+    }
+</script>
+
+<!-- scroll down script -->
+<script>
+    function scrollToStats() {
+        const elem = document.getElementById('numbers-scroll-point');
+        elem.scrollIntoView();
+    }
+</script>
+
 </body>
 
 <footer>

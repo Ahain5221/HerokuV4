@@ -10,7 +10,7 @@
             <span class="icon solid fa-greater-than" style="margin-right: 1em"><a href="{% url 'category' %}"
                                                                                   style="margin-left: 1em">Forums</a></span>
             <span class="icon solid fa-greater-than" style="margin-right: 1em"><a
-                    href="{% url 'thread-list' thread.category.slug %}"
+                    href="{% url 'thread-list' thread.category.slug '-last_post_date' %}"
                     style="margin-left: 1em">{{ thread.category }}</a></span>
             <span class="icon solid fa-greater-than" style="margin-right: 1em"></span> <span
                 class="breadcrumb-item active" aria-current="page">{{ thread.title }}</span>
@@ -20,7 +20,7 @@
             <div class="col-10">
                 <h2 style="margin-bottom: 0"> {{ thread.title }} </h2>
                 <p style="margin: 0; color: #e4e4e4; font-size: small">Discussion in <a
-                        href="{% url 'thread-list' thread.category.slug %}">{{ thread.category }}</a> started by <a
+                        href="{% url 'thread-list' thread.category.slug '-last_post_date' %}">{{ thread.category }}</a> started by <a
                         href="{{ thread.creator.get_absolute_url }}">{{ thread.creator }}</a>, {{ thread.date }}</p>
                 <p style="margin: 0; color: #d0d0d0; font-size: smaller"> Tags: <a href="#">tag1</a> | <a
                         href="#">tag2</a> | <a href="#">tag3</a> | <a href="#">tag4</a></p>
@@ -31,7 +31,7 @@
                         <a href="{% url 'thread-delete' pk=thread.id %}" style="margin: 1em">
                             <button class="btn btn-danger btn-sm" style="margin: 0.5em">Delete Thread</button>
                         </a>
-                        <a href="{% url 'thread-update' pk=thread.id %}" style="margin: 1em">
+                        <a href="{% url 'thread-update' pk=thread.id  category_slug=category.slug  %}" style="margin: 1em">
                             <button class="btn btn-dark btn-sm" style="margin: 0.5em">Edit Thread</button>
                         </a>
                     {% endif %}
@@ -61,10 +61,10 @@
             {% for post_liked, post in posts %}
 
                 <div class="row" style="margin: 0">
-                    <div class="col-1 bg-dark" style="padding-left: 0.5em; margin-left: 0; height: 20em">
+                    <div class="col-1 bg-dark" style="padding-left: 0.5em; margin-left: 0; height: 21em">
                         <a href="{{ post.creator.get_absolute_url }}"><img src="{{ post.creator.profile_image_url }}"
-                                                                           class="card-img"
-                                                                           style="padding: 0.75em 1.25em 0 0.75em"></a>
+                                                                           class="card-img" height="140" width="140"
+                                                                           style="padding: 0.75em 1.25em 0 0.75em; aspect-ratio: 1/1"></a>
                         <p style="font-size: medium; margin: 0 0 0 0.5em"><a
                                 href="{{ post.creator.get_absolute_url }}"> {{ post.creator }} </a></p>
                         <p style="font-size: smaller; margin: 0 0 0 0.5em">Title</p>
@@ -74,8 +74,8 @@
                         <p style="font-size: 0.5vw; margin: 0 0 0 0.5em">Likes received:{{ post.all_my_likes }}</p>
                     </div>
                     <div class="col-10 bg-dark"
-                         style="padding: 0 1em 0 1.25em; margin-left: 1em; height: auto; width: 90.66667%;">
-                        <p style="color: #d1cfcb; font-size: 10pt; margin: 1em">
+                         style="padding: 0 0.25em 0 1em; margin-left: 1em; height: auto; width: 90.66667%;">
+                        <p style="color: #d1cfcb; font-size: 10pt; margin: -1em 0 0 0">
                             {{ post.content|safe }}
                         </p>
                         <div class="row" style="margin: 0 0 0 0.25em; height: 35px">

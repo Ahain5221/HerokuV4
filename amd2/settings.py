@@ -171,10 +171,10 @@ STATIC_URL = '/app/staticfiles/'
 # https://pypi.org/project/whitenoise/
 
 # Ten zakomentowany wywala ciągle błąd po ustawieniu Debug na False
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Z tym poniżej wszystko działa dobrze
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 
 MESSAGE_TAGS = {

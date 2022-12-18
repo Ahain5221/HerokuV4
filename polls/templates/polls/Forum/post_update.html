@@ -11,7 +11,7 @@
             <div class="form-group text-end">
                 {% csrf_token %}
                 <label for="create_post"></label>
-                <textarea id="create_post" name="content" datatype='{{ form }}'></textarea>
+                <textarea id="create_post" name="content" datatype='{{ form }}'>{{ object.content }}</textarea>
                 <input type="submit" value="Create" class="bg-dark" style="margin: 1em 0 1em 0">
             </div>
         </div>

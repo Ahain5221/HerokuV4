@@ -1731,7 +1731,6 @@ class ProfilePageView(UserPassesTestMixin, generic.DetailView):
         amount_of_pending_friend_request = len(received)
         was_send_friend_request = False
         received_friend_request = False
-        print(sended)
 
         for te2 in received:
             if te2.from_user == page_user.user:
@@ -1739,13 +1738,7 @@ class ProfilePageView(UserPassesTestMixin, generic.DetailView):
 
         for te in sended:
             test2 = te.to_user
-            print("Logi start")
-            print(test2)
-
-            print(page_user.user)
-            print("Logi end")
             if test2 == page_user.user:
-
                 was_send_friend_request = True
 
         are_we_friends = Friend.objects.are_friends(self.request.user, page_user.user)

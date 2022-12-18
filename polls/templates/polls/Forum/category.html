@@ -383,13 +383,10 @@
                         {% for post in last_posts %}
                             <li style="border-bottom:1px solid #ccc; margin-right: 0.5em">
                                 <div class="row">
-                                    <div class="col-1" style="margin-top: 4em">
-                                        <span class="icon solid fa-circle-arrow-right" style="margin-right: 1em"></span>
-                                    </div>
-                                    <div class="col" style="margin-bottom: 0.5em">
-                                        <a href="{% url 'thread-list' post.thread.slug_category '-last_post_date' %}" style="font-size: 0.6vw; padding: 0; margin: 0">{{ post.thread.category }}</a>
-                                        <a href="{% url 'post-list' post.thread.slug_category post.thread.slug %}" style="font-size: 0.6vw; padding: 0; margin: 0">{{ post.thread.title }}</a> |
-                                        <a href="{% url 'profile-page' post.thread.creator.user %}" style="font-size: 0.6vw; padding: 0; margin: 0">{{ post.thread.creator }}</a> {{ post.date }}
+                                    <div class="col-10" style="margin-bottom: 0.5em">
+                                        <a href="{% url 'post-list' post.thread.slug_category post.thread.slug %}" style="font-size: 0.6vw; padding: 0; margin: 0">{{ post.thread.title }}</a><br>
+                                        <a href="{% url 'profile-page' post.thread.creator.user %}" style="font-size: 0.6vw; padding: 0; margin: 0">{{ post.thread.creator }}</a>, {{ post.date }}<br>
+                                        <h1><a href="{% url 'thread-list' post.thread.slug_category '-last_post_date' %}" style="font-size: 0.6vw; padding: 0; margin: 0">{{ post.thread.category }}</a></h1>
                                     </div>
                                 </div>
                             </li>

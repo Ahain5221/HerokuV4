@@ -1791,7 +1791,7 @@ input, select, textarea {
 		position: relative;
 		display: inline-block;
 		background: #ed786a;
-		color: #fff !important;
+		color: #fff;
 		text-transform: uppercase;
 		border-radius: 2px;
 		border: 0;

@@ -45,9 +45,9 @@
                     <div class="card-body bg-dark">
                         <p class="text-white" style="font-size: 1.1em">
                             {% if page_user.profile_description %}
-                                 {{ page_user.profile_description }}
+                                {{ page_user.profile_description }}
                             {% else %}
-                                No description
+                                Uh-oh, better hide that VIRGINITY!
                             {% endif %}
                         </p>
                     </div>
@@ -59,7 +59,7 @@
                 {% endif %}
             </div>
             <div class="col-md-10" style="margin-top: 1.5em">
-            <h5 class="card-title text-center" style="padding-right: 15em; margin-bottom: 1em">
+            <h5 class="card-title text-center" style="padding-right: 15em; margin: 2em 0 1em 0">
              Joined: {{ page_user.user.date_joined.date }} | Last seen: {{ page_user.user.last_login.date }} | Gender: {{ page_user.gender }} | Likes received: {{ page_user.likes.count }}
             {% if page_user.date_of_birth %}
                 | Birth date: {{ page_user.date_of_birth }}
@@ -72,8 +72,6 @@
             </div>
         </div>
     </div>
-
-
         {% if page_user.user != user %}
         {% if not are_we_friends %}
             {% if not received_friend_request and page_user.user != user %}

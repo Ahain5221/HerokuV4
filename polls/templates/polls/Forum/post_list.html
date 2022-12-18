@@ -11,7 +11,7 @@
                                                                                   style="margin-left: 1em">Forums</a></span>
             <span class="icon solid fa-greater-than" style="margin-right: 1em"><a
                     href="{% url 'thread-list' thread.category.slug '-last_post_date' %}"
-                    style="margin-left: 1em">{{ thread.category }}</a></span>
+                    style="margin-left: 1em; text-transform: capitalize">{{ thread.category }}</a></span>
             <span class="icon solid fa-greater-than" style="margin-right: 1em"></span> <span
                 class="breadcrumb-item active" aria-current="page">{{ thread.title }}</span>
         </span>
@@ -85,33 +85,41 @@
                                     - Report </p>
                             </div>
                             <div class="col-6">
-                                <p class="text-end" style="font-size: smaller; margin-right: 1em"> Like Reply </p>
-
-                                {% if user.is_authenticated %}
+                                <p class="text-end" style="font-size: smaller; margin-right: 1em"> {% if user.is_authenticated %}
                                     <form action="{% url 'like_post' post.pk thread.pk %}" method="POST"
-                                          style="margin-left: 47.25em; margin-top: 3em">
+                                          style="margin-left: 45em; margin-top: 3.4em">
                                         {% csrf_token %}
                                         {% if post_liked %}
                                             <button type="submit" name="profile_id" value="{{ post.id }}"
-                                                    class="btn btn-danger btn-sm"><a class="icon solid fa-thumbs-down"
-                                                                                     style="color: #710000"></a>
-                                                Unlike </button>
+                                            style="background: none!important;
+                                                   color: #d1cfcb;
+                                                   border: none;
+                                                   padding: 0!important;
+                                                   box-shadow: none;
+                                                   letter-spacing: 1px;
+                                                   cursor: pointer;">Unlike</button>
                                             <input type="hidden" value="{{ thread.id }}">
                                         {% else %}
                                             <button type="submit" name="profile_id" value="{{ post.id }}"
-                                                    class="btn btn-primary btn-sm"><a
-                                                    class="icon solid fa-thumbs-up fa-xl" style="color: #2b2a5c"></a>
-                                                Like  </button>
+                                            style="background: none!important;
+                                                   color: #d1cfcb;
+                                                   border: none;
+                                                   padding: 0!important;
+                                                   box-shadow: none;
+                                                   letter-spacing: 1px;
+                                                   cursor: pointer;
+                                                   margin-left: 1em">Like</button>
                                             <input type="hidden" value="{{ thread.id }}">
                                         {% endif %}
                                     </form>
                                 {% else %}
                                     <a class="btn btn-outline-info" href="{% url 'login' %}?next={{ request.path }}">Log
                                         in to like this post!</a><br>
-                                {% endif %}
+                                {% endif %}  </p>
+
                             </div>
                         </div>
-                        <div class="row" style="margin: 0 0 5em 0.25em; height: 90px">
+                        <div class="row" style="margin: 0 0 1em 0.25em; height: 90px">
                             <div class="col-6" style="padding: 0">
                                 <p class="text-start" style="font-size: smaller">
                                 {% if post.likes.all %}
@@ -186,7 +194,7 @@
                         </div>
                         {% if post.creator.signature is not None %}
                             <p class="text-start"
-                               style="font-size: smaller; margin: 0 0 10em 0.25em"> {{ post.creator.signature }} </p>
+                               style="font-size: smaller; margin: 0 0 5em 0.25em"> {{ post.creator.signature }} </p>
                         {% endif %}
                     </div>
                 </div>
@@ -268,6 +276,8 @@
             color: #d1cfcb;
             border-bottom-color: rgba(255, 255, 255, 0);
         }
+
+
 
     </style>
 

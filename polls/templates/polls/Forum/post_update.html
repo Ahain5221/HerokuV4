@@ -5,12 +5,46 @@
     {{ form.media }}
     </head>
     <h1>Edit Post</h1>
-    <form action="" method="post">
+    <form action="" method="POST" name="PostForm" id="write_post" class="PostForm" onSubmit="return checkTimer()" style="margin: 8em 1em 0 -1em ">
         {% csrf_token %}
-        <table>
-            {{ form.as_table }}
-        </table>
-        <input type="submit" value="Submit"/>
+        <div class="col-lg-12" style="margin-left: 1em">
+            <div class="form-group text-end">
+                {% csrf_token %}
+                <label for="create_post"></label>
+                <textarea id="create_post" name="content" datatype='{{ form }}'></textarea>
+                <input type="submit" value="Create" class="bg-dark" style="margin: 1em 0 1em 0">
+            </div>
+        </div>
     </form>
     <input type=button value="Cancel" onClick="javascript:history.go(-1);" style="margin-top: 1em">
+
+
+
+<script type="text/javascript">
+        function addText(number) {
+            const input = document.getElementById('create_post');
+            const button = document.getElementById('reply' + number);
+            const enter = '\n';
+            const lines = '--------------------------------------------------------------------------------------';
+            input.value = input.value + button.value + enter + lines + enter;
+        }
+
+        CKEDITOR.replace('create_post');
+        let flag = false;
+
+        function checkTimer() {
+            if (flag) {
+                flag = false;
+                return true;
+            }
+            alert("Stop spamming man!");
+            return false;
+        }
+
+        //12 seconds, max 5 times per minute
+        setTimeout(function () {
+            flag = true;
+        }, 1000);
+    </script>
+
 {% endblock %}

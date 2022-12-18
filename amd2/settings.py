@@ -164,7 +164,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 # STATIC_URL = 'static/'
 # The URL to use when referring to static files (where they will be served from)
-STATIC_URL = 'static/'
+STATIC_URL = '/app/staticfiles/'
+
 
 # Simplified static file serving.
 # https://pypi.org/project/whitenoise/

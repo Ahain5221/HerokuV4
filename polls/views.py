@@ -59,6 +59,7 @@ from .models import Post, Thread
 from .forms import PostForm, ForumCategory, ThreadCategoryForm, ThreadForm
 from django.views.generic.edit import FormMixin
 from taggit.models import Tag
+from django.views.decorators.cache import never_cache
 
 # standard library imports
 import csv
@@ -1578,7 +1579,7 @@ class UserProfileEditView(UserPassesTestMixin, generic.UpdateView):
     def get_success_url(self):
         return reverse('profile-page', args=[str(self.object.user)])
 
-
+@never_cache
 @login_required(login_url='/polls/login/')
 def send_friendship_request(request, pk):
     other_user = User.objects.get(id=pk)
@@ -1591,7 +1592,7 @@ def send_friendship_request(request, pk):
     except (Exception,):
         return redirect('profile-page', other_user)
 
-
+@never_cache
 @login_required(login_url='/polls/login/')
 def accept_friendship_request(request, pk):
     try:
@@ -1602,7 +1603,7 @@ def accept_friendship_request(request, pk):
     except (Exception,):
         return redirect('profile-page', other_user)
 
-
+@never_cache
 @login_required(login_url='/polls/login/')
 def reject_friendship_request(request, pk):
     try:
@@ -1614,7 +1615,7 @@ def reject_friendship_request(request, pk):
     except (Exception,):
         return redirect('profile-page', other_user)
 
-
+@never_cache
 @login_required(login_url='/polls/login/')
 def cancel_friendship_request(request, pk):
     try:
@@ -1625,7 +1626,7 @@ def cancel_friendship_request(request, pk):
     except FriendshipRequest.DoesNotExist:
         return redirect('profile-page', other_user)
 
-
+@never_cache
 @login_required(login_url='/polls/login/')
 def delete_friendship(request, pk):
     try:
@@ -1635,7 +1636,7 @@ def delete_friendship(request, pk):
     except (Exception,):
         return redirect('profile-page', other_user)
 
-
+@never_cache
 def friend_list(request, pk):
     get_user = User.objects.get(id=pk)
     friends = Friend.objects.friends(get_user)
@@ -1651,7 +1652,7 @@ def friend_list(request, pk):
     }
     return render(request, 'FriendList.html', context=context)
 
-
+@never_cache
 def friend_request_list(request, pk):
     get_user = User.objects.get(id=pk)
     request_list = Friend.objects.unread_requests(get_user)

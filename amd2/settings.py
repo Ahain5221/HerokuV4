@@ -208,3 +208,10 @@ CKEDITOR_CONFIGS = {
 }
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'my_cache_table',
+    }
+}

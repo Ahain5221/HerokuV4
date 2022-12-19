@@ -4,6 +4,8 @@ from .models import Author, Genre, Book, Language, Director, Actor, Movie, Serie
 from .models import GameGenre, GameMode, Developer, Game, Profile, KnownSteamAppID, RequestPermission
 from .models import Season, Episode, MovieReview, MovieWatchlist, SeriesReview, SeriesWatchlist, GameReview, GameList
 from .models import ForumCategory, Post
+from .models import *
+admin.site.register(MyCacheTable)
 # admin.site.register(Author, AuthorAdmin)
 admin.site.register(Book)
 admin.site.register(Author)
@@ -17,6 +19,7 @@ admin.site.register(Game)
 admin.site.register(Profile)
 admin.site.register(KnownSteamAppID)
 admin.site.register(RequestPermission)
+
 
 
 admin.site.register(Director)

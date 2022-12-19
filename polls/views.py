@@ -1589,7 +1589,7 @@ def send_friendship_request(request, pk):
             request.user,  # The sender
             other_user,  # The recipient
             message='Hi! I would like to add you')  # This message is optional
-                bust_cache('requests', request.user)
+        bust_cache('requests', request.user)
         bust_cache('sent_requests', request.user)
         # Bust reverse requests cache - reverse request might be deleted
         bust_cache('requests', other_user)

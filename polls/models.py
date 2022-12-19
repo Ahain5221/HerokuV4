@@ -17,6 +17,15 @@ from django.utils.text import slugify
 
 # Create your models here.
 
+class MyCacheTable(models.Model):
+    cache_key = models.CharField(primary_key=True, max_length=255)
+    value = models.TextField()
+    expires = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'my_cache_table'
+
 class Genre(models.Model):
     name = models.CharField(max_length=200, help_text='Enter a book genre (e.g. Science Fiction)')
 

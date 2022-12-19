@@ -1579,7 +1579,8 @@ class UserProfileEditView(UserPassesTestMixin, generic.UpdateView):
     def get_success_url(self):
         return reverse('profile-page', args=[str(self.object.user)])
 
-@never_cache
+from friendship.models import bust_cache, FriendshipRequest
+
 @login_required(login_url='/polls/login/')
 def send_friendship_request(request, pk):
     other_user = User.objects.get(id=pk)
@@ -1588,6 +1589,11 @@ def send_friendship_request(request, pk):
             request.user,  # The sender
             other_user,  # The recipient
             message='Hi! I would like to add you')  # This message is optional
+                bust_cache('requests', request.user)
+        bust_cache('sent_requests', request.user)
+        # Bust reverse requests cache - reverse request might be deleted
+        bust_cache('requests', other_user)
+        bust_cache('sent_requests', other_user)
         return redirect('profile-page', other_user)
     except (Exception,):
         return redirect('profile-page', other_user)
@@ -1599,6 +1605,11 @@ def accept_friendship_request(request, pk):
         other_user = User.objects.get(id=pk)
         friend_request = FriendshipRequest.objects.get(from_user=other_user, to_user=request.user)
         friend_request.accept()
+        bust_cache('requests', request.user)
+        bust_cache('sent_requests', request.user)
+        # Bust reverse requests cache - reverse request might be deleted
+        bust_cache('requests', other_user)
+        bust_cache('sent_requests', other_user)
         return redirect('profile-page', other_user)
     except (Exception,):
         return redirect('profile-page', other_user)
@@ -1622,6 +1633,11 @@ def cancel_friendship_request(request, pk):
         other_user = User.objects.get(id=pk)
         friend_request = FriendshipRequest.objects.get(from_user=request.user, to_user=other_user)
         friend_request.cancel()
+        bust_cache('requests', request.user)
+        bust_cache('sent_requests', request.user)
+        # Bust reverse requests cache - reverse request might be deleted
+        bust_cache('requests', other_user)
+        bust_cache('sent_requests', other_user)
         return redirect('profile-page', other_user)
     except FriendshipRequest.DoesNotExist:
         return redirect('profile-page', other_user)

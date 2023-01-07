@@ -6,63 +6,69 @@
         {% if searched_games %}
             <h1>Games:</h1>
             <ul>
-            {% for game in searched_games %}
-                <li><a href="{{ game.get_absolute_url }}">{{ game }}</a></li>
-            {% endfor %}
+                {% for game in searched_games %}
+                    <li><a href="{{ game.get_absolute_url }}">{{ game }}</a></li>
+                {% endfor %}
             </ul>
         {% endif %}
 
         {% if searched_movies %}
             <p>Movies:</p>
-                        <ul>
+            <ul>
 
-            {% for movie in searched_movies %}
-                <li><a href="{{ book.get_absolute_url }}">{{ movie }}</a></li>
-            {% endfor %}
-                        </ul>
+                {% for movie in searched_movies %}
+                    <li><a href="{{ book.get_absolute_url }}">{{ movie }}</a></li>
+                {% endfor %}
+            </ul>
 
         {% endif %}
 
         {% if searched_series %}
             <p>Series:</p>
             <ul>
-            {% for series in searched_series %}
-                <li><a href="{{ series.get_absolute_url }}">{{ series }}</a></li>
-            {% endfor %}
+                {% for series in searched_series %}
+                    <li><a href="{{ series.get_absolute_url }}">{{ series }}</a></li>
+                {% endfor %}
             </ul>
         {% endif %}
 
         {% if searched_actors %}
             <p>Actors:</p>
             <ul>
-            {% for actor in searched_actors %}
-                <li><a href="{{ actor.get_absolute_url }}">{{ actor }}</a></li>
-            {% endfor %}
+                {% for actor in searched_actors %}
+                    <li><a href="{{ actor.get_absolute_url }}">{{ actor }}</a></li>
+                {% endfor %}
             </ul>
         {% endif %}
 
         {% if searched_books %}
             <p>Books:</p>
             <ul>
-            {% for book in searched_books %}
-                <li><a href="{{ book.get_absolute_url }}">{{ book }}</a></li>
-            {% endfor %}
+                {% for book in searched_books %}
+                    <li><a href="{{ book.get_absolute_url }}">{{ book }}</a></li>
+                {% endfor %}
             </ul>
         {% endif %}
 
         {% if searched_profiles %}
             <p>Profiles:</p>
             {% for profile in searched_profiles %}
-                <img src="{{ profile.profile_image_url }}" alt="" >
-                <a href="{{ profile.get_absolute_url }}">Name: {{ profile }} Last time active: {{ profile.LastSeen }}</a>
+                <img src="{{ profile.profile_image_url }}" alt="">
+                <a href="{{ profile.get_absolute_url }}">Name: {{ profile }} Last time
+                    active: {{ profile.LastSeen }}</a>
 
-                <br><hr>
+                <br>
+                <hr>
             {% endfor %}
         {% endif %}
 
+    {% elif searched %}
+
+        <h1>No matches found with the phrase: {{ searched }}</h1>
 
     {% else %}
-        <h1>Nothing was given to search...</h1>
-    {% endif %}
 
+        <h1>Nothing was given to search...</h1>
+
+    {% endif %}
 {% endblock %}

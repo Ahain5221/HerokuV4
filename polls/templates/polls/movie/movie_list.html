@@ -6,8 +6,18 @@
         <a class="icon solid fa-search text-white" href="{% url 'search-movie' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Search</a>
     </button>
 
+    {% if order_by == '-imdb_votes' %}
+        <button class="btn btn-dark">
+            <a href="{% url 'movies' 'title' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> alphabetic sort</a>
+        </button>
+    {% else %}
+        <button class="btn btn-dark">
+            <a href="{% url 'movies' '-imdb_votes' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> popularity sort</a>
+        </button>
+    {% endif %}
+
     {% if movie_list %}
-        <h1 style="font-size: 250%; text-align: center;">Movies list</h1>
+        <h1 style="font-size: 250%; text-align: center;">Movies list {{ genre_name }}</h1>
         <hr style="width:auto">
         <div class="row" style="padding-top: 3em">
             {% for movie in movie_list %}

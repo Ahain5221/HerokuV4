@@ -18,7 +18,6 @@ from django.contrib.messages import constants as messages
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -87,7 +86,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'amd2.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
@@ -97,7 +95,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -116,7 +113,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
@@ -145,9 +141,7 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'pct-team@outlook.com'
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
-
 EMAIL_USE_TLS = True
-
 
 # Heroku: Update database configuration from $DATABASE_URL.
 db_from_env = dj_database_url.config(conn_max_age=500)
@@ -157,7 +151,7 @@ DATABASES['default'].update(db_from_env)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 # The absolute path to the directory where collectstatic will collect static files for deployment.
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'polls/static'
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Static files (CSS, JavaScript, Images)
@@ -175,36 +169,35 @@ STATIC_URL = 'static/'
 # Z tym poniżej wszystko działa dobrze
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
-
 MESSAGE_TAGS = {
-        messages.DEBUG: 'alert-secondary',
-        messages.INFO: 'alert-info',
-        messages.SUCCESS: 'alert-success',
-        messages.WARNING: 'alert-warning',
-        messages.ERROR: 'alert-danger',
- }
+    messages.DEBUG: 'alert-secondary',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
 
 PASSWORD_RESET_TIMEOUT = 604800
 
-#GRAPH_MODELS = {
- #   'all_applications': True,
-  #  'group_models': True,
-   # 'app_labels': ["polls"]
-#}
+# GRAPH_MODELS = {
+#   'all_applications': True,
+#  'group_models': True,
+# 'app_labels': ["polls"]
+# }
 
 CKEDITOR_CONFIGS = {
-   'default': {
-       'toolbar_Full': [
+    'default': {
+        'toolbar_Full': [
             ['Styles', 'Format', 'Bold', 'Italic', 'Underline', 'Strike', 'SpellChecker', 'Undo', 'Redo'],
             ['Link', 'Unlink'],
             ['Image', 'Flash', 'Table', 'HorizontalRule'],
             ['TextColor'],
             ['Smiley', 'SpecialChar'],
-            ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
-            ['NumberedList','BulletedList'],
+            ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+            ['NumberedList', 'BulletedList'],
         ],
         'extraPlugins': 'justify,liststyle,indent',
-   },
+    },
 }
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

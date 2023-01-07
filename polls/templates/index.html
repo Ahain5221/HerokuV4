@@ -6,30 +6,28 @@
         <div class="new-banner-column" style="float: left">
             <p style="max-width: 50%; font-weight: bold">Newest additions:</p><br/>
 
-            <div class="last-serie" style="max-width: 50%">
+            <div class="last-serie" style="max-width: 70%">
                 <a href="{{ last_series.get_absolute_url }}">
                     <img src="{{ last_series.poster }}" class="card-img" alt="">
                     <p>{{ last_series.title }}</p>
                 </a><br/><br/>
             </div>
 
-            <!-- Todo book covers?
-            <div class="last-book" style="max-width: 50%">
+            <div class="last-book" style="max-width: 70%">
                 <a href="{{ last_book.get_absolute_url }}">
-                    <img style='' src="{{ last_book }}" class="card-img" alt="">
+                    <img style='' src="{{ last_book.book_image }}" class="card-img" alt="">
                     <p>{{ last_book.title }}</p>
                 </a><br/><br/>
             </div>
-            -->
 
-            <div class="last-movie" style="max-width: 50%">
+            <div class="last-movie" style="max-width: 70%">
                 <a href="{{ last_movie.get_absolute_url }}">
                     <img src="{{ last_movie.poster }}" class="card-img" alt="">
                     <p>{{ last_movie.title }}</p>
                 </a><br/><br/>
             </div>
 
-            <div class="last-game" style="max-width: 50%">
+            <div class="last-game" style="max-width: 70%">
                 <a href="{{ last_game.get_absolute_url }}">
                     <img src="{{ last_game.game_image }}" class="card-img" alt="">
                     <p>{{ last_game.title }}</p>
@@ -37,20 +35,20 @@
             </div>
         </div>
 
-        <!-- TODO refresh twitts-->
+        <!-- TODO refresh tweets-->
         <div class="twitter-table" style="float: right; width: 40em">
             <p style="max-width: 50%; font-weight: bold">Twitter news flash:</p><br/>
             <table class="table table-hover table-dark">
-                <thead>
+                <thead style="color: white">
                 <tr>
-                    <th scope="col">tweet</th>
-                    <th scope="col">date</th>
+                    <th scope="col" style="color: white">tweet</th>
+                    <th scope="col" style="color: white">date</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for tweet in tweets %}
-                    <tr data-href="https://twitter.com/user/status/{{ tweet.tweet_id }}">
-                        <th scope="row">{{ tweet.tweet_text }}</th>
+                    <tr data-href="https://twitter.com/user/status/{{ tweet.tweet_id }}" style="border-color: grey">
+                        <th scope="row" style="color: white">{{ tweet.tweet_text }}</th>
                         <td>{{ tweet.published_date }}</td>
                     </tr>
                 {% endfor %}
@@ -58,6 +56,7 @@
             </table>
         </div>
     </div>
+
 
     <script>
         $(document).ready(function () {

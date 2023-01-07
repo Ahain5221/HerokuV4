@@ -2,7 +2,7 @@
 
 {% block content %}
     <head>
-    {{ form.media }}
+        {{ form.media }}
     </head>
     <h1>Edit thread</h1>
     <form action="" method="post">
@@ -11,6 +11,18 @@
             {{ form.as_table }}
         </table>
         <input type="submit" value="Submit"/>
+
     </form>
+    {% if user.is_superuser or user.is_staff %}
+
+        <form action="{% url 'thread-active-unactive' thread.pk %}">
+            {% csrf_token %}
+            {% if thread.is_thread_active %}
+                <button type="submit" value="{{ thread.pk }}" class="btn btn-danger btn-sm">Deactive</button>
+            {% else %}
+                <button type="submit" value="{{ thread.pk }}" class="btn btn-primary btn-sm">Active</button>
+            {% endif %}
+        </form>
+    {% endif %}
     <input type=button value="Cancel" onClick="javascript:history.go(-1);" style="margin-top: 1em">
 {% endblock %}

@@ -17,15 +17,6 @@ from django.utils.text import slugify
 
 # Create your models here.
 
-class MyCacheTable(models.Model):
-    cache_key = models.CharField(primary_key=True, max_length=255)
-    value = models.TextField()
-    expires = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'my_cache_table'
-
 class Genre(models.Model):
     name = models.CharField(max_length=200, help_text='Enter a book genre (e.g. Science Fiction)')
 
@@ -116,16 +107,17 @@ class Game(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=200)
     authors = models.ManyToManyField('Author')
-    book_image = models.TextField(max_length=100, null=True, blank=True,
-                                  default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400"
-                                          ".jpg")
+
 
     summary = models.TextField(max_length=2000, help_text='Enter a brief description of the book')
     isbn = ISBNField('ISBN', unique=True,
-                     help_text='13 Character <a href="https://www.isbn-international.org/content/what-isbn'
+                     help_text='10 or 13 Character <a href="https://www.isbn-international.org/content/what-isbn'
                                '">ISBN number</a>')
     genre = models.ManyToManyField('MovieSeriesGenre', help_text='Select a genre for this book')
     languages = models.ManyToManyField('Language')
+    book_image = models.TextField(max_length=100, null=True, blank=True,
+                                  default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400"
+                                          ".jpg")
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     Verified = models.BooleanField(default=False)
 
@@ -139,7 +131,7 @@ class Book(models.Model):
         return reverse('book-detail', args=[str(self.id)])
 
     def display_genre(self):
-        return ', '.join(genr.name for genr in self.genre.all()[:3])
+        return ', '.join(genre_object.name for genre_object in self.genre.all()[:3])
 
     display_genre.short_description = 'Genre'
 
@@ -215,12 +207,11 @@ class Developer(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
-    # profile_image = models.ImageField(null = True, blank=True, upload_to="images/")
     profile_image_url = models.TextField(null=True, blank=True, default="https://pbs.twimg.com/profile_images"
                                                                         "/1510045751803404288/W-AAI2EH_400x400.jpg")
     date_of_birth = models.DateField(null=True, blank=True)
     profile_description = models.TextField(null=True, blank=True, max_length=1000)
-    signature = models.TextField(null=True, blank=True, max_length=250)
+    signature = models.TextField(null=True, blank=True, max_length=575)
     likes = models.ManyToManyField(User, related_name="blog_posts")
     favorite_games = models.ManyToManyField('Game')
     favorite_movies = models.ManyToManyField('Movie')
@@ -260,7 +251,7 @@ class Profile(models.Model):
         return reverse('profile-page', args=[str(self.user.username)])
 
     def __str__(self):
-        return str(self.user)
+        return str(self.name)
 
     @property
     def number_of_watched_movies(self):
@@ -358,6 +349,7 @@ class MovieSeriesBase(models.Model):
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     imdb_rating = models.FloatField(default=None, null=True, blank=True)
     imdb_id = models.CharField(max_length=10, unique=True, null=True)
+    imdb_votes = models.IntegerField(null=True, default=0)
 
     CHOICES = [
         ('movie', 'movie'),
@@ -468,7 +460,7 @@ class Season(models.Model):
 
 
 class Episode(models.Model):
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=200)
     season = models.ForeignKey('Season', on_delete=models.CASCADE)
     release_date = models.DateField(null=True)
     episode_number = models.IntegerField(null=True)
@@ -667,11 +659,12 @@ class Thread(Forum):
     category = models.ForeignKey(ForumCategory, on_delete=models.SET_NULL, related_name='categories', null=True)
     likes = models.ManyToManyField(Profile, related_name='thread_like')
     slug = models.SlugField(unique=True, null=True)
-    slug_category = models.SlugField(null=True)
     tags = TaggableManager()
     views = models.IntegerField(default=0)
     last_post_date = models.DateTimeField(null=True)
     number_of_posts = models.IntegerField(default=0)
+    slug_category = models.SlugField(null=True)
+    is_thread_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title
@@ -691,16 +684,8 @@ class Thread(Forum):
         return post
 
 
-
-
-LIKE_CHOICES = (
-    ('Like', 'Like'),
-    ('Unlike', 'Unlike')
-)
-
-
 class Post(Forum):
-    thread = models.ForeignKey(Thread, on_delete=models.SET_NULL, related_name='posts', null=True)
+    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name='posts', null=True)
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
     likes = models.ManyToManyField(Profile, related_name='post_like')
     content = RichTextField(null=False)
@@ -729,12 +714,17 @@ class Post(Forum):
 
 
 class Like(models.Model):
+    LIKE_CHOICES = (
+        ('Like', 'Like'),
+        ('Unlike', 'Unlike')
+    )
+
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True)
     value = models.CharField(choices=LIKE_CHOICES, default='Post_Like', max_length=10)
 
     def __str__(self):
-        return self.post
+        return self.value
 
 
 class Tweet(models.Model):
@@ -745,3 +735,12 @@ class Tweet(models.Model):
 
     def __str__(self):
         return self.tweet_text
+
+
+class MyCacheTable(models.Model):
+    cache_key = models.CharField(primary_key=True, max_length=255)
+    value = models.TextField()
+    expires = models.DateTimeField()
+
+    class Meta:
+        db_table = 'my_cache_table'

@@ -6,13 +6,17 @@
         <a href="{{ object.game.get_absolute_url }}">{{ object.game }}</a> review
     </h1>
 
-    <div style="border: 1px solid #262626; width: 50em">
-        <div style="border: 1px solid #262626; background-color: #262626">
+    <div class="review_box">
+            <div class="review_bar">
             <a href="{{ object.author.profile.get_absolute_url }}">
                 <strong>&nbsp;&nbsp;{{ object.author }}</strong>
             </a> &nbsp;&nbsp;&nbsp; {{ object.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ object.rate }}
         </div>
-        <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ object.content }} </div>
+        <div class="review_content">
+            <p class="text-medium-black">
+                {{ object.content }}
+            </p>
+        </div>
     </div>
 
     <a href="{% url 'game-review-update' game_pk=object.game.pk pk=object.pk%}">

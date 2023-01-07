@@ -2,9 +2,7 @@
 
 {% block content %}
 
-
-    <article class="main container"
-             style="width: auto; margin-top: 2em ;margin-bottom: 2em; margin-left: 5em; padding: 0">
+    <article class="main container thread-container">
         <span class="breadcrumb bg-dark" style="padding-left: 1em">
             <span class="breadcrumb-item" style="margin-right: 1em"><a href="{% url 'index' %}">Home</a></span>
             <span class="icon solid fa-greater-than" style="margin-right: 1em"><a href="{% url 'category' %}"
@@ -19,18 +17,51 @@
         <div class="row">
             <div class="col-10">
                 <h2 style="margin-bottom: 0"> {{ thread.title }} </h2>
-                <p style="margin: 0; color: #e4e4e4; font-size: small">Discussion in <a
+                <p class="thread-info">Discussion in <a
                         href="{% url 'thread-list' thread.category.slug '-last_post_date' %}">{{ thread.category }}</a> started by <a
                         href="{{ thread.creator.get_absolute_url }}">{{ thread.creator }}</a>, {{ thread.date }}</p>
-                <p style="margin: 0; color: #d0d0d0; font-size: smaller"> Tags: <a href="#">tag1</a> | <a
-                        href="#">tag2</a> | <a href="#">tag3</a> | <a href="#">tag4</a></p>
+                <p class="tags"> Tags:
+                    {% for tag in thread.tags.all %}
+                        <a class="btn btn-dark btn-sm" href="#">&nbsp;{{ tag.name }}&nbsp;</a>
+                    {% endfor %}
+                </p>
             </div>
-            <div class="col-1" style="margin-top: 3.5em; margin-left: 7em">
+            <div class="col-1 thread-edit-panel">
                 {% if user.is_authenticated %}
                     {% if user.id == thread.creator.id or user.is_superuser %}
-                        <a href="{% url 'thread-delete' pk=thread.id %}" style="margin: 1em">
-                            <button class="btn btn-danger btn-sm" style="margin: 0.5em">Delete Thread</button>
+                        <a style="margin: 1em">
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#delete_thread" style="margin: 0.5em">Delete Thread</button>
                         </a>
+                        <div class="modal fade" id="delete_thread" tabindex="-1" aria-labelledby="reviewLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content bg-dark">
+                                    <form method="POST" action="{% url 'thread-delete' pk=thread.id %}">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="reviewLabel">Delete post</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete {{ thread.creator }}'s thread?</p>
+                                            {% csrf_token %}
+                                            {% if user.is_superuser %}
+                                                <textarea id="delete_reason" name="delete_reason"
+                                                          placeholder="Enter any reason, if necessary"
+                                                          maxlength="200" rows="4" cols="30"></textarea>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <input type="submit" value="DELETE">
+                                            <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Close
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
                         <a href="{% url 'thread-update' pk=thread.id  category_slug=category.slug  %}" style="margin: 1em">
                             <button class="btn btn-dark btn-sm" style="margin: 0.5em">Edit Thread</button>
                         </a>
@@ -38,7 +69,6 @@
                 {% endif %}
             </div>
         </div>
-
 
         {% block pagination %}
             {% if is_paginated %}
@@ -58,68 +88,52 @@
                 </div>
             {% endif %}
 
+            <!--{{ posts_id }}-->
+
             {% for post_liked, post in posts %}
 
                 <div class="row" style="margin: 0">
-                    <div class="col-1 bg-dark" style="padding-left: 0.5em; margin-left: 0; height: 21em">
+                    <div class="col-1 bg-dark user-box">
                         <a href="{{ post.creator.get_absolute_url }}"><img src="{{ post.creator.profile_image_url }}"
-                                                                           class="card-img" height="140" width="140"
-                                                                           style="padding: 0.75em 1.25em 0 0.75em; aspect-ratio: 1/1"></a>
-                        <p style="font-size: medium; margin: 0 0 0 0.5em"><a
+                                                                           class="card-img avatar-style" height="140" width="140"></a>
+                        <p class="user-additional-info" style="font-size: medium; margin-bottom: 1em"><a
                                 href="{{ post.creator.get_absolute_url }}"> {{ post.creator }} </a></p>
-                        <p style="font-size: smaller; margin: 0 0 0 0.5em">Title</p>
-                        <p style="font-size: 0.5vw; margin: 0 0 0 0.5em">
-                            Joined: {{ post.creator.user.date_joined.date }} </p>
-                        <p style="font-size: 0.5vw; margin: 0 0 0 0.5em"> Posts: {{ post.number_of_posts }} </p>
-                        <p style="font-size: 0.5vw; margin: 0 0 0 0.5em">Likes received:{{ post.all_my_likes }}</p>
+                        <p class="user-additional-info"> Joined: {{ post.creator.user.date_joined.date }} </p>
+                        <p class="user-additional-info"> Posts: {{ post.number_of_posts }} </p>
+                        <p class="user-additional-info"> Likes received:{{ post.all_my_likes }}</p>
                     </div>
-                    <div class="col-10 bg-dark"
-                         style="padding: 0 0.25em 0 1em; margin-left: 1em; height: auto; width: 90.66667%;">
-                        <p style="color: #d1cfcb; font-size: 10pt; margin: -1em 0 0 0">
+                    <div class="col-10 bg-dark post-content-box" style="width: 90.66667%;">
+                        <p class="post-content">
                             {{ post.content|safe }}
                         </p>
-                        <div class="row" style="margin: 0 0 0 0.25em; height: 35px">
+                        <div class="row post-date-like">
                             <div class="col-6" style="padding: 0">
                                 <p class="text-start" style="font-size: smaller"><a
                                         href="{{ post.creator.get_absolute_url }}"> {{ post.creator }}</a>, {{ post.date }}
-                                    - Report </p>
+                                </p>
                             </div>
                             <div class="col-6">
-                                <p class="text-end" style="font-size: smaller; margin-right: 1em"> {% if user.is_authenticated %}
-                                    <form action="{% url 'like_post' post.pk thread.pk %}" method="POST"
-                                          style="margin-left: 45em; margin-top: 3.4em">
-                                        {% csrf_token %}
-                                        {% if post_liked %}
-                                            <button type="submit" name="profile_id" value="{{ post.id }}"
-                                            style="background: none!important;
-                                                   color: #d1cfcb;
-                                                   border: none;
-                                                   padding: 0!important;
-                                                   box-shadow: none;
-                                                   letter-spacing: 1px;
-                                                   cursor: pointer;">Unlike</button>
-                                            <input type="hidden" value="{{ thread.id }}">
-                                        {% else %}
-                                            <button type="submit" name="profile_id" value="{{ post.id }}"
-                                            style="background: none!important;
-                                                   color: #d1cfcb;
-                                                   border: none;
-                                                   padding: 0!important;
-                                                   box-shadow: none;
-                                                   letter-spacing: 1px;
-                                                   cursor: pointer;
-                                                   margin-left: 1em">Like</button>
-                                            <input type="hidden" value="{{ thread.id }}">
-                                        {% endif %}
-                                    </form>
-                                {% else %}
-                                    <a class="btn btn-outline-info" href="{% url 'login' %}?next={{ request.path }}">Log
-                                        in to like this post!</a><br>
-                                {% endif %}  </p>
+                                    {% if user.is_authenticated %}
+                                        <form action="{% url 'like_post' post.pk thread.pk %}" method="POST"
+                                              style="margin-left: 45em; margin-top: 3.4em">
+                                            {% csrf_token %}
+                                            {% if post_liked %}
+                                                <button type="submit" name="profile_id" value="{{ post.id }}" class="post-like-button">Unlike</button>
+                                                <input type="hidden" value="{{ thread.id }}">
+                                            {% else %}
+                                                <button type="submit" name="profile_id" value="{{ post.id }}" class="post-like-button"
+                                                style="margin-left: 1em">Like</button>
+                                                <input type="hidden" value="{{ thread.id }}">
+                                            {% endif %}
+                                        </form>
+                                    {% else %}
+                                        <a class="btn btn-outline-info" href="{% url 'login' %}?next={{ request.path }}">Log
+                                            in to like this post!</a><br>
+                                    {% endif %}
 
                             </div>
                         </div>
-                        <div class="row" style="margin: 0 0 1em 0.25em; height: 90px">
+                        <div class="row post-edit-row">
                             <div class="col-6" style="padding: 0">
                                 <p class="text-start" style="font-size: smaller">
                                 {% if post.likes.all %}
@@ -193,8 +207,7 @@
                             </div>
                         </div>
                         {% if post.creator.signature is not None %}
-                            <p class="text-start"
-                               style="font-size: smaller; margin: 0 0 5em 0.25em"> {{ post.creator.signature }} </p>
+                            <p class="text-start signature-style"> {{ post.creator.signature }} </p>
                         {% endif %}
                     </div>
                 </div>
@@ -221,8 +234,6 @@
 
             {% endfor %}
 
-
-
             {% if is_paginated %}
                 <div class="pagination">
                     <span class="page-links" style="margin-top: 2.5em">
@@ -242,24 +253,21 @@
         {% endblock %}
 
     {{ form.media }}
-
+    {% if thread.is_thread_active %}
     <form action="" method="POST" name="PostForm" id="write_post" class="PostForm" onSubmit="return checkTimer()" style="margin: 8em 1em 0 -1em ">
         {% csrf_token %}
         <div class="col-lg-12" style="margin-left: 1em">
             <div class="form-group text-end">
-                {% csrf_token %}
                 <label for="create_post"></label>
                 <textarea id="create_post" name="content" datatype='{{ post_form.content }}'></textarea>
                 <input type="submit" value="Create" class="bg-dark" style="margin: 1em 0 1em 0">
             </div>
         </div>
     </form>
-
+    {% else %}
+        <h3 style="text-align: center">The thread was closed by the moderators.</h3>
+    {% endif %}
     </article>
-
-
-
-
 
 
     <style>

@@ -1,5 +1,6 @@
 import os
 import random
+import ast
 from datetime import datetime
 from time import time, sleep
 from django.contrib.admin.views.decorators import staff_member_required
@@ -32,7 +33,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -59,7 +60,6 @@ from .models import Post, Thread
 from .forms import PostForm, ForumCategory, ThreadCategoryForm, ThreadForm
 from django.views.generic.edit import FormMixin
 from taggit.models import Tag
-from django.views.decorators.cache import never_cache
 
 # standard library imports
 import csv
@@ -198,26 +198,30 @@ class cbv_view(generic.ListView):
     template_name = 'index.html'
 
 
-def handler(request, exception):
+def custom_handler_404(request, exception):
     context = {'domain': get_current_site(request)}
-    return render(request, 'errorrr.html', context=context)
+    return render(request, 'error_404.html', context=context)
 
 
 @stuff_or_superuser_required
 def get_autocomplete_permission(request, pk):
-    new_group, created = Group.objects.get_or_create(name='new_group')
+    autocomplete_group, created = Group.objects.get_or_create(name='autocomplete_group')
     user_object = User.objects.get(id=pk)
     if created:
         permission_developer = Permission.objects.get(name='Can add developer')
         permission_actor = Permission.objects.get(name='Can add actor')
         permission_director = Permission.objects.get(name='Can add director')
-        new_group.permissions.add(permission_developer, permission_actor, permission_director)
-    new_group.user_set.add(user_object)
+        permission_author = Permission.objects.get(name='Can add author')
+
+        autocomplete_group.permissions.add(permission_developer, permission_actor,
+                                           permission_director, permission_author)
+    autocomplete_group.user_set.add(user_object)
     try:
-        checkP = RequestPermission.objects.get(FromUser=pk)
-        checkP.status = "Accepted"
-        checkP.save(update_fields=['status'])
+        check_permission = RequestPermission.objects.get(FromUser=pk)
+        check_permission.status = "Accepted"
+        check_permission.save(update_fields=['status'])
     except (Exception,):
+        messages.error(request, 'Check if the request still exists')
         return redirect('profile-page', user_object.username)
     return redirect('request-list')
     # return redirect('profile-page',pk)
@@ -315,9 +319,8 @@ class AuthorAutocomplete(autocomplete.Select2QuerySetView):
                                                  first_last_name=create_field_from_url)[0]
 
 
+@anonymous_required
 def signup(request):
-    if request.user.is_authenticated:
-        return redirect('index')
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
@@ -416,7 +419,7 @@ def activate(request, uidb64, token):
 
 def sendmail(request):
     send_mail(
-        'Weryfikkacja rejestracji na PCT',  # Tytuł maila
+        'Weryfikacja rejestracji na PCT',  # Tytuł maila
         'Link do weryfikacji.',  # Treść maila
         'pct-team@outlook.com',  # Z jakiego maila wysyłamy
         ['pct-team@outlook.com'],  # Na jakiego maila wysyłamy
@@ -426,11 +429,9 @@ def sendmail(request):
 
 
 def index(request):
-    """View function for home page of site."""
     if request.user.is_authenticated:
-
         # num_visits = request.session.get('num_visits', 0)
-        #last_book = Book.objects.filter(Verified=True).last()
+        # last_book = Book.objects.filter(Verified=True).last()
         last_game = Game.objects.filter(Verified=True).last()
         last_series = Series.objects.filter(Verified=True).last()
         last_movie = Movie.objects.filter(Verified=True).last()
@@ -757,14 +758,9 @@ def stuff_verification(request):
 
 @anonymous_required
 def login_user(request):
-    if request.user.is_authenticated:
-        return redirect('index')
-    # username = password = ''
     if request.POST:
-        username = request.POST['username']
+        username = request.POST['username'].lower()
         password = request.POST['password']
-        username = username.lower()
-
         user = authenticate(username=username, password=password)
         if user is not None:
             if user.is_active:
@@ -918,7 +914,7 @@ class BookDelete(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
-            basic_message_content = 'Your book was deleted from PTC, title: ' + str(self.object)
+            basic_message_content = 'Your book was deleted from PCT, title: ' + str(self.object)
             mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'added_by')
         messages.success(self.request, "The book has been deleted!")
         return super().form_valid(form)
@@ -1058,6 +1054,14 @@ class ProfileBookList(generic.DetailView):
 
         status = self.kwargs['status']
 
+        if_book_in_other_user_list = []
+        if self.request.user.is_authenticated:
+            logged_user_book_list = BookList.objects.filter(profile=self.request.user.profile).values_list(
+                'book', flat=True)
+
+        else:
+            logged_user_book_list = []
+
         if status == 'all':
             book_list_all = BookList.objects.filter(profile=self.object)
             book_list_books = BookList.objects.filter(profile=self.object).values_list('book', flat=True)
@@ -1070,13 +1074,19 @@ class ProfileBookList(generic.DetailView):
         book_reviews_books = BookReview.objects.filter(author=self.object.user).values_list('book', flat=True)
 
         for book in book_list_books:
+
+            if book in logged_user_book_list:
+                if_book_in_other_user_list.append(True)
+            else:
+                if_book_in_other_user_list.append(False)
+
             if book in book_reviews_books:
                 book_reviews_all.append(BookReview.objects.filter(
                     author=self.object.user).filter(book=book).first())
             else:
                 book_reviews_all.append(False)
 
-        reviews_and_books = zip(book_list_all, book_reviews_all)
+        reviews_and_books = zip(book_list_all, book_reviews_all, if_book_in_other_user_list)
         context['reviews_and_books'] = reviews_and_books
 
         context['status'] = status
@@ -1125,10 +1135,6 @@ class GameDetailView(UserPassesTestMixin, generic.DetailView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(GameDetailView, self).get_context_data(*args, **kwargs)
-
-        kont = False
-
-        context["kont"] = kont
 
         if self.request.user.is_authenticated:
             profile_pk = Profile.objects.filter(user=self.request.user.pk).first().pk
@@ -1225,7 +1231,7 @@ class SeriesReviewDelete(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         if self.object.author is not None and self.request.user.is_superuser:
             delete_reason_content = form.data['delete_reason']
-            basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.series)
+            basic_message_content = 'Your review was deleted from PCT, title: ' + str(self.object.series)
             mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'author')
         messages.success(self.request, "The review has been deleted!")
         return super().form_valid(form)
@@ -1252,7 +1258,7 @@ def mail_notification(thing_object, basic_message_content, additional, filed_nam
 
     if not superuser_test:
         send_mail(
-            'Delete notification from PTC ',
+            'Delete notification from PCT ',
             message_content,
             'pct-team@outlook.com',
             [user_email],
@@ -1275,7 +1281,7 @@ class GameReviewDelete(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         if self.object.author is not None and self.request.user.is_superuser:
             delete_reason_content = form.data['delete_reason']
-            basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.game)
+            basic_message_content = 'Your review was deleted from PCT, title: ' + str(self.object.game)
             mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'author')
         messages.success(self.request, "The review has been deleted!")
         return super().form_valid(form)
@@ -1299,7 +1305,7 @@ class BookReviewDelete(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         if self.object.author is not None and self.request.user.is_superuser:
             delete_reason_content = form.data['delete_reason']
-            basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.book)
+            basic_message_content = 'Your review was deleted from PCT, title: ' + str(self.object.book)
             mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'author')
         messages.success(self.request, "The review has been deleted!")
         return super().form_valid(form)
@@ -1323,7 +1329,7 @@ class MovieReviewDelete(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         if self.object.author is not None and self.request.user.is_superuser:
             delete_reason_content = form.data['delete_reason']
-            basic_message_content = 'Your review was deleted from PTC, title: ' + str(self.object.movie)
+            basic_message_content = 'Your review was deleted from PCT, title: ' + str(self.object.movie)
             mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'author')
         messages.success(self.request, "The review has been deleted!")
         return super().form_valid(form)
@@ -1370,6 +1376,14 @@ class ProfileGameList(generic.DetailView):
 
         status = self.kwargs['status']
 
+        if_game_in_other_user_list = []
+        if self.request.user.is_authenticated:
+            logged_user_game_list = GameList.objects.filter(profile=self.request.user.profile).values_list(
+                'game', flat=True)
+
+        else:
+            logged_user_game_list = []
+
         if status == 'all':
             game_list_all = GameList.objects.filter(profile=self.object)
             game_list_games = GameList.objects.filter(profile=self.object).values_list('game', flat=True)
@@ -1382,13 +1396,18 @@ class ProfileGameList(generic.DetailView):
         game_reviews_games = GameReview.objects.filter(author=self.object.user).values_list('game', flat=True)
 
         for game in game_list_games:
+            if game in logged_user_game_list:
+                if_game_in_other_user_list.append(True)
+            else:
+                if_game_in_other_user_list.append(False)
+
             if game in game_reviews_games:
                 game_reviews_all.append(GameReview.objects.filter(
                     author=self.object.user).filter(game=game).first())
             else:
                 game_reviews_all.append(False)
 
-        reviews_and_games = zip(game_list_all, game_reviews_all)
+        reviews_and_games = zip(game_list_all, game_reviews_all, if_game_in_other_user_list)
 
         context['reviews_and_games'] = reviews_and_games
         context['status'] = status
@@ -1450,31 +1469,11 @@ class GameDelete(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
-            basic_message_content = 'Your game was deleted from PTC, title: ' + str(self.object)
+            basic_message_content = 'Your game was deleted from PCT, title: ' + str(self.object)
             mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'added_by')
         messages.success(self.request, "The game has been deleted!")
         return super().form_valid(form)
 
-
-"""
-def mail_notification(thing_object, basic_message_content, additional):
-    user_email = thing_object.added_by.email
-    if additional:
-        message_content = basic_message_content + "\n" + "Reason for removal: " + additional
-    else:
-        message_content = basic_message_content
-
-    if not thing_object.added_by.is_superuser:
-        print("Wysłano maila")
-        print(thing_object.added_by)
-        send_mail(
-            'Delete notification from PTC ',
-            message_content,
-            'pct-team@outlook.com',
-            [user_email],
-            fail_silently=False,
-        )
-"""
 
 class GameListView(generic.ListView):
     model = Game
@@ -1483,8 +1482,95 @@ class GameListView(generic.ListView):
     ordering = ["title"]
 
 
+class GameGenreList(generic.ListView):
+    model = Game
+    paginate_by = 12
+    template_name = "polls/Game/game_list.html"
+    ordering = ["title"]
+
+    def get_queryset(self):
+        get_all_games = Game.objects.all()
+        try:
+            genre_pk = GameGenre.objects.get(name=self.kwargs['selected_genre']).pk
+        except ObjectDoesNotExist:
+            raise Http404
+        filtered_game_list = get_all_games.filter(genre=genre_pk, Verified=True)
+
+        return filtered_game_list
+
+    def get_context_data(self, **kwargs):
+        context = super(GameGenreList, self).get_context_data(**kwargs)
+        context['genre_name'] = self.kwargs['selected_genre']
+        return context
+
+
+class MovieGenreList(generic.ListView):
+    model = Movie
+    paginate_by = 12
+    template_name = "polls/movie/movie_list.html"
+    ordering = ["title"]
+
+    def get_queryset(self):
+        get_all_movies = Movie.objects.all()
+        try:
+            genre_pk = MovieSeriesGenre.objects.get(name=self.kwargs['selected_genre']).pk
+        except ObjectDoesNotExist:
+            raise Http404
+        filtered_movie_list = get_all_movies.filter(genre=genre_pk, Verified=True)
+
+        return filtered_movie_list
+
+    def get_context_data(self, **kwargs):
+        context = super(MovieGenreList, self).get_context_data(**kwargs)
+        context['genre_name'] = self.kwargs['selected_genre']
+        return context
+
+
+class SeriesGenreList(generic.ListView):
+    model = Series
+    paginate_by = 12
+    template_name = "polls/movie/series_list.html"
+    ordering = ["title"]
+
+    def get_queryset(self):
+        get_all_series = Series.objects.all()
+        try:
+            genre_pk = MovieSeriesGenre.objects.get(name=self.kwargs['selected_genre']).pk
+        except ObjectDoesNotExist:
+            raise Http404
+        filtered_series_list = get_all_series.filter(genre=genre_pk, Verified=True)
+
+        return filtered_series_list
+
+    def get_context_data(self, **kwargs):
+        context = super(SeriesGenreList, self).get_context_data(**kwargs)
+        context['genre_name'] = self.kwargs['selected_genre']
+        return context
+
+
+class BookGenreList(generic.ListView):
+    model = Book
+    paginate_by = 12
+    template_name = "polls/Book/book_list.html"
+    ordering = ["title"]
+
+    def get_queryset(self):
+        get_all_books = Book.objects.all()
+        try:
+            genre_pk = MovieSeriesGenre.objects.get(name=self.kwargs['selected_genre']).pk
+        except ObjectDoesNotExist:
+            raise Http404
+        filtered_book_list = get_all_books.filter(genre=genre_pk, Verified=True)
+
+        return filtered_book_list
+
+    def get_context_data(self, **kwargs):
+        context = super(BookGenreList, self).get_context_data(**kwargs)
+        context['genre_name'] = self.kwargs['selected_genre']
+        return context
+
+
 class DeveloperDetailView(generic.DetailView):
-    """Generic class-based detail view for a developer."""
     model = Developer
     template_name = 'polls/Game/developer_detail.html'
 
@@ -1508,7 +1594,7 @@ class DeveloperDelete(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
-            basic_message_content = 'Your developer was deleted from PTC, title: ' + str(self.object)
+            basic_message_content = 'Your developer was deleted from PCT, title: ' + str(self.object)
             mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'added_by')
         messages.success(self.request, "The developer has been deleted!")
         return super().form_valid(form)
@@ -1579,7 +1665,6 @@ class UserProfileEditView(UserPassesTestMixin, generic.UpdateView):
     def get_success_url(self):
         return reverse('profile-page', args=[str(self.object.user)])
 
-from friendship.models import bust_cache, FriendshipRequest
 
 @login_required(login_url='/polls/login/')
 def send_friendship_request(request, pk):
@@ -1589,7 +1674,6 @@ def send_friendship_request(request, pk):
             request.user,  # The sender
             other_user,  # The recipient
             message='Hi! I would like to add you')  # This message is optional
-
         return redirect('profile-page', other_user)
     except (Exception,):
         return redirect('profile-page', other_user)
@@ -1601,7 +1685,6 @@ def accept_friendship_request(request, pk):
         other_user = User.objects.get(id=pk)
         friend_request = FriendshipRequest.objects.get(from_user=other_user, to_user=request.user)
         friend_request.accept()
-
         return redirect('profile-page', other_user)
     except (Exception,):
         return redirect('profile-page', other_user)
@@ -1625,7 +1708,6 @@ def cancel_friendship_request(request, pk):
         other_user = User.objects.get(id=pk)
         friend_request = FriendshipRequest.objects.get(from_user=request.user, to_user=other_user)
         friend_request.cancel()
-
         return redirect('profile-page', other_user)
     except FriendshipRequest.DoesNotExist:
         return redirect('profile-page', other_user)
@@ -1727,11 +1809,11 @@ class ProfilePageView(UserPassesTestMixin, generic.DetailView):
             perm_request.first()
         else:
             perm_request = None
-        has_perm = self.request.user.groups.filter(name='new_group').exists()
+        has_perm = self.request.user.groups.filter(name='autocomplete_group').exists()
         liked = False
         if page_user.likes.filter(id=self.request.user.id).exists():
             liked = True
-        sended = Friend.objects.sent_requests(user=self.request.user)
+        sent = Friend.objects.sent_requests(user=self.request.user)
         received = Friend.objects.unread_requests(user=self.request.user)
         amount_of_pending_friend_request = len(received)
         was_send_friend_request = False
@@ -1741,7 +1823,7 @@ class ProfilePageView(UserPassesTestMixin, generic.DetailView):
             if te2.from_user == page_user.user:
                 received_friend_request = True
 
-        for te in sended:
+        for te in sent:
             test2 = te.to_user
             if test2 == page_user.user:
                 was_send_friend_request = True
@@ -1867,9 +1949,21 @@ def add_favorite_series(request, pk):
 
 class MovieListView(generic.ListView):
     template_name = "polls/movie/movie_list.html"
-    model = Movie
+    # model = Movie
     paginate_by = 18
-    ordering = ["title"]
+    # ordering = ["-imdb_votes"]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        order_by = self.kwargs['order_by']
+        context['order_by'] = order_by
+        return context
+
+    def get_queryset(self):
+        order_by = self.kwargs['order_by']
+        movie_list = Movie.objects.order_by(order_by)
+
+        return movie_list
 
 
 class MovieDetailView(UserPassesTestMixin, generic.DetailView):
@@ -1932,7 +2026,7 @@ class MovieDelete(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
-            basic_message_content = 'Your movie was deleted from PTC, title: ' + str(self.object)
+            basic_message_content = 'Your movie was deleted from PCT, title: ' + str(self.object)
             mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'added_by')
         messages.success(self.request, "The movie has been deleted!")
         return super().form_valid(form)
@@ -2005,7 +2099,7 @@ def movie_verification(request, pk):
 @stuff_or_superuser_required
 def movie_verification_stuff_page(request):
 
-    list_of_movies = request.POST.getlist('series-select')
+    list_of_movies = request.POST.getlist('movies-select')
     if not list_of_movies:
         return redirect("stuff-verification")
     query_set_of_movies = Game.objects.none()
@@ -2082,6 +2176,17 @@ class ProfileWatchlist(generic.DetailView):
         type_of_show = self.kwargs['type_of_show']
         status = self.kwargs['status']
 
+        if_movie_in_other_user_list = []
+        if_series_in_other_user_list = []
+        if self.request.user.is_authenticated:
+            logged_user_movie_watchlist = MovieWatchlist.objects.filter(profile=self.request.user.profile).values_list(
+                'movie', flat=True)
+            logged_user_series_watchlist = SeriesWatchlist.objects.filter(
+                profile=self.request.user.profile).values_list('series', flat=True)
+        else:
+            logged_user_movie_watchlist = []
+            logged_user_series_watchlist = []
+
         if type_of_show in ['all', 'movies'] and status != 'watching' and status != 'dropped':
             if status == 'all':
                 movie_watchlist_all = MovieWatchlist.objects.filter(profile=self.object)
@@ -2096,13 +2201,18 @@ class ProfileWatchlist(generic.DetailView):
             movie_reviews_movies = MovieReview.objects.filter(author=self.object.user).values_list('movie', flat=True)
 
             for movie in movie_watchlist_movies:
+                if movie in logged_user_movie_watchlist:
+                    if_movie_in_other_user_list.append(True)
+                else:
+                    if_movie_in_other_user_list.append(False)
+
                 if movie in movie_reviews_movies:
                     movie_reviews_all.append(MovieReview.objects.filter(
                         author=self.object.user).filter(movie=movie).first())
                 else:
                     movie_reviews_all.append(False)
 
-            reviews_and_movies = zip(movie_watchlist_all, movie_reviews_all)
+            reviews_and_movies = zip(movie_watchlist_all, movie_reviews_all, if_movie_in_other_user_list)
             context['reviews_and_movies'] = reviews_and_movies
 
         if type_of_show in ['all', 'series']:
@@ -2119,13 +2229,19 @@ class ProfileWatchlist(generic.DetailView):
                                                                                                      flat=True)
 
             for series in series_watchlist_series:
+
+                if series in logged_user_series_watchlist:
+                    if_series_in_other_user_list.append(True)
+                else:
+                    if_series_in_other_user_list.append(False)
+
                 if series in series_reviews_series:
                     series_reviews_all.append(SeriesReview.objects.filter(
                         author=self.object.user).filter(series=series).first())
                 else:
                     series_reviews_all.append(False)
 
-            reviews_and_series = zip(series_watchlist_all, series_reviews_all)
+            reviews_and_series = zip(series_watchlist_all, series_reviews_all, if_series_in_other_user_list)
             context['reviews_and_series'] = reviews_and_series
 
         context['type_of_show'] = type_of_show
@@ -2236,9 +2352,21 @@ class MovieWatchlistView(generic.ListView):
 
 class SeriesListView(generic.ListView):
     template_name = "polls/movie/series_list.html"
-    model = Series
+    # model = Series
     paginate_by = 18
-    ordering = ["title"]
+    # ordering = ["-imdb_votes"]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        order_by = self.kwargs['order_by']
+        context['order_by'] = order_by
+        return context
+
+    def get_queryset(self):
+        order_by = self.kwargs['order_by']
+        series_list = Series.objects.order_by(order_by)
+
+        return series_list
 
 
 class SeriesDetailView(UserPassesTestMixin, generic.DetailView):
@@ -2405,7 +2533,7 @@ class SeriesDelete(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         if self.object.added_by is not None:
             delete_reason_content = form.data['delete_reason']
-            basic_message_content = 'Your series were deleted from PTC, title: ' + str(self.object)
+            basic_message_content = 'Your series were deleted from PCT, title: ' + str(self.object)
             mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'added_by')
         messages.success(self.request, "The series has been deleted!")
         return super().form_valid(form)
@@ -2678,8 +2806,10 @@ def scrape_steam_ids(page, start):
     print(page)
     print(url)
     response = requests.get(url)
+    print(response)
     only_item_cells = SoupStrainer("div", attrs={'id': 'search_resultsRows'})
     table = BeautifulSoup(response.content, 'lxml', parse_only=only_item_cells)
+    print(table.prettify())
     games = table.find_all("a")
     for game in games:
         try:
@@ -2908,14 +3038,13 @@ def scrape_show(url, multi_search, type_of_show, api, update, months, start):
     created = 0
     updated = 0
     titles = []
-    print(url)
     response = requests.get(url)
     only_item_cells = SoupStrainer("div", attrs={'class': 'discovery-tiles__wrap'})
     table = BeautifulSoup(response.content, 'lxml', parse_only=only_item_cells)
-    movies_data = table.find_all("span", attrs={'class': 'p--small'})
+    shows_data = table.find_all("span", attrs={'class': 'p--small'})
 
-    for movie in movies_data:
-        title = str(movie.text.strip())
+    for show in shows_data:
+        title = str(show.text.strip())
         titles.append(title)
 
     if multi_search:
@@ -3015,6 +3144,8 @@ def scrape_show(url, multi_search, type_of_show, api, update, months, start):
                     name=language
                 )
                 languages_pk_list.append(language_instance.pk)
+        imdb_votes = data['imdb_votes']
+        imdb_votes = int(imdb_votes.replace(',', ''))
 
         if type_of_show == 'movie':
             try:
@@ -3031,6 +3162,7 @@ def scrape_show(url, multi_search, type_of_show, api, update, months, start):
                 movie_object.type_of_show = type_of_show
                 movie_object.imdb_rating = imdb_rating
                 movie_object.Verified = True
+                movie_object.imdb_votes = imdb_votes
                 movie_object.director.set(directors_pk_list)
                 movie_object.language.set(languages_pk_list)
                 movie_object.genre.set(genres_pk_list)
@@ -3051,6 +3183,7 @@ def scrape_show(url, multi_search, type_of_show, api, update, months, start):
                     Verified=True,
                     # 'added_by': User.objects.get(pk=1),
                     imdb_rating=imdb_rating,
+                    imdb_votes=imdb_votes
                 )
                 movie_object.director.set(directors_pk_list)
                 movie_object.language.set(languages_pk_list)
@@ -3095,6 +3228,7 @@ def scrape_show(url, multi_search, type_of_show, api, update, months, start):
                 series_object.type_of_show = type_of_show
                 series_object.imdb_rating = imdb_rating
                 series_object.Verified = True
+                series_object.imdb_votes = imdb_votes
                 series_object.director.set(directors_pk_list)
                 series_object.language.set(languages_pk_list)
                 series_object.genre.set(genres_pk_list)
@@ -3114,6 +3248,7 @@ def scrape_show(url, multi_search, type_of_show, api, update, months, start):
                     type_of_show=type_of_show,
                     poster=poster,
                     Verified=True,
+                    imdb_votes=imdb_votes,
                     # 'added_by': User.objects.get(pk=1),
                     imdb_rating=imdb_rating,
                 )
@@ -3172,13 +3307,8 @@ def omdb_api(request, url, multi_search, type_of_show):
     months = {"Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06", "Jul": "07",
               "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"}
 
-    if multi_search == 'True':
-        multi_search = True
-    else:
-        multi_search = False
-
+    multi_search = ast.literal_eval(multi_search)
     url = url.replace("\\", "/")
-
     final_time, end = scrape_show(url, multi_search, type_of_show, api, True, months, final_time)
 
     context = {
@@ -3202,12 +3332,19 @@ def omdb_api_page(request):
             critics = form.cleaned_data.get('critics')
             pages = form.cleaned_data.get('pages')
             sort = form.cleaned_data.get('sort')
+            genres = form.cleaned_data.get('genres')
             url = "https://www.rottentomatoes.com/browse/" + type_of_show
 
             if len(vods) != 0:
                 url += "/affiliates:"
                 for vod in vods:
                     url += vod + ','
+                url = url[:-1]
+
+            if len(genres) != 0:
+                url += "~genres:"
+                for genre in genres:
+                    url += genre + ','
                 url = url[:-1]
 
             if len(audience) != 0:
@@ -3406,6 +3543,7 @@ def episodes_scraping_script(request):
     for series in series_set.all():
         if series.episodes_update_date:
             days_difference = (today_date - series.episodes_update_date).days
+            print(days_difference)
             if days_difference >= 7:
                 series_pks.append(series.pk)
         else:
@@ -3446,6 +3584,8 @@ def episode_scraping(series, episode_imdb_id, season_object, months, api, action
             imdb_rating = float(episode['imdb_rating'])
 
         poster = episode['poster']
+        if poster == 'N/A':
+            poster = series.poster
         imdb_id = episode_imdb_id
 
     else:
@@ -3462,22 +3602,6 @@ def episode_scraping(series, episode_imdb_id, season_object, months, api, action
     episode = Episode.objects.filter(imdb_id=imdb_id).first()
 
     if action == 'update':
-        """
-        Episode.objects.update_or_create(
-            imdb_id=imdb_id,
-            defaults={
-                'title': title,
-                'release_date': release_date,
-                'episode_number': int(episode_number),
-                'runtime': int(runtime),
-                'plot': plot,
-                'imdb_rating': imdb_rating,
-                'poster': poster,
-                'imdb_id': imdb_id,
-                'season': season_object
-            }
-        )
-        """
         episode.title = title
         episode.release_date = release_date
         episode.episode_number = episode_number
@@ -3491,19 +3615,6 @@ def episode_scraping(series, episode_imdb_id, season_object, months, api, action
         episodes.append(episode)
 
     elif action == 'create':
-        """
-        Episode.objects.create(
-            imdb_id=imdb_id,
-            title=title,
-            release_date=release_date,
-            episode_number=int(episode_number),
-            runtime=int(runtime),
-            plot=plot,
-            imdb_rating=imdb_rating,
-            poster=poster,
-            season=season_object
-        )
-        """
         episode = Episode(
             imdb_id=imdb_id,
             title=title,
@@ -3579,7 +3690,6 @@ class RequestPermissionCreate(UserPassesTestMixin, CreateView):
         return redirect('index')
 
     def form_valid(self, form):
-        messages.success(self.request, "Test!")
         form.instance.FromUser = self.request.user.profile
         form.instance.status = 'Sent'
 
@@ -3609,7 +3719,7 @@ def delete_unverified_users(request):
         else:
             continue
 
-    return redirect('index')  # W skryptcie zastąpić jako exit()
+    return redirect('index')  # W skryPCTie zastąpić jako exit()
 
 
 class UserPageManagement(UserPassesTestMixin, generic.DetailView):
@@ -3794,6 +3904,7 @@ def search_result_general(request):
                        'searched_movies': searched_movies,
                        'searched_series': searched_series,
                        'searched_actors': searched_actors,
+                       'searched': searched,
                        'searched_books': searched_books})
     else:
         return render(request, 'polls/search_result.html')
@@ -3827,6 +3938,8 @@ class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
         thread.save()
 
         posts = Post.objects.filter(thread=thread).order_by('date')
+        posts_id = posts.values_list('id', flat=True)
+        data['posts_id'] = posts_id
         data['posts'] = posts
         data['thread'] = thread
         data['category'] = category
@@ -3956,7 +4069,20 @@ def ThreadLike(request, pk):
     else:
         thread.likes.add(request.user.profile)
 
-    return HttpResponseRedirect(reverse('thread-detail', args=[str(thread.slug_category),str(thread.slug)]))
+    return HttpResponseRedirect(reverse('thread-detail', args=[str(thread.slug_category), str(thread.slug)]))
+
+
+@stuff_or_superuser_required
+def thread_active_unactive(request, pk):
+    thread = get_object_or_404(Thread, id=pk)
+    t = thread.is_thread_active
+    if thread.is_thread_active:
+        thread.is_thread_active = False
+    else:
+        thread.is_thread_active = True
+    thread.save()
+
+    return redirect('post-list', thread.slug_category, thread.slug)
 
 
 class CategoryCreate(UserPassesTestMixin, CreateView):
@@ -4057,13 +4183,15 @@ class ThreadCreate(UserPassesTestMixin, CreateView):
     form_class = ThreadForm
     template_name = "polls/Forum/thread_create.html"
 
-    #def form_view(self, request, pk):
-     #   if 'category_id' in request == "POST":
-      #       category = get_object_or_404(ForumCategory, id=pk)
-       #      saved_category = Thread(category=category)
-        #     saved_category.save()
-
-         #return render(request, 'polls/Forum/thread_create.html', {'form': ThreadCreate()})
+    """"
+    def form_view(self, request, pk):
+        if 'category_id' in request == "POST":
+            category = get_object_or_404(ForumCategory, id=pk)
+            saved_category = Thread(category=category)
+            saved_category.save()
+    
+        return render(request, 'polls/Forum/thread_create.html', {'form': ThreadCreate()})
+    """
 
     def form_valid(self, form):
         form.instance.creator = self.request.user.profile
@@ -4151,6 +4279,19 @@ class ThreadDelete(UserPassesTestMixin, DeleteView):
     def handle_no_permission(self):
         return redirect('index')
 
+    def form_valid(self, form):
+        if self.object.creator is not None and self.request.user.is_superuser:
+            delete_reason_content = form.data['delete_reason']
+            basic_message_content = 'Your post was deleted from PCT'
+            mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'creator')
+        messages.success(self.request, "The post has been deleted!")
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        category_slug = Thread.objects.get(id=self.object.pk).category.slug
+        return reverse('thread-list', kwargs={'slug': category_slug, 'order_by': '-last_post_date'})
+
 
 """
 class ThreadCategoryDelete(UserPassesTestMixin, DeleteView):
@@ -4185,7 +4326,7 @@ class PostDelete(UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         if self.object.creator is not None and self.request.user.is_superuser:
             delete_reason_content = form.data['delete_reason']
-            basic_message_content = 'Your post was deleted from PTC'
+            basic_message_content = 'Your post was deleted from PCT'
             mail_notification(self.get_object(), basic_message_content, delete_reason_content, 'creator')
         messages.success(self.request, "The post has been deleted!")
 
@@ -4283,7 +4424,7 @@ def tweet_save_to_db():
 
 
 def tweet_list(request):
-    #expand
+    # expand
     tweet_fetch(request)
     tweets = Tweet.objects.order_by('-published_date')[:10]
 

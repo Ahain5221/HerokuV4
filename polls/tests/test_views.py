@@ -64,7 +64,6 @@ class AuthorCreateViewTest(TestCase):
         test_user2.user_permissions.add(permission)
         test_user2.save()
 
-        # Create a book
         test_author = Author.objects.create(first_name='John', last_name='Smith')
 
     def test_redirect_if_not_logged_in(self):

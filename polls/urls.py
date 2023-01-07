@@ -191,7 +191,7 @@ urlpatterns = [
     path('password_success', views.password_change_success, name="password_success"),
 
     # MOVIE
-    path('movie/', views.MovieListView.as_view(), name='movies'),
+    path('movies/<order_by>', views.MovieListView.as_view(), name='movies'),
     path('movie/<int:pk>', views.MovieDetailView.as_view(), name='movie-detail'),
     path('movie/<int:pk>/delete', views.MovieDelete.as_view(), name='movie-delete'),
     path('movie/create', views.MovieCreate.as_view(), name='movie-create'),
@@ -210,7 +210,7 @@ urlpatterns = [
     path('movie_watched/<int:movie_pk>/<int:profile_pk>', views.movie_watched, name='movie-watched'),
 
     # SERIES
-    path('series/', views.SeriesListView.as_view(), name='series'),
+    path('seriess/<order_by>', views.SeriesListView.as_view(), name='series'),
     path('series/<int:pk>', views.SeriesDetailView.as_view(), name='series-detail'),
     path('series/<int:pk>/delete', views.SeriesDelete.as_view(), name='series-delete'),
     path('series/create', views.SeriesCreate.as_view(), name='series-create'),
@@ -273,6 +273,10 @@ urlpatterns = [
     path('scrapegames-start/', views.scrape_games_redirect, name='scrape-games-redirect'),
 
     path('genres/<model_name>/<int:pk>', views.games_series_movies_by_genre, name='genre-list'),
+    path('games/genres/<selected_genre>/', views.GameGenreList.as_view(), name='genre-games'),
+    path('movies/genres/<selected_genre>/', views.MovieGenreList.as_view(), name='genre-movies'),
+    path('series/genres/<selected_genre>/', views.SeriesGenreList.as_view(), name='genre-series'),
+    path('books/genres/<selected_genre>/', views.BookGenreList.as_view(), name='genre-books'),
 
     path('create_records', views.create_record, name='create_record'),
     path('request/create', views.RequestPermissionCreate.as_view(), name='request-create'),
@@ -302,6 +306,8 @@ urlpatterns = [
     path('forum/thread/create/<int:category_pk>', views.ThreadCreate.as_view(), name='thread-create'),
     path('forum/thread/<int:pk>/delete', views.ThreadDelete.as_view(), name='thread-delete'),
     path('forum/thread/<int:pk>/update/<category_slug>', views.ThreadUpdate.as_view(), name='thread-update'),
+    path('forum/thread/<int:pk>/update_status', thread_active_unactive, name='thread-active-unactive'),
+
     path('thread-like/<int:pk>', views.ThreadLike, name="thread_like"),
 
     path('forum/', views.CategoryListView.as_view(), name='category'),

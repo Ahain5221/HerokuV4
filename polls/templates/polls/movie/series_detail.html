@@ -2,13 +2,13 @@
 
 {% block content %}
     <div class="container-fluid">
-    <h1 style="font-size: xxx-large; margin-bottom: 1.5rem"> {{ series.title }} </h1>
-    <a class="page-link" style="font-size: larger; display: inline; margin-right: 6px">
-        TV Series
-        &nbsp;&nbsp;&nbsp;
+    <h1 class="records_title"> {{ series.title }} </h1>
+    <a class="records_info">
         {{ series.date_of_release }}
         &nbsp;&nbsp;&nbsp;
         IMDB rating: {{ series.imdb_rating }}
+        &nbsp;&nbsp;&nbsp;
+        PCT rating: {{ series.users_rating }}
         {% if series.number_of_seasons != NULL %}
             &nbsp;&nbsp;&nbsp;
             {{ series.number_of_seasons }} Seasons
@@ -55,35 +55,35 @@
 
     <div class="row">
         <div class="col" style="margin-top: 5em">
-            <img style='height: initial; width: initial; padding-left: inherit' src="{{ series.poster }}" class="card-img" alt="">
+            <img class="records_poster" src="{{ series.poster }}" alt="{{ series.title }}_poster">
             {% if series.genre.all.count == 3 %}
-                <ul style="margin-left: 4em">
+                <ul class="record_genre_small">
                     {% for genre in series.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-series' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% elif series.genre.all.count == 2 %}
-                <ul style="margin-left: 7em">
+                <ul class="record_genre_medium">
                     {% for genre in series.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-series' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% elif series.genre.all.count == 1 %}
-                <ul style="margin-left: 10em">
+                <ul class="record_genre_large">
                     {% for genre in series.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-series' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% else %}
                 <ul>
                     {% for genre in series.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-series' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% endif %}
         </div>
         <div class="col" style="padding-top: 25px">
-            <article style="display: inline-block; font-size: initial; margin-bottom: 1em">
+            <article class="record_summary">
             {% if series.number_of_seasons != None %}
             <h3> Seasons: </h3>
             {% if series.season_set.all %}
@@ -106,11 +106,11 @@
                     {% endif %}
                 {% endfor %}
                 <li>
-                        {% for director in series.director.all %}
-                            {% if director.full_name != 'N/A' %}
-                                <a style="display: inline; margin-right: 6px; font-size: initial" href="{{ director.get_absolute_url }}"> {{ director }} </a>
-                            {% endif %}
-                        {% endfor %}
+                    {% for director in series.director.all %}
+                        {% if director.full_name != 'N/A' %}
+                            <a class="record_detail_link" href="{{ director.get_absolute_url }}"> {{ director }} </a>
+                        {% endif %}
+                    {% endfor %}
                 </li>
                 {% for actor in series.actors.all|slice:":1" %}
                     {% if actor.full_name != 'N/A' %}
@@ -118,11 +118,11 @@
                     {% endif %}
                 {% endfor %}
                 <li>
-                        {% for actor in series.actors.all %}
-                            {% if actor.full_name != 'N/A' %}
-                                <a style="display: inline; margin-right: 6px; font-size: initial" href="{{ actor.get_absolute_url }}"> {{ actor }} </a>
-                            {% endif %}
-                        {% endfor %}
+                    {% for actor in series.actors.all %}
+                        {% if actor.full_name != 'N/A' %}
+                            <a class="record_detail_link" href="{{ actor.get_absolute_url }}"> {{ actor }} </a>
+                        {% endif %}
+                    {% endfor %}
                 </li>
                 {% for language in series.language.all|slice:":1" %}
                     {% if language.id != 2 %}
@@ -130,11 +130,11 @@
                     {% endif %}
                 {% endfor %}
                 <li>
-                        {% for language in series.language.all %}
-                            {% if language.id != 2 %}
-                                <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial"> {{ language }} </a>
-                            {% endif %}
-                        {% endfor %}
+                    {% for language in series.language.all %}
+                        {% if language.id != 2 %}
+                            <a class="record_detail_text"> {{ language }} </a>
+                        {% endif %}
+                    {% endfor %}
                 </li>
                 <!--
                 {% if series.Verified %}
@@ -201,7 +201,7 @@
     </div>
     </div>
 
-    <h1 style="padding-bottom: 1em; margin-top: 5em">
+    <h1 class="review_title">
         {% if series_reviews.count > 0 %}
             Reviews
         {% endif %}
@@ -218,8 +218,8 @@
     </h1>
 
     {% for review in series_reviews %}
-        <div style="border: 1px solid #262626; width: 50em">
-            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}
+        <div class="review_box">
+            <div class="review_bar"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}
                 {% if user.is_authenticated%}
                     {% if series_watched_watching %}
                         {% if review.author == user or user.is_superuser %}
@@ -257,7 +257,11 @@
                     {% endif %}
                 {% endif %}
             </div>
-            <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ review.content }} </div>
+            <div class="review_content">
+                <p class="text-medium-black">
+                    {{ review.content }}
+                </p>
+            </div>
         </div>
         <br>
     {% endfor %}

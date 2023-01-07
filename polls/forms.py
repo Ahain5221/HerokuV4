@@ -336,7 +336,28 @@ class OmdbApiForm(forms.Form):
                    ('amc_plus', 'AMC+'),
                    ('amazon_prime', 'Prime video'),
                    ('disney_plus', 'Disney+'),
-                   ('hbo_max', 'HBO Max'))
+                   ('hbo_max', 'HBO Max'),
+                   ('apple_tv', 'Apple TV'),
+                   ('apple_tv_plus', 'Apple TV+'),
+                   ('hulu', 'Hulu'),
+                   ('paramount_plus', 'Paramount+'),
+                   ('peacock', 'Peacock'),
+                   ('showtime', 'Showtime'),
+                   ('vudu', 'Vudu'))
+
+    genres_CHOICES = (('action', 'action'),
+                      ('adventure', 'adventure'),
+                      ('comedy', 'comedy'),
+                      ('crime', 'crime'),
+                      ('drama', 'drama'),
+                      ('fantasy', 'fantasy'),
+                      ('horror', 'horror'),
+                      ('sci_fi', 'sci_fi'),
+                      ('romance', 'romance'),
+                      ('war', 'war'))
+
+    # genres = ['romance', 'war', 'history', 'mystery_and_thriller']
+
     critics_CHOICES = (('fresh', 'fresh'),
                        ('rotten', 'rotten'))
     sort_CHOICES = ((False, 'No sort'),
@@ -354,11 +375,12 @@ class OmdbApiForm(forms.Form):
 
     type_of_show = forms.ChoiceField(choices=type_CHOICES)
     VOD = forms.MultipleChoiceField(required=False, choices=VOD_CHOICES, widget=forms.CheckboxSelectMultiple())
+    genres = forms.MultipleChoiceField(required=False, choices=genres_CHOICES, widget=forms.CheckboxSelectMultiple())
     critics = forms.MultipleChoiceField(required=False, choices=critics_CHOICES, widget=forms.CheckboxSelectMultiple())
     audience = forms.MultipleChoiceField(required=False, choices=audience_CHOICES,
                                          widget=forms.CheckboxSelectMultiple())
     sort = forms.ChoiceField(choices=sort_CHOICES)
-    pages = forms.IntegerField(min_value=1, required=False, help_text="One page contains 30 movies or series",
+    pages = forms.IntegerField(min_value=1, required=False, help_text="One page contains up to 30 movies or series",
                                widget=forms.NumberInput(attrs={'class': 'custom-form-control'}))
     multi_search = forms.ChoiceField(required=True, choices=CHOICES, help_text='Search for similar titles')
 

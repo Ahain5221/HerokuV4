@@ -25,12 +25,10 @@
         {% endif %}
     </ul>
 
-    {% if user.is_authenticated %}
-        {% if actor.added_by == user and not actor.Verified %}
+    {% if user.is_authenticated and user.is_superuser %}
             <a href="{% url 'actor-update' pk=actor.id %}">
                 <button class="btn btn-success btn-sm">UPDATE</button>
             </a>
-        {% else %}
             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal_2">EDIT</button>
             <div class="modal fade" id="exampleModal_2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -42,33 +40,30 @@
                         <div class="modal-body">
                             <div class="row">
                                 <div class="col">
-                                    {% if user.is_superuser %}
-                                            <a href="{% url 'actor-update' pk=actor.id %}">
-                                                <button class="btn btn-success btn-sm">UPDATE</button>
-                                            </a>
+                                    <a href="{% url 'actor-update' pk=actor.id %}">
+                                        <button class="btn btn-success btn-sm">UPDATE</button>
+                                    </a>
                                 </div>
-                                        <div class="col">
-                                            <a href="{% url 'actor-delete' pk=actor.id %}">
-                                                <button class="btn btn-danger btn-sm">DELETE ACTOR</button>
-                                            </a>
-                                        </div>
-                                        <div class="col">
-                                            <form action="{% url 'actor-verification' actor.pk %}">
-                                                {% csrf_token %}
-                                                {% if actor.Verified %}
-                                                    <button type="submit" value="{{ actor.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
-                                                {% else %}
-                                                    <button type="submit" value="{{ actor.pk }}"   class="btn btn-primary btn-sm">Verify</button>
-                                                {% endif %}
-                                            </form>
-                                        </div>
-                                    {% endif %}
+                                <div class="col">
+                                    <a href="{% url 'actor-delete' pk=actor.id %}">
+                                        <button class="btn btn-danger btn-sm">DELETE ACTOR</button>
+                                    </a>
+                                </div>
+                                <div class="col">
+                                    <form action="{% url 'actor-verification' actor.pk %}">
+                                        {% csrf_token %}
+                                        {% if actor.Verified %}
+                                            <button type="submit" value="{{ actor.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+                                        {% else %}
+                                            <button type="submit" value="{{ actor.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+                                        {% endif %}
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            {% endif %}
     {% endif %}
 
 {% endblock %}

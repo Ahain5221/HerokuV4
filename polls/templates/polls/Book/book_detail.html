@@ -2,169 +2,173 @@
 
 {% block content %}
 
-        <div class="container-fluid">
-    <h1 style="font-size: xxx-large; margin-bottom: 1.5rem"> {{ book.title }} </h1>
-    <a class="page-link" style="font-size: larger; display: inline; margin-right: 6px">
-        &nbsp;&nbsp;&nbsp;
-        Rating: {{ book.users_rating }}
-        &nbsp;&nbsp;&nbsp;
-        ISBN: {{ book.isbn }}
-    </a>
-    {% if user.is_authenticated %}
-    <div class="container text-center">
-      <div class="row row-cols-auto">
-        <div class="col">
-            <form action="{% url 'add-favorite-book' book.pk%}" method="POST">
-                {% csrf_token %}
-                {% if book in user.profile.favorite_books.all %}
-                    <button type="submit" name="series_id" value="{{ book.pk }}" class="btn btn-secondary btn-sm"><a class="icon solid fa-heart-broken fa-2xl" style="color: #dad0c0"></a>Unfavorite</button>
-                {% else %}
-                    <button type="submit" name="series_id" value="{{ book.pk }}" class="btn btn-danger btn-sm"><a class="icon solid fa-heart fa-2xl" style="color: #710000"></a>Favorite</button>
-                {% endif %}
-            </form>
-        </div>
-        <div class="col">
-            {% if book_in_user_book_list %}
-                <a onclick="location.href='{% url 'remove-book-from-book-list' book.pk user.pk %}'"><button class="btn btn-primary btn-sm">REMOVE FROM BOOK LIST</button></a>
-            {% else %}
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#add_to_booklist">Add to My List</button>
-            <div class="modal fade" id="add_to_booklist" tabindex="-1" aria-labelledby="booklistLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header bg-dark">
-                            <h1 class="modal-title fs-5" id="booklistLabel">Add to My book List</h1>
-                            <button type="button" class="btn-close btn-close-white" style="opacity: 0.25"  data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body bg-dark">
-                            <a onclick="location.href='{% url 'add-book-to-book-list' book.pk user.pk 'read'%}'"><button class="btn btn-primary btn-sm" style="margin-right: 1em">Read</button></a>
-                            <a onclick="location.href='{% url 'add-book-to-book-list' book.pk user.pk 'reading'%}'"><button class="btn btn-primary btn-sm" style="margin-right: 1em">Reading</button></a>
-                            <a onclick="location.href='{% url 'add-book-to-book-list' book.pk user.pk 'want to read'%}'"><button class="btn btn-primary btn-sm">Want to read</button></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-      </div>
-    </div>
-    {% endif %}
-
-
-<div class="row">
-        <div class="col" style="margin-top: 5em">
-            <img style='height: initial; width: initial; padding-left: inherit' src="{{ book.book_image }}" class="card-img" alt="">
-            {% if book.genre.all.count == 3 %}
-                <ul style="margin-left: 4em">
-                    {% for genre in book.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
-                    {% endfor %}
-                </ul>
-            {% elif book.genre.all.count == 2 %}
-                <ul style="margin-left: 7em">
-                    {% for genre in book.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
-                    {% endfor %}
-                </ul>
-            {% elif series.genre.all.count == 1 %}
-                <ul style="margin-left: 10em">
-                    {% for genre in book.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <ul>
-                    {% for genre in book.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        </div>
-        <div class="col" style="padding-top: 25px">
-            <h3> Summary: </h3>
-            <article style="display: inline-block; font-size: initial; margin-bottom: 0.25em"> {{ book.summary }} </article>
-            <ul class="list-inline" style="margin-top: 0.5em">
-                    {% for author in book.authors.all|slice:":1" %}
-                        {% if author != 'N/A' %}
-                            <h3> Authors: </h3>
-                        {% endif %}
-                    {% endfor %}
-                    <li>
-                        {% for author in book.authors.all %}
-                            {% if author != 'N/A' %}
-                                <a style="display: inline; margin-right: 6px; font-size: initial" href="{{ author.get_absolute_url }}"> {{ author }} </a>
-                            {% endif %}
-                        {% endfor %}
-                    </li>
-                    {% for language in book.languages.all|slice:":1" %}
-                        {% if language != None %}
-                            <h3 style="padding-top: 5px"> Language: </h3>
-                        {% endif %}
-                    {% endfor %}
-                    <li>
-                        {% for language in book.languages.all %}
-                            {% if language.id != 2 %}
-                                <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial"> {{ language }} </a>
-                            {% endif %}
-                        {% endfor %}
-                    </li>
-                    {% if  book.added_by%}
-                        <li>Added by <a href="{% url 'profile-page' user %}">{{ book.added_by }}</a></li>
+    <div class="container-fluid">
+        <h1 class="records_title"> {{ book.title }} </h1>
+        <a class="records_info">
+            &nbsp;&nbsp;&nbsp;
+            ISBN: {{ book.isbn }}
+            &nbsp;&nbsp;&nbsp;
+            PCT rating: {{ book.users_rating }}
+        </a>
+        {% if user.is_authenticated %}
+        <div class="container text-center">
+          <div class="row row-cols-auto">
+            <div class="col">
+                <form action="{% url 'add-favorite-book' book.pk%}" method="POST">
+                    {% csrf_token %}
+                    {% if book in user.profile.favorite_books.all %}
+                        <button type="submit" name="series_id" value="{{ book.pk }}" class="btn btn-secondary btn-sm"><a class="icon solid fa-heart-broken fa-2xl" style="color: #dad0c0"></a>Unfavorite</button>
+                    {% else %}
+                        <button type="submit" name="series_id" value="{{ book.pk }}" class="btn btn-danger btn-sm"><a class="icon solid fa-heart fa-2xl" style="color: #710000"></a>Favorite</button>
                     {% endif %}
-            </ul>
-
-            {% if user.is_superuser %}
-             {% if book.added_by == user and not book.Verified%}
-                 <div class="col">
-                     <a href="{% url 'book-update' pk=book.id %}">
-                         <button class="btn btn-success btn-sm">UPDATE</button>
-                     </a>
-                 </div>
-             {% elif user.is_superuser or user.is_staff %}
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit">EDIT</button>
-                <div class="modal fade" id="edit" tabindex="-1" aria-labelledby="editLabel" aria-hidden="true">
+                </form>
+            </div>
+            <div class="col">
+                {% if book_in_user_book_list %}
+                    <a onclick="location.href='{% url 'remove-book-from-book-list' book.pk user.pk %}'"><button class="btn btn-primary btn-sm">REMOVE FROM BOOK LIST</button></a>
+                {% else %}
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#add_to_booklist">Add to My List</button>
+                <div class="modal fade" id="add_to_booklist" tabindex="-1" aria-labelledby="booklistLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header bg-dark">
-                                <h1 class="modal-title fs-5" id="editLabel">Edit</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <h1 class="modal-title fs-5" id="booklistLabel">Add to My book List</h1>
+                                <button type="button" class="btn-close btn-close-white" style="opacity: 0.25" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body bg-dark">
-                                <div class="row">
-                                    {% if book.added_by == user and not book.Verified or user.is_superuser %}
+                                <a onclick="location.href='{% url 'add-book-to-book-list' book.pk user.pk 'read'%}'"><button class="btn btn-primary btn-sm" style="margin-right: 1em">Read</button></a>
+                                <a onclick="location.href='{% url 'add-book-to-book-list' book.pk user.pk 'reading'%}'"><button class="btn btn-primary btn-sm" style="margin-right: 1em">Reading</button></a>
+                                <a onclick="location.href='{% url 'add-book-to-book-list' book.pk user.pk 'want to read'%}'"><button class="btn btn-primary btn-sm">Want to read</button></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col" style="margin-top: 5em">
+                <img class="records_poster" src="{{ book.book_image }}" alt="{{ book.title }}_cover">
+                {% if book.genre.all.count == 3 %}
+                    <ul class="record_genre_small">
+                    <li>
+                        {% for genre in book.genre.all %}
+                            <a href="{% url 'genre-books' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        {% endfor %}
+                    </li>
+                    </ul>
+                {% elif book.genre.all.count == 2 %}
+                    <ul class="record_genre_medium">
+                    <li>
+                        {% for genre in book.genre.all %}
+                            <a href="{% url 'genre-books' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        {% endfor %}
+                    </li>
+                    </ul>
+                {% elif book.genre.all.count == 1 %}
+                    <ul class="record_genre_large">
+                    <li>
+                        {% for genre in book.genre.all %}
+                            <a href="{% url 'genre-books' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        {% endfor %}
+                    </li>
+                    </ul>
+                {% else %}
+                    <ul>
+                        {% for genre in book.genre.all %}
+                            <a href="{% url 'genre-books' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            <div class="col">
+                <h3> Summary: </h3>
+                <article class="record_summary"> {{ book.summary }} </article>
+                <ul class="list-inline" style="margin-top: 0.5em">
+                        {% for author in book.authors.all|slice:":1" %}
+                            {% if author != 'N/A' %}
+                                <h3> Authors: </h3>
+                            {% endif %}
+                        {% endfor %}
+                        <li>
+                            {% for author in book.authors.all %}
+                                {% if author != 'N/A' %}
+                                    <a class="record_detail_link" href="{{ author.get_absolute_url }}"> {{ author }} </a>
+                                {% endif %}
+                            {% endfor %}
+                        </li>
+                        {% for language in book.languages.all|slice:":1" %}
+                            {% if language != None %}
+                                <h3 style="padding-top: 5px"> Language: </h3>
+                            {% endif %}
+                        {% endfor %}
+                        <li>
+                            {% for language in book.languages.all %}
+                                {% if language.id != 2 %}
+                                    <a class="record_detail_text"> {{ language }} </a>
+                                {% endif %}
+                            {% endfor %}
+                        </li>
+                        {% if  book.added_by%}
+                            <li>Added by <a href="{% url 'profile-page' user %}">{{ book.added_by }}</a></li>
+                        {% endif %}
+                </ul>
+
+                {% if user.is_superuser %}
+                 {% if book.added_by == user and not book.Verified%}
+                     <div class="col">
+                         <a href="{% url 'book-update' pk=book.id %}">
+                             <button class="btn btn-success btn-sm">UPDATE</button>
+                         </a>
+                     </div>
+                 {% elif user.is_superuser or user.is_staff %}
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit">EDIT</button>
+                    <div class="modal fade" id="edit" tabindex="-1" aria-labelledby="editLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-dark">
+                                    <h1 class="modal-title fs-5" id="editLabel">Edit</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body bg-dark">
+                                    <div class="row">
+                                        {% if book.added_by == user and not book.Verified or user.is_superuser %}
+                                            <div class="col">
+                                                <a href="{% url 'book-update' pk=book.id %}">
+                                                    <button class="btn btn-success btn-sm">UPDATE</button>
+                                                </a>
+                                            </div>
+                                        {% endif %}
                                         <div class="col">
-                                            <a href="{% url 'book-update' pk=book.id %}">
-                                                <button class="btn btn-success btn-sm">UPDATE</button>
+                                            <a href="{% url 'book-delete' pk=book.id %}">
+                                                <button class="btn btn-danger btn-sm">DELETE BOOK</button>
                                             </a>
                                         </div>
-                                    {% endif %}
-                                    <div class="col">
-                                        <a href="{% url 'book-delete' pk=book.id %}">
-                                            <button class="btn btn-danger btn-sm">DELETE BOOK</button>
-                                        </a>
-                                    </div>
-                                    <div class="col">
-                                        <form action="{% url 'add_verf' book.pk %}">
-                                            {% csrf_token %}
-                                            {% if book.Verified %}
-                                                <button type="submit" value="{{ book.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
-                                            {% else %}
-                                                <button type="submit" value="{{ book.pk }}"   class="btn btn-primary btn-sm">Verify</button>
-                                            {% endif %}
-                                        </form>
+                                        <div class="col">
+                                            <form action="{% url 'add_verf' book.pk %}">
+                                                {% csrf_token %}
+                                                {% if book.Verified %}
+                                                    <button type="submit" value="{{ book.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+                                                {% else %}
+                                                    <button type="submit" value="{{ book.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+                                                {% endif %}
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-             {% endif %}
-            {% endif %}
-            </ul>
+                 {% endif %}
+                {% endif %}
+            </div>
         </div>
     </div>
-    </div>
 
-    <h1 style="padding-bottom: 1em; margin-top: 5em">
+    <h1 class="review_title">
         {% if book_reviews.count > 0 %}
             Reviews
         {% endif %}
@@ -181,8 +185,8 @@
     </h1>
 
     {% for review in book_reviews %}
-        <div style="border: 1px solid #262626; width: 50em">
-            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}
+        <div class="review_box">
+            <div class="review_bar"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}
                 {% if user.is_authenticated%}
                     {% if book_read_reading %}
                         {% if review.author == user or user.is_superuser %}
@@ -220,10 +224,26 @@
                     {% endif %}
                 {% endif %}
             </div>
-            <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ review.content }} </div>
+            <div class="review_content">
+                <p class="text-medium-black">
+                    {{ review.content }}
+                </p>
+            </div>
         </div>
         <br>
     {% endfor %}
 
+    <style>
+        .record_genre_small {
+            margin-left: 1.5em;
+        }
 
+        .record_genre_medium {
+            margin-left: 4em;
+        }
+
+        .record_genre_large {
+            margin-left: 7.5em;
+        }
+    </style>
 {% endblock %}

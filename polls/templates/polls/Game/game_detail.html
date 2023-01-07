@@ -2,10 +2,12 @@
 {% block content %}
 
     <div class="container-fluid">
-    <h1 style="font-size: xxx-large; margin-bottom: 1.5rem"> {{ game.title }} </h1>
-    <a class="page-link" style="font-size: larger; display: inline; margin-right: 6px">
+    <h1 class="records_title"> {{ game.title }} </h1>
+    <a class="records_info">
         &nbsp;&nbsp;&nbsp;
         Release date: {{ game.date_of_release }}
+        &nbsp;&nbsp;&nbsp;
+        PCT rating: {{ game.users_rating }}
     </a>
     {% if user.is_authenticated %}
     <div class="container text-center">
@@ -48,36 +50,36 @@
 
     <div class="row">
         <div class="col" style="margin-top: 5em">
-            <img style='height: initial; width: initial; padding-left: inherit' src="{{ game.game_image }}" class="card-img" alt="">
+            <img class="records_poster" src="{{ game.game_image }}" alt="{{ game.title }}_poster">
             {% if game.genre.all.count == 3 %}
-                <ul style="margin-left: 4em">
+                <ul class="record_genre_small">
                     {% for genre in game.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-games' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% elif game.genre.all.count == 2 %}
-                <ul style="margin-left: 7em">
+                <ul class="record_genre_medium">
                     {% for genre in game.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-games' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% elif series.genre.all.count == 1 %}
-                <ul style="margin-left: 10em">
+                <ul class="record_genre_large">
                     {% for genre in game.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-games' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% else %}
                 <ul>
                     {% for genre in game.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-games' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% endif %}
         </div>
         <div class="col" style="padding-top: 25px">
             <h3> Summary: </h3>
-            <article style="display: inline-block; font-size: initial; margin-bottom: 0.25em"> {{ game.summary }} </article>
+            <article class="record_summary"> {{ game.summary }} </article>
             <ul class="list-inline" style="margin-top: 0.5em">
                     {% for developer in game.developer.all|slice:":1" %}
                         {% if developer != 'N/A' %}
@@ -87,7 +89,7 @@
                     <li>
                         {% for developer in game.developer.all %}
                             {% if developer != 'N/A' %}
-                                <a style="display: inline; margin-right: 6px; font-size: initial" href="{{ developer.get_absolute_url }}"> {{ developer }} </a>
+                                <a class="record_detail_link" href="{{ developer.get_absolute_url }}"> {{ developer }} </a>
                             {% endif %}
                         {% endfor %}
                     </li>
@@ -96,7 +98,7 @@
                         {% endfor %}
                     <li>
                         {% for mode in game.mode.all %}
-                            <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial">{{ mode }}</a>
+                            <a class="record_detail_text">{{ mode }}</a>
                         {% endfor %}
                     </li>
                     {% if  game.added_by%}
@@ -159,7 +161,7 @@
     </div>
 
 
-<h1 style="padding-bottom: 1em; margin-top: 5em">
+    <h1 class="review_title">
         {% if game_reviews.count > 0 %}
             Reviews
         {% endif %}
@@ -176,8 +178,8 @@
     </h1>
 
     {% for review in game_reviews %}
-        <div style="border: 1px solid #262626; width: 50em">
-            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}
+        <div class="review_box">
+            <div class="review_bar"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}
                 {% if user.is_authenticated%}
                     {% if game_played_playing %}
                         {% if review.author == user or user.is_superuser %}
@@ -215,7 +217,11 @@
                     {% endif %}
                 {% endif %}
             </div>
-            <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ review.content }} </div>
+            <div class="review_content">
+                <p class="text-medium-black">
+                    {{ review.content }}
+                </p>
+            </div>
         </div>
         <br>
     {% endfor %}

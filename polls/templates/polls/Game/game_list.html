@@ -6,7 +6,7 @@
         <a class="icon solid fa-search text-white" href="{% url 'search-game' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Search</a>
     </button>
 
-    <h1 style="font-size: 250%; text-align: center;">Games list</h1>
+    <h1 style="font-size: 250%; text-align: center;">Games list {{ genre_name }}</h1>
     <hr style="width:auto">
     <div class="row" style="padding-top: 3em">
         {% for game in game_list %}

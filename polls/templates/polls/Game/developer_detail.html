@@ -20,13 +20,10 @@
         {% endif %}
     </ul>
 
-    {% if developer.added_by == user and not developer.Verified %}
+    {% if user.is_authenticated and user.is_superuser %}
         <a href="{% url 'developer-update' pk=developer.id %}">
             <button class="btn btn-success btn-sm">UPDATE</button>
         </a>
-    {% else %}
-
-    {% if user.is_authenticated %}
             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal_2">EDIT</button>
             <div class="modal fade" id="exampleModal_2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -37,35 +34,31 @@
                         </div>
                         <div class="modal-body">
                             <div class="row">
-                                {% if user.is_superuser %}
-                                    <div class="col">
-                                        <a href="{% url 'developer-update' pk=developer.id %}">
-                                            <button class="btn btn-success btn-sm">UPDATE</button>
-                                        </a>
-                                    </div>
-                                    <div class="col">
-                                        <a href="{% url 'developer-delete' pk=developer.id %}">
-                                            <button class="btn btn-danger btn-sm">DELETE DEVELOPER</button>
-                                        </a>
-                                    </div>
-                                    <div class="col">
-                                        <form action="{% url 'developer-verification' developer.pk %}">
-                                            {% csrf_token %}
-                                            {% if developer.Verified %}
-                                                <button type="submit" value="{{ developer.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
-                                            {% else %}
-                                                <button type="submit" value="{{ developer.pk }}"   class="btn btn-primary btn-sm">Verify</button>
-                                            {% endif %}
-                                        </form>
-                                    </div>
-                                {% endif %}
+                                <div class="col">
+                                    <a href="{% url 'developer-update' pk=developer.id %}">
+                                        <button class="btn btn-success btn-sm">UPDATE</button>
+                                    </a>
+                                </div>
+                                <div class="col">
+                                    <a href="{% url 'developer-delete' pk=developer.id %}">
+                                        <button class="btn btn-danger btn-sm">DELETE DEVELOPER</button>
+                                    </a>
+                                </div>
+                                <div class="col">
+                                    <form action="{% url 'developer-verification' developer.pk %}">
+                                        {% csrf_token %}
+                                        {% if developer.Verified %}
+                                            <button type="submit" value="{{ developer.pk }}"  class="btn btn-danger btn-sm">Undo verification</button>
+                                        {% else %}
+                                            <button type="submit" value="{{ developer.pk }}"   class="btn btn-primary btn-sm">Verify</button>
+                                        {% endif %}
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        {% endif %}
     {% endif %}
-
 
 {% endblock %}

@@ -2,16 +2,16 @@
 
 {% block content %}
     <div class="container-fluid">
-    <h1 style="font-size: xxx-large; margin-bottom: 1.5rem"> {{ movie.title }} </h1>
-        <a class="page-link" style="font-size: larger; display: inline; margin-right: 6px">
-        Movie
-        &nbsp;&nbsp;&nbsp;
+    <h1 class="records_title"> {{ movie.title }} </h1>
+    <a class="records_info">
         {{ movie.date_of_release }}
         &nbsp;&nbsp;&nbsp;
         IMDB rating: {{ movie.imdb_rating }}
         &nbsp;&nbsp;&nbsp;
+        PCT rating: {{ movie.users_rating }}
+        &nbsp;&nbsp;&nbsp;
         {{ movie.running_time}}m
-        </a>
+    </a>
     {% if user.is_authenticated %}
     <div class="container text-center">
       <div class="row row-cols-auto">
@@ -53,36 +53,36 @@
 
     <div class="row">
         <div class="col" style="margin-top: 5em">
-            <img style='height: initial; width: initial; padding-left: inherit' src="{{ movie.poster }}" class="card-img" alt="">
+            <img class="records_poster" src="{{ movie.poster }}" alt="{{ movie.title }}_poster">
             {% if movie.genre.all.count == 3 %}
-                <ul style="margin-left: 4em">
+                <ul class="record_genre_small">
                     {% for genre in movie.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-movies' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% elif movie.genre.all.count == 2 %}
-                <ul style="margin-left: 7em">
+                <ul class="record_genre_medium">
                     {% for genre in movie.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-movies' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% elif movie.genre.all.count == 1 %}
-                <ul style="margin-left: 10em">
+                <ul class="record_genre_large">
                     {% for genre in movie.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-movies' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% else %}
                 <ul>
                     {% for genre in movie.genre.all %}
-                        <a href="{% url 'genre-list' genre.class_name genre.pk%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
+                        <a href="{% url 'genre-movies' genre%}" style="padding-left: 2px; padding-right: 2px"> <button type="button" class="btn btn-secondary btn-sm" style="font-size: x-small"> {{ genre }} </button> </a>
                     {% endfor %}
                 </ul>
             {% endif %}
         </div>
         <div class="col" style="padding-top: 25px">
             <h3> Summary: </h3>
-            <article style="display: inline-block; font-size: initial; margin-bottom: 0.25em"> {{ movie.summary }} </article>
+            <article class="record_summary"> {{ movie.summary }} </article>
             <ul class="list-inline">
                 {% for director in movie.director.all|slice:":1" %}
                     {% if director.full_name != 'N/A' %}
@@ -92,7 +92,7 @@
                 <li>
                         {% for director in movie.director.all %}
                             {% if director.full_name != 'N/A' %}
-                                <a style="display: inline; margin-right: 6px; font-size: initial" href="{{ director.get_absolute_url }}"> {{ director }} </a>
+                                <a class="record_detail_link" href="{{ director.get_absolute_url }}"> {{ director }} </a>
                             {% endif %}
                         {% endfor %}
                 </li>
@@ -104,7 +104,7 @@
                 <li>
                         {% for actor in movie.actors.all %}
                             {% if actor.full_name != 'N/A' %}
-                                <a style="display: inline; margin-right: 6px; font-size: initial" href="{{ actor.get_absolute_url }}"> {{ actor }} </a>
+                                <a class="record_detail_link" href="{{ actor.get_absolute_url }}"> {{ actor }} </a>
                             {% endif %}
                         {% endfor %}
                 </li>
@@ -114,11 +114,11 @@
                     {% endif %}
                 {% endfor %}
                 <li>
-                        {% for language in movie.language.all %}
-                            {% if language.id != 2 %}
-                                <a class="page-link" style="display: inline; margin-right: 6px; font-size: initial"> {{ language }} </a>
-                            {% endif %}
-                        {% endfor %}
+                    {% for language in movie.language.all %}
+                        {% if language.id != 2 %}
+                            <a class="record_detail_text"> {{ language }} </a>
+                        {% endif %}
+                    {% endfor %}
                 </li>
                 {% if  movie.added_by%}
                     <li>Added by <a href="{% url 'profile-page' name=movie.added_by.profile.name %}">{{ movie.added_by }}</a></li>
@@ -178,7 +178,7 @@
     </div>
     </div>
 
-    <h1 style="padding-bottom: 1em; margin-top: 5em">
+    <h1 class="review_title">
         {% if series_reviews.count > 0 %}
             Reviews
         {% endif %}
@@ -195,8 +195,8 @@
     </h1>
 
     {% for review in movie_reviews %}
-        <div style="border: 1px solid #262626; width: 50em">
-            <div style="border: 1px solid #262626; background-color: #262626"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}
+        <div class="review_box">
+            <div class="review_bar"> <a href="{{ review.author.profile.get_absolute_url }}"> <strong>&nbsp;&nbsp;{{ review.author }}</strong></a> &nbsp;&nbsp;&nbsp; {{ review.review_date }} &nbsp;&nbsp;&nbsp; Rating: {{ review.rate }}
                 {% if user.is_authenticated%}
                     {% if movie_watched %}
                         {% if review.author == user or user.is_superuser %}
@@ -234,7 +234,11 @@
                     {% endif %}
                 {% endif %}
             </div>
-            <div style="border: thin solid #262626; background-color: #d3d3d3; color: black; font-size: medium; padding: 1em">{{ review.content }} </div>
+            <div class="review_content">
+                <p class="text-medium-black">
+                    {{ review.content }}
+                </p>
+            </div>
         </div>
         <br>
     {% endfor %}

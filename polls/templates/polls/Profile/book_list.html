@@ -49,18 +49,18 @@
 
     </div>
 
-    <table class="center" style="border: 1px solid;">
-    <tr style="border: 1px solid; background-color: #262626">
-        <th style="color: white">Title</th>
-        <th style="color: white">Score</th>
-        <th style="color: white">Review</th>
-        <th style="color: white">Progress</th>
-        <th style="color: white">Action</th>
+    <table class="border-1 bg-dark">
+    <tr class="border-1 bg-dark">
+        <th class="text-white">Title</th>
+        <th class="text-white">Score</th>
+        <th class="text-white">Review</th>
+        <th class="text-white">Progress</th>
+        <th class="text-white">Action</th>
     </tr>
 
 
-    {% for book_list, review in reviews_and_books %}
-        <tr style="border: 1px solid; background-color: #d3d3d3">
+    {% for book_list, review, if_in_other_user_list in reviews_and_books %}
+        <tr class="white-list">
         <th> <a href="{{ book_list.book.get_absolute_url }}"><strong>{{ book_list.book }}</strong></a></th>
         {% if review %}
             <th>{{ review.rate }}</th>
@@ -139,11 +139,20 @@
                     </div>
                 </th>
             {% else %}
-                <th>
-                    <a href="{% url 'add-book-to-book-list' book_list.book.pk user.pk 'want to read' %}">
-                        <button class="btn btn-success btn-sm">Add to my book list</button>
-                    </a>
-                </th>
+
+                {% if not if_in_other_user_list %}
+                    <th>
+                        <a href="{% url 'add-book-to-book-list' book_list.book.pk user.pk 'want to read' %}">
+                            <button class="btn btn-success btn-sm">Add to my book list</button>
+                        </a>
+                    </th>
+                {% else %}
+                    <th>
+                        <a href="{% url 'remove-book-from-book-list' book_list.book.pk user.pk %}">
+                            <button class="btn btn-danger btn-sm">Remove from my book list</button>
+                        </a>
+                    </th>
+                {% endif %}
             {% endif %}
         {% else %}
             <th>NONE</th>

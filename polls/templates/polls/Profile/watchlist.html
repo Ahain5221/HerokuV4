@@ -72,19 +72,19 @@
         </div>
     </div>
 
-    <table class="center" style="border: 1px solid;">
-    <tr style="border: 1px solid; background-color: #262626">
-        <th style="color: white">Title</th>
-        <th style="color: white">Score</th>
-        <th style="color: white">Review</th>
-        <th style="color: white">Type</th>
-        <th style="color: white">Progress</th>
-        <th style="color: white">Action</th>
+    <table class="border-1 bg-dark">
+    <tr class="border-1 bg-dark">
+        <th class="text-white">Title</th>
+        <th class="text-white">Score</th>
+        <th class="text-white">Review</th>
+        <th class="text-white">Type</th>
+        <th class="text-white">Progress</th>
+        <th class="text-white">Action</th>
     </tr>
 
 
-    {% for movie_watchlist, review in reviews_and_movies %}
-        <tr style="border: 1px solid; background-color: #d3d3d3">
+    {% for movie_watchlist, review, in_other_user_watchlist in reviews_and_movies %}
+        <tr class="white-list">
         <th> <a href="{{ movie_watchlist.movie.get_absolute_url }}"><strong>{{ movie_watchlist.movie }}</strong></a></th>
         {% if review %}
             <th>{{ review.rate }}</th>
@@ -143,11 +143,21 @@
                     </div>
                 </th>
             {% else %}
-                <th>
-                    <a href="{% url 'add-movie-to-watchlist' movie_watchlist.movie.pk user.pk 'want to watch' %}">
-                        <button class="btn btn-success btn-sm">Add to my watchlist</button>
-                    </a>
-                </th>
+                {% if not in_other_user_watchlist %}
+                    <th>
+                        <a href="{% url 'add-movie-to-watchlist' movie_watchlist.movie.pk user.pk 'want to watch' %}">
+                            <button class="btn btn-success btn-sm">Add to my watchlist</button>
+                        </a>
+                    </th>
+
+                {% else %}
+                    <th>
+                        <a href="{% url 'remove-movie-from-watchlist' movie_watchlist.movie.pk user.pk %}">
+                            <button class="btn btn-danger btn-sm">Remove from my watchlist</button>
+                        </a>
+                    </th>
+                {% endif %}
+
             {% endif %}
         {% else %}
             <th>NONE</th>
@@ -155,8 +165,8 @@
         </tr>
     {% endfor %}
 
-    {% for series_watchlist, review in reviews_and_series %}
-        <tr style="border: 1px solid; background-color: #d3d3d3">
+    {% for series_watchlist, review, in_other_user_watchlist in reviews_and_series %}
+        <tr class="white-list">
             <th><a href="{{ series_watchlist.series.get_absolute_url }}"><strong>{{ series_watchlist.series }}</strong></a></th>
             {% if review %}
                 <th>{{ review.rate }}</th>
@@ -199,11 +209,19 @@
                         </a>
                     </th>
                 {% else %}
+                    {% if not in_other_user_watchlist %}
                     <th>
-                        <a href="{% url 'add-movie-to-watchlist' series_watchlist.series.pk user.pk 'want to watch' %}">
+                        <a href="{% url 'add-series-to-watchlist' series_watchlist.series.pk user.pk 'want to watch' %}">
                             <button class="btn btn-success btn-sm">Add to my watchlist</button>
                         </a>
                     </th>
+                        {% else %}
+                            <th>
+                        <a href="{% url 'remove-series-from-watchlist' series_watchlist.series.pk user.pk %}">
+                            <button class="btn btn-success btn-sm">Remove from my watchlist</button>
+                        </a>
+                    </th>
+                        {% endif %}
                 {% endif %}
             {% else %}
                 <th>NONE</th>

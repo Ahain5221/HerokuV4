@@ -12,88 +12,108 @@
 
     <!-- Add additional CSS in static file -->
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/all.min.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}"> <!-- ?version=1 -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/popup-style.css' %}">
     <script src="{% static main.js %}"></script>
+
 </head>
 <body>
  <!-- Main Content -->
-      <div id="content">
-        {% include 'polls/messages.html' %}
-      </div>
+{#      <div id="content">#}
+{#        {% include 'polls/messages.html' %}#}
+{#      </div>#}
+<div style="all: initial">
+ <div id="popup1" class="overlay">
+    <div class="popup">
+        <a id='closing' class="close" onclick="$('body').css({'overflow':'visible'})" href="#">&times;</a>
+        <div id='alert-message' class="content">
+            {% include 'polls/messages.html' %}
+        </div>
+    </div>
+ </div>
+</div>
 
-  <script>
-    setTimeout(function(){
-      if ($('#msg').length > 0) {
-        $('#msg').remove();
-      }
-    }, 5000)
-  </script>
+<script>
+    const box = document.getElementById('alert-message');
+    if (box.textContent.trim() !== '') {
+        window.location.href = "#popup1";
+        $('body').css({'overflow':'hidden'});
+
+        setTimeout(function () {
+            {#window.location.href = "#closing";#}
+            document.getElementById('closing').click();
+        }, 5000);
+    }
+</script>
+
+{#  <script>#}
+{#    setTimeout(function(){#}
+{#      if ($('#msg').length > 0) {#}
+{#        $('#msg').remove();#}
+{#      }#}
+{#    }, 5000)#}
+{#  </script>#}
  <!-- End of Main Content -->
 <!-- Nav -->
     <nav class="navbar navbar-expand-lg bg-dark">
         <div class="container-fluid">
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapseBar" aria-controls="navbarCollapseBar" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarCollapseBar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon">Button</span></button>
-                    <li class="nav-item dropdown" style="padding-left: 1.5em">
-                        <a class="icon solid fa-book" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Books</a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown" style="margin-top: 17px; margin-left: 1em; text-align: start; background-color: #000000d4; color: #d1cfcb">
-                            <li style="padding-left: 0"><a class="dropdown-item" style="--bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'books' %}">Books</a></li>
-                            <li style="padding-left: 0"><a class="dropdown-item" style="--bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'authors' %}">Authors</a></li>
+                    <li class="nav-item dropdown nav-item-padding" style="margin-top: 0.75em">
+                        <a class="icon solid fa-book navbar-icon-style" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Books</a>
+                        <ul class="dropdown-menu drop-menu-style" aria-labelledby="navbarDropdown">
+                            <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'books' %}">Books</a></li>
+                            <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'authors' %}">Authors</a></li>
                             <!--
                             --bs-dropdown-link-active-bg: #b2b7bf;
                             -->
+
                         </ul>
                     </li>
-                    <li class="nav-item dropdown" style="padding-left: 1.5em">
-                        <a class="icon solid fa-gamepad" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Games</a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown" style="margin-top: 17px; margin-left: 1em; text-align: start; background-color: #000000d4">
-                            <li style="padding-left: 0"><a class="dropdown-item" style=" --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'games' %}">Games</a></li>
-                            <li style="padding-left: 0"><a class="dropdown-item" style=" --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1" href="{% url 'developers' %}">Developers</a></li>
-                            <!--<li><hr class="dropdown-divider"></li>
-                            <li style="padding-left: 0"><a class="dropdown-item text-white shadow-lg" href="#">Something else here</a></li>-->
+                    <li class="nav-item dropdown nav-item-padding">
+                        <a class="icon solid fa-gamepad navbar-icon-style" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Games</a>
+                        <ul class="dropdown-menu drop-menu-style" aria-labelledby="navbarDropdown">
+                            <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'games' %}">Games</a></li>
+                            <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'developers' %}">Developers</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item dropdown" style="padding-left: 1.5em">
-                        <a class="icon solid fa-film" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Movies&TVs</a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown" style="margin-top: 17px; margin-left: 1em; text-align: start; color: white; background-color: #000000d4">
-                            <li style="padding-left: 0"><a class="dropdown-item" style=" --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'actors' %}">Actors</a></li>
-                            <li style="padding-left: 0"><a class="dropdown-item" style=" --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'directors' %}">Directors</a></li>
-                            <li style="padding-left: 0"><a class="dropdown-item" style=" --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'movies' %}"> Movies</a></li>
-                            <li style="padding-left: 0"><a class="dropdown-item" style=" --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; font-size: 1vw; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'series' %}"> TV Series</a></li>
-                            <!--<li style="padding-left: 0"><a class="dropdown-item" href="#">Something else here</a></li>-->
+                    <li class="nav-item dropdown nav-item-padding">
+                        <a class="icon solid fa-film navbar-icon-style" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Movies&TVs</a>
+                        <ul class="dropdown-menu drop-menu-style" aria-labelledby="navbarDropdown">
+                            <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'movies' '-imdb_votes' %}"> Movies</a></li>
+                            <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'series' '-imdb_votes' %}"> TV Series</a></li>
+                            <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'actors' %}">Actors</a></li>
+                            <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'directors' %}">Directors</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item" style="padding-left: 1.5em">
-                        <a class="icon solid fa-comment" href="{% url 'category' %}" role="button" aria-expanded="false" style="font-size:1.5vw; font-weight: bolder"> Forum</a>
+                    <li class="nav-item nav-item-padding">
+                        <a class="icon solid fa-comment navbar-icon-style" href="{% url 'category' %}" role="button" aria-expanded="false"> Forum</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav" style="margin-right: 2em">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon">Button</span></button>
-                            <li class="nav-item dropdown">
-                                <a class="icon solid fa-user" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 1.15vw; font-weight: bolder"> Profile</a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="margin-top: 18px; margin-left: 1em; text-align: start; color: white; background-color: #000000d4">
+                            <li class="nav-item dropdown" style="margin-top: 0.75em">
+                                <a class="icon solid fa-user fw-bolder" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 1.15vw"> Profile</a>
+                                <ul class="dropdown-menu dropdown-menu-end drop-menu-style" aria-labelledby="navbarDropdown" style="margin-top: 18px">
                                     {% if user.is_authenticated %}
-                                        <li style="padding-left: 0"><a class="dropdown-item" style="font-size: medium;  --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'profile-page' user.username %}">Your Profile Page</a></li>
-                                        <li style="padding-left: 0"><a class="dropdown-item" style="font-size: medium;  --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'edit_profile' %}">Account Settings</a></li>
-                                        <li style="padding-left: 0"><a class="dropdown-item" style="font-size: medium;  --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'create_record' %}">Add record</a></li>
-                                        <li style="padding-left: 0"><hr class="dropdown-divider"></li>
-                                        <li style="padding-left: 0"><a class="dropdown-item" style="font-size: medium;  --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'logout' %}">Log Out</a></li>
+                                        <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'profile-page' user.username %}">Your Profile Page</a></li>
+                                        <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'edit_profile' %}">Account Settings</a></li>
+                                        <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'create_record' %}">Add record</a></li>
+                                        <li class="list-padding"><hr class="dropdown-divider"></li>
+                                        <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'logout' %}">Log Out</a></li>
                                     {% else %}
-                                    <li style="padding-left: 0"><a class="dropdown-item" style="font-size: medium;  --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'login' %}"> Login </a></li>
-                                    <li style="padding-left: 0"><a class="dropdown-item" style="font-size: medium;  --bs-dropdown-link-hover-bg: #ffffff4f; color: #4990F8FF; text-shadow: -1px -1px 0 #04142cd1, 1px -1px 0 #04142cd1, -1px 1px 0 #04142cd1, 1px 1px 0 #04142cd1;" href="{% url 'signup' %}"> Register </a></li>
+                                    <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'login' %}"> Login </a></li>
+                                    <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'signup' %}"> Register </a></li>
                                     {% endif %}
                                 </ul>
                             </li>
                 </ul>
-
             </div>
         </div>
     </nav>
 
-    <div id="page-wrapper" style="margin: 2em">
+    <div id="page-wrapper" style="margin: 2em; z-index: 1;">
         <section id="header">
             <div class="container">
                 <h1 id="logo"><a href="{% url 'index' %}">Pop Culture Tracker</a></h1>
@@ -108,7 +128,7 @@
 <div class="container-fluid" role="document">
     <div class="modal-content row main justify-content-around" style="position: relative">
         <main class="col-lg-8 col-md-12 col-sm-12 col-sm-12 col-12">
-            <article class="container" style="width: available; margin-top: 2em ;margin-bottom: 4em; padding: 2em">
+            <article class="container content-style">
                 {% block content %}{% endblock %}
                 {% block pagination %}
                     {% if is_paginated %}
@@ -137,30 +157,30 @@
             <section id="footer">
             <div class="row" style="margin-left: auto">
 			<div class="col-md-5">
-				<h3 style="padding-bottom: 1em; text-align: center">Website for fans of pop culture</h3>
+				<h3 style="padding-bottom: 1em; text-align: center;">Website for fans of pop culture</h3>
 				<p style="font-size: large; color: #919191; text-align: center">
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
 				</p>
 			</div>
 
-			<div class="col-md-2 shortcut-links" style="margin-left: 6em">
-				<h3 style="padding-bottom: 1em; text-align: center">Shortcuts</h3>
+			<div class="col-md-2" style="margin-left: 6em">
+				<h3 style="padding-bottom: 1em; text-align: center;">Shortcuts</h3>
 				<ul class="list-inline" style="font-size: medium; font-weight: bolder">
-					<li style="margin-left: 1em"><a href="{% url 'category' %}">Forum</a></li>
-					<li style="margin-left: 1em"><a href="#">Terms</a></li>
-					<li style="margin-left: 1em"><a href="#">Privacy</a></li>
+					<li class="list-margin"><a href="{% url 'category' %}">Forum</a></li>
+					<li class="list-margin"><a href="#">Terms</a></li>
+					<li class="list-margin"><a href="#">Privacy</a></li>
 				</ul>
 			</div>
             <div class="col-3" style="margin-left: 6em">
-                <h3 style="padding-bottom: 1em; text-align: center">Our community</h3>
+                <h3 style="padding-bottom: 1em; text-align: center;">Our community</h3>
                 <span style="font-size: 1.5em; margin-left: 2.5em">
-                     <a href="#"> <i class="fa-brands fa-discord"></i> </a>
+                     <a href="https://discord.gg/fZbG7axdcx"> <i class="fa-brands fa-discord"></i> </a>
                 </span>
                 <span style="font-size: 1.5em; margin-left: 1.5em">
-                     <a href="#"> <i class="fa-brands fa-steam"></i> </a>
+                     <a href="https://steamcommunity.com/groups/my-pct"> <i class="fa-brands fa-steam"></i> </a>
                 </span>
                 <span style="font-size: 1.5em; margin-left: 1.5em">
-                     <a href="#"> <i class="fa-brands fa-twitter"></i> </a>
+                     <a href="https://twitter.com/PopCultureTrack"> <i class="fa-brands fa-twitter"></i> </a>
                 </span>
             </div>
 

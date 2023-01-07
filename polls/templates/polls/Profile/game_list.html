@@ -48,18 +48,17 @@
 
     </div>
 
-    <table class="center" style="border: 1px solid;">
-    <tr style="border: 1px solid; background-color: #262626">
-        <th style="color: white">Title</th>
-        <th style="color: white">Score</th>
-        <th style="color: white">Review</th>
-        <th style="color: white">Status</th>
-        <th style="color: white">Action</th>
-
+    <table class="border-1 bg-dark">
+    <tr class="border-1 bg-dark">
+        <th class="text-white">Title</th>
+        <th class="text-white">Score</th>
+        <th class="text-white">Review</th>
+        <th class="text-white">Status</th>
+        <th class="text-white">Action</th>
     </tr>
 
-    {% for game_list, review in reviews_and_games %}
-        <tr style="border: 1px solid; background-color: #d3d3d3">
+    {% for game_list, review, if_in_other_user_list in reviews_and_games %}
+        <tr class="white-list">
         <th><a href="{{ game_list.game.get_absolute_url }}"><strong>{{ game_list.game }}</strong></a></th>
         {% if review %}
             <th>{{ review.rate }}</th>
@@ -137,11 +136,21 @@
                     </div>
                 </th>
             {% else %}
-                <th>
-                    <a href="{% url 'add-game-to-game-list' game_list.game.pk user.pk 'want to play' %}">
-                        <button class="btn btn-success btn-sm">Add to my game list</button>
-                    </a>
-                </th>
+                {% if not if_in_other_user_list %}
+                    <th>
+                        <a href="{% url 'add-game-to-game-list' game_list.game.pk user.pk 'want to play' %}">
+                            <button class="btn btn-success btn-sm">Add to my game list</button>
+                        </a>
+                    </th>
+
+                {% else %}
+                    <th>
+                        <a href="{% url 'remove-game-from-game-list' game_list.game.pk user.pk %}">
+                            <button class="btn btn-danger btn-sm">Remove from my game list</button>
+                        </a>
+                    </th>
+                {% endif %}
+
             {% endif %}
         {% else %}
             <th>NONE</th>

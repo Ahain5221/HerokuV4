@@ -7,6 +7,7 @@
     <!-- Web page CSS -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+    <link rel="stylesheet" href="{% static 'css/popup-style.css' %}">
 
     <title>Welcome to PCT</title>
 
@@ -16,7 +17,7 @@
 <!-- alert popup -->
 <div id="popup1" class="overlay">
     <div class="popup">
-        <a id='closing' class="close" href="#">&times;</a>
+        <a id='closing' class="close" onclick="$('body').css({'overflow':'visible'})" href="#">&times;</a>
         <div id='alert-message' class="content">
             {% include 'polls/messages.html' %}
         </div>
@@ -57,9 +58,51 @@
             <span class="boast">Your whole digital pop culture</span> <br/>
             <span class="boast">In one place</span>
         </h1>
-        <a class="btn red" href="#" onclick='scrollToStats()'>Learn More</a>
+        <a class="btn red" onclick='scrollToStats()'>Learn More</a>
     </div>
 </section>
+
+<section class="slideshow">
+    <br/>
+    <div class="slideshow-container">
+
+  <!-- Full-width images with number and caption text -->
+{#  <div class="mySlides fade">#}
+{#      <img src="{% static 'img/slideshow1.png' %}" style="width:100%">#}
+{#      <div class="text-caption">Caption Text</div>#}
+{#  </div>#}
+
+  <div class="mySlides fade">
+      <img src="{% static 'img/slideshow2.png' %}" style="width:100%">
+      <div class="text-caption">Browse database</div>
+  </div>
+
+  <div class="mySlides fade">
+      <img src="{% static 'img/slideshow3.png' %}" style="width:100%">
+      <div class="text-caption">Write reviews</div>
+  </div>
+
+  <div class="mySlides fade">
+      <img src="{% static 'img/slideshow4.png' %}" style="width:100%">
+      <div class="text-caption">Join discussion in forum</div>
+  </div>
+
+  <!-- Next and previous buttons -->
+        <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+        <a class="next" onclick="plusSlides(1)">&#10095;</a>
+</div>
+<br>
+
+<!-- The dots/circles -->
+<div style="text-align:center">
+    <span class="dot" onclick="currentSlide(1)"></span>
+    <span class="dot" onclick="currentSlide(2)"></span>
+    <span class="dot" onclick="currentSlide(3)"></span>
+{#    <span class="dot" onclick="currentSlide(4)"></span>#}
+    <br/><br/>
+</div>
+</section>
+
 
 <!-- About section -->
 <section class="about" id="about">
@@ -181,21 +224,26 @@
     });
 </script>
 
+<script src="{% static 'js/slideshow.js' %}"></script>
+
 <!-- message show and hide script -->
 <script>
     const box = document.getElementById('alert-message');
     if (box.textContent.trim() !== '') {
         window.location.href = "#popup1";
+        $('body').css({'overflow':'hidden'});
+
         setTimeout(function () {
-            window.location.href = "#closing";
-        }, 5000)
+            {#window.location.href = "#closing";#}
+            document.getElementById('closing').click();
+        }, 5000);
     }
 </script>
 
 <!-- scroll down script -->
 <script>
     function scrollToStats() {
-        const elem = document.getElementById('numbers-scroll-point');
+        const elem = document.getElementById('stats');
         elem.scrollIntoView();
     }
 </script>

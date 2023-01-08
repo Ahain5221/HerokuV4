@@ -3556,7 +3556,7 @@ def episodes_scraping_script(request):
         print("Series pk:", series_pk)
         episodes_scraping(series_pk, api, start)
         print(time() - start)
-        if time() - start > 1000:
+        if time() - start > 25:
             print('timeout')
             return redirect('index')
     return redirect('index')

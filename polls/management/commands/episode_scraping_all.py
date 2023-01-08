@@ -11,7 +11,7 @@ class Command(BaseCommand):
         api = omdb.OMDBClient(apikey=api_key)
         today_date = datetime.strptime(datetime.today().strftime('%Y-%m-%d'), "%Y-%m-%d").date()
         series_pks = []
-        series_set = Series.objects.filter(Verified=True)
+        series_set = Series.objects.filter(Verified=True).order_by('-imdb_votes')
 
         for series in series_set.all():
             if series.episodes_update_date:
@@ -23,7 +23,7 @@ class Command(BaseCommand):
         for series_pk in series_pks:
             print(series_pk)
             episodes_scraping(series_pk, api, start)
-            print(time() - start)
+            print(time() - start,"   time:", time(), "   start:", start)
             if time() - start > 25:
                 print('timeout')
                 exit()

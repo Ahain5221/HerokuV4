@@ -1,0 +1,123 @@
+{% extends "forum_generic.html" %}
+
+{% block content %}
+    <article class="main container thread-list-box">
+        <span class="breadcrumb bg-dark" style="padding-left: 1em">
+            <span class="breadcrumb-item" style="margin-right: 1em"><a href="{% url 'index' %}">Home</a></span>
+            <span class="icon solid fa-greater-than" style="margin-right: 1em"><a href="{% url 'category' %}" style="margin-left: 1em">Forums</a></span>
+            <span class="icon solid fa-greater-than" style="margin-right: 1em"></span> <span class="breadcrumb-item active" aria-current="page" style="text-transform: capitalize"> Tag: {{tag_name}} </span>
+        </span>
+
+
+        {% block pagination %}
+            {% if is_paginated %}
+                <div class="pagination">
+                    <span class="page-links" style="margin-top: 2.5em">
+                        {% if page_obj.has_previous %}
+                            <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}" style="margin-right: 2px">Previous</a>
+                        {% endif %}
+                        <span class="page-current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+                        {% if page_obj.has_next %}
+                            <a href="{{ request.path }}?page={{ page_obj.next_page_number }}" style="margin-left: 2px">Next</a>
+                        {% endif %}
+                    </span>
+                </div>
+            {% endif %}
+            <ul class="list-inline bg-dark sort-threads">
+                <li id="buffer-sort"></li>
+                {% if order_by == 'title' %}
+                    <li id="title-sort"><a href="{% url 'tag-thread-list' tag_name '-title' %}">Title ↑</a></li>
+                {% else %}
+                    <li id="title-sort"><a href="{% url 'tag-thread-list' tag_name 'title' %}">Title ↓</a></li>
+                {% endif %}
+
+                {% if order_by == 'date' %}
+                    <li id="date-sort"><a href="{% url 'tag-thread-list' tag_name '-date' %}">Start date ↑</a></li>
+                {% else %}
+                    <li id="date-sort"><a href="{% url 'tag-thread-list' tag_name 'date' %}">Start date ↓</a></li>
+                {% endif %}
+
+                {% if order_by == 'number_of_posts' %}
+                    <li id="count-sort"><a href="{% url 'tag-thread-list' tag_name '-number_of_posts' %}">Replies ↑</a></li>
+                {% else %}
+                    <li id="count-sort"><a href="{% url 'tag-thread-list' tag_name 'number_of_posts' %}">Replies ↓</a></li>
+                {% endif %}
+
+                {% if order_by == 'views' %}
+                    <li id="views-sort"><a href="{% url 'tag-thread-list' tag_name '-views' %}">Views ↑</a></li>
+                {% else %}
+                    <li id="views-sort"><a href="{% url 'tag-thread-list' tag_name 'views' %}">Views ↓</a></li>
+                {% endif %}
+
+                {% if order_by == 'last_post_date' %}
+                    <li id="last-post-sort"><a href="{% url 'tag-thread-list' tag_name '-last_post_date' %}">Last message ↑</a></li>
+                {% else %}
+                    <li id="last-post-sort"><a href="{% url 'tag-thread-list' tag_name 'last_post_date' %}">Last message ↓</a></li>
+                {% endif %}
+            </ul>
+
+            <ol class="list-inline bg-dark threads-box">
+                <li id="thread-row" style="text-transform: capitalize" >{{ tag_name }} Threads</li>
+                {% for thread in object_list %}
+                        <li style="border-bottom:1px solid #ccc">
+                        <ol class="list-inline">
+                            <li style="margin-right: 0.5em">
+                                <div class="row">
+                                    <div class="col-1">
+                                        <p style="margin-top: 0; margin-bottom: 0 "><span style="margin-right: 1em"><a href="{{ thread.creator.get_absolute_url }}">
+                                            <img src="{{ thread.creator.profile_image_url }}" class="card-img thread-author-img" height="70" width="70"></a></span></p>
+                                    </div>
+                                    <div class="col-7" style="margin-top: 4.5em">
+                                        <h3><a href="{% url 'post-list' thread.slug_category thread.slug %}" > {{ thread.title }} </a></h3>
+                                        <a href="{% url 'thread-list' thread.category.slug '-last_post_date' %}" style="text-transform: capitalize"> {{ thread.category }} </a>,<a href="{{ thread.creator.get_absolute_url }}"> {{ thread.creator }} </a>, {{ thread.date }}
+                                    </div>
+                                    <div class="col-1" style="margin-left: 5em">
+                                        <p class="thread-info"> Replies: {{ thread.number_of_posts }} </p>
+                                        <p class="thread-info"> Views: {{ thread.views }} </p>
+                                    </div>
+                                    <div class="col-2" style="margin-left: 5em">
+                                        <a href="{{ thread.get_last_post.creator.user.profile.get_absolute_url }}"><p style="margin: 0; font-size: small"> {{ thread.get_last_post.creator.user}} </p></a>
+                                        <p class="thread-info"> {{thread.get_last_post.date }} </p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </li>
+                {% endfor %}
+            </ol>
+
+            {% if is_paginated %}
+                <div class="pagination">
+                    <span class="page-links" style="margin-top: 2.5em">
+                        {% if page_obj.has_previous %}
+                            <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}" style="margin-right: 2px">Previous</a>
+                        {% endif %}
+                        <span class="page-current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+                        {% if page_obj.has_next %}
+                            <a href="{{ request.path }}?page={{ page_obj.next_page_number }}" style="margin-left: 2px">Next</a>
+                        {% endif %}
+                    </span>
+                </div>
+            {% endif %}
+        {% endblock %}
+
+
+            <ul>
+                {% for forum_category in forumcategory_list %}
+                        <li>
+                            <a href="{{ forum_category.get_absolute_url }}">{{ forum_category.title }}</a>
+                            <strong class="text-secondary"> Thread's: {{ forum_category.number_of_threads }} </strong>
+                            <strong class="text-secondary"> Post's: {{ forum_category.number_of_posts}} </strong>
+                        </li>
+                {% endfor %}
+            </ul>
+
+
+
+    </article>
+
+{% endblock %}

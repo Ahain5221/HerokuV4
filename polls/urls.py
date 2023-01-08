@@ -318,7 +318,7 @@ urlpatterns = [
     # Trzymać je na dole, bo narobią zamętu...
     path('forum/category/<slug:slug>/<order_by>', views.ThreadListView.as_view(), name='thread-list'),
     path('forum/<slug:slug_category>/<slug:slug>', views.PostListView.as_view(), name='post-list'),
-
+    path('forum/thread/tag/<tag>/<order_by>', views.TaggedThreadListView.as_view(), name='tag-thread-list'),
 
     # Ruszę to najwyżej jeśli będzie to miało jakikolwiek sens
     path('post/', views.PostListView.as_view(), name='post'),

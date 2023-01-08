@@ -2804,9 +2804,21 @@ input, select, textarea {
 		color: inherit;
 	}
 
-	.records_poster {
+	.book_poster {
 		height: 383px;
 		width: 293px;
+		padding-left: inherit;
+	}
+
+	.game_cover {
+		height: initial;
+		width: initial;
+		padding-left: inherit;
+	}
+
+	.movie_series_poster {
+		height: initial;
+		width: initial;
 		padding-left: inherit;
 	}
 

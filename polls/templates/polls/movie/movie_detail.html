@@ -53,7 +53,7 @@
 
     <div class="row">
         <div class="col" style="margin-top: 5em">
-            <img class="records_poster" src="{{ movie.poster }}" alt="{{ movie.title }}_poster">
+            <img class="movie_series_poster" src="{{ movie.poster }}" alt="{{ movie.title }}_poster">
             {% if movie.genre.all.count == 3 %}
                 <ul class="record_genre_small">
                     {% for genre in movie.genre.all %}

@@ -4,6 +4,8 @@ from polls.models import *
 from django.contrib.auth.models import User
 import requests
 from time import time, sleep
+
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
         start = time()

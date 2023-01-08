@@ -32,16 +32,16 @@
                     <li><a class="btn btn-close-white" href="{% url 'stuff-verification' %}"> Stuff to verify </a></li>
                     <li><a class="btn btn-close-white" href="{% url 'request-list' %}"> Permission requests </a></li>
 
-                    <li><a class="btn btn-close-white" href="{% url 'scrape-shows-script' type_of_show='movies_at_home' update='0'%}">
+                    <li><a class="btn btn-close-white" href="{% url 'scrape-shows-script' type_of_show='movies_at_home' update='False'%}">
                         Scrape movies without update
                     </a></li>
-                    <li><a class="btn btn-close-white" href="{% url 'scrape-shows-script' type_of_show='tv_series_browse' update='0'%}">
+                    <li><a class="btn btn-close-white" href="{% url 'scrape-shows-script' type_of_show='tv_series_browse' update='False'%}">
                         Scrape series without update
                     </a></li>
-                    <li><a class="btn btn-close-white" href="{% url 'scrape-shows-script' type_of_show='movies_at_home' update='1'%}">
+                    <li><a class="btn btn-close-white" href="{% url 'scrape-shows-script' type_of_show='movies_at_home' update='True'%}">
                         Scrape movies with update
                     </a></li>
-                    <li><a class="btn btn-close-white" href="{% url 'scrape-shows-script' type_of_show='tv_series_browse' update='1'%}">
+                    <li><a class="btn btn-close-white" href="{% url 'scrape-shows-script' type_of_show='tv_series_browse' update='True'%}">
                         Scrape series with update
                     </a></li>
                     <li><a class="btn btn-close-white" href="{% url 'scrape-episodes-script' %}">

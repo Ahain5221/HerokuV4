@@ -3283,10 +3283,7 @@ def scraping_shows_script(request, type_of_show, update):
     random.shuffle(genres)
     random.shuffle(services)
 
-    if update == '1':
-        update = True
-    else:
-        update = False
+    update = ast.literal_eval(update)
 
     for service in services:
         for genre in genres:
@@ -3404,6 +3401,7 @@ def create_episodes(series, series_imdb_id, start_seasons_number, end_seasons_nu
     episodes_to_update = []
     for season in range(start_seasons_number, end_seasons_number + 1):
         url = "https://www.imdb.com/title/" + series_imdb_id + "/episodes?season=" + str(season)
+        print(url)
 
         response = requests.get(url)
         only_item_cells = SoupStrainer("div", attrs={'id': 'episodes_content'})
@@ -3427,9 +3425,11 @@ def create_episodes(series, series_imdb_id, start_seasons_number, end_seasons_nu
             link = episode.a['href']
             episode_imdb_id = link.split("/")[2]
             if Episode.objects.filter(imdb_id=episode_imdb_id).exists():
+                print(f"update {series} season {season} episode {episode_number}")
                 episodes_to_update = episode_scraping(series, episode_imdb_id, season_object, months, api, 'update',
                                                       episodes_to_update, episode_number)
             else:
+                print(f"create {series} season {season} episode {episode_number}")
                 episodes_to_create = episode_scraping(series, episode_imdb_id, season_object, months, api, 'create',
                                                       episodes_to_create, episode_number)
 
@@ -3522,10 +3522,15 @@ def episodes_scraping(pk, api, start):
         series_imdb_id = series.imdb_id
         seasons_number = scrape_seasons_number(series_imdb_id)
         Series.objects.filter(id=pk).update(number_of_seasons=seasons_number)
-        timeout = create_episodes(series, series_imdb_id, 1, int(seasons_number), api, months, start)
+        current_seasons_number = int(Season.objects.filter(series=pk).count())
+        if current_seasons_number == 0:
+            current_seasons_number = 1
+        timeout = create_episodes(series, series_imdb_id, int(current_seasons_number), int(seasons_number), api, months, start)
 
     end = time()
     print(end - start)
+    t = timeout
+    e_s = end - start
     if not timeout:
         Series.objects.filter(id=pk).update(episodes_update_date=datetime.datetime.today().strftime('%Y-%m-%d'))
 
@@ -3538,21 +3543,20 @@ def episodes_scraping_script(request):
     api = omdb.OMDBClient(apikey=api_key)
     today_date = datetime.datetime.strptime(datetime.datetime.today().strftime('%Y-%m-%d'), "%Y-%m-%d").date()
     series_pks = []
-    series_set = Series.objects.filter(Verified=True)
+    series_set = Series.objects.filter(Verified=True).order_by('-imdb_votes')
 
     for series in series_set.all():
         if series.episodes_update_date:
             days_difference = (today_date - series.episodes_update_date).days
-            print(days_difference)
             if days_difference >= 7:
                 series_pks.append(series.pk)
         else:
             series_pks.append(series.pk)
     for series_pk in series_pks:
-        print(series_pk)
+        print("Series pk:", series_pk)
         episodes_scraping(series_pk, api, start)
         print(time() - start)
-        if time() - start > 25:
+        if time() - start > 1000:
             print('timeout')
             return redirect('index')
     return redirect('index')
@@ -4000,10 +4004,14 @@ class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
             # thread = Thread.objects.filter(slug=thread_slug).first()
             # self.object = thread
             form = self.get_form()
+            tt = kwargs['slug_category']
             if form.is_valid():
                 return self.form_valid(form)
             else:
-                return self.form_invalid(form)
+                return HttpResponseRedirect(reverse('post-list',
+                                                    args=[kwargs['slug_category'],
+                                                          kwargs['slug']]))
+
 
     def form_valid(self, form):
         thread_slug = self.kwargs['slug']
@@ -4176,6 +4184,29 @@ class ThreadListView(UserPassesTestMixin, generic.ListView):
         sticky = Thread.objects.filter(category=category).first()
         queryset = Thread.objects.filter(slug_category=self.kwargs['slug']).exclude(id=sticky.pk).order_by(order_by)
         return queryset
+
+
+class TaggedThreadListView(generic.ListView):
+    model = Thread
+    paginate_by = 20
+    template_name = "polls/Forum/tag_thread_list.html"
+    #ordering = ["title"]
+
+    def get_queryset(self):
+        try:
+            tag_id = Tag.objects.get(name=self.kwargs['tag']).pk
+        except ObjectDoesNotExist:
+            raise Http404
+
+        threads_with_tag = Thread.objects.filter(tags=tag_id).order_by(self.kwargs['order_by'])
+
+        return threads_with_tag
+
+    def get_context_data(self, **kwargs):
+        context = super(TaggedThreadListView, self).get_context_data(**kwargs)
+        context['tag_name'] = Tag.objects.get(name=self.kwargs['tag']).name
+        context['order_by'] = self.kwargs['order_by']
+        return context
 
 
 class ThreadCreate(UserPassesTestMixin, CreateView):

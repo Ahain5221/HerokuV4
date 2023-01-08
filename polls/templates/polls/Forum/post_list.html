@@ -22,9 +22,11 @@
                         href="{{ thread.creator.get_absolute_url }}">{{ thread.creator }}</a>, {{ thread.date }}</p>
                 <p class="tags"> Tags:
                     {% for tag in thread.tags.all %}
-                        <a class="btn btn-dark btn-sm" href="#">&nbsp;{{ tag.name }}&nbsp;</a>
+                        <a class="btn btn-dark btn-sm" href="{% url 'tag-thread-list' tag.name '-last_post_date' %}">&nbsp;{{ tag.name }}&nbsp;</a>
                     {% endfor %}
                 </p>
+                <a class="btn btn-danger btn-sm" href="?page=1#post_20">Static scroll to post nmb 20 on page 1</a>
+                <!-- <a class="btn btn-danger btn-sm" href="?page={{ index_post.page }}#post_{{ index_post.id }}">Dynamic scroll - thread needs another field with a list of post.id & post.page that it is on</a> -->
             </div>
             <div class="col-1 thread-edit-panel">
                 {% if user.is_authenticated %}
@@ -92,7 +94,7 @@
 
             {% for post_liked, post in posts %}
 
-                <div class="row" style="margin: 0">
+                <div id="post_{{ post.id }}" class="row" style="margin: 0">
                     <div class="col-1 bg-dark user-box">
                         <a href="{{ post.creator.get_absolute_url }}"><img src="{{ post.creator.profile_image_url }}"
                                                                            class="card-img avatar-style" height="140" width="140"></a>
@@ -289,30 +291,18 @@
 
     </style>
 
-    <script type="text/javascript">
-        function addText(number) {
-            const input = document.getElementById('create_post');
-            const button = document.getElementById('reply' + number);
-            const enter = '\n';
-            const lines = '--------------------------------------------------------------------------------------';
-            input.value = input.value + button.value + enter + lines + enter;
-        }
+    <script>
+
+        $(document).ready(function (){
+            $("#click").click(function (){
+                $('html, body').animate({
+                    scrollTop: $("#post_31").offset().top
+                }, 2000);
+            });
+        });
 
         CKEDITOR.replace('create_post');
         let flag = false;
 
-        function checkTimer() {
-            if (flag) {
-                flag = false;
-                return true;
-            }
-            alert("Stop spamming man!");
-            return false;
-        }
-
-        //12 seconds, max 5 times per minute
-        setTimeout(function () {
-            flag = true;
-        }, 1000);
     </script>
 {% endblock %}

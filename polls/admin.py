@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import Author, Genre, Book, Language, Director, Actor, Movie, Series, MovieSeriesGenre
 from .models import GameGenre, GameMode, Developer, Game, Profile, KnownSteamAppID, RequestPermission
 from .models import Season, Episode, MovieReview, MovieWatchlist, SeriesReview, SeriesWatchlist, GameReview, GameList
-from .models import ForumCategory, Post
+from .models import ForumCategory, Post, Thread
 # admin.site.register(Author, AuthorAdmin)
 
 from .models import *
@@ -11,7 +11,7 @@ from .models import *
 
 admin.site.register(MyCacheTable)
 admin.site.register(Book)
-
+admin.site.register(Thread)
 admin.site.register(Author)
 # admin.site.register(BookInstance)
 admin.site.register(Genre)

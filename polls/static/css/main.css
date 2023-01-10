@@ -2908,6 +2908,12 @@ input, select, textarea {
 		padding-top: 0.5em;
 	}
 
+	.new-posts {
+		font-size: 0.6vw;
+		padding: 0;
+		margin: 0;
+	}
+
 	/* Thread list */
 
 	.thread-list-box {

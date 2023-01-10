@@ -87,7 +87,7 @@
             {% if series.number_of_seasons != None %}
             <h3> Seasons: </h3>
             {% if series.season_set.all %}
-                {% for season in series.season_set.all %}
+                {% for season in series.season_set.all|dictsort:"season_number" %}
                     <a href="{% url 'season-detail' pk=season.id %}">
                         <button class="btn btn-secondary btn-sm" style="font-size: smaller">Season {{ season.season_number }}</button>
                     </a>

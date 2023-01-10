@@ -1,7 +1,6 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-
     <h1>
         <a href="{{ object.movie.get_absolute_url }}">{{ object.movie }}</a> review
     </h1>
@@ -18,7 +17,7 @@
             </p>
         </div>
     </div>
-
+    {% if object.author == user or user.is_staff or user.is_superuser%}
     <a href="{% url 'movie-review-update' movie_pk=object.movie.pk pk=object.pk%}">
         <button class="btn btn-success btn-sm">Update review</button>
     </a>
@@ -48,6 +47,6 @@
             </div>
         </div>
     </div>
-
+{% endif %}
 {% endblock %}
 

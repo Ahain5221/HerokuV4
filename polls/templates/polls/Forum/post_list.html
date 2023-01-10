@@ -25,8 +25,6 @@
                         <a class="btn btn-dark btn-sm" href="{% url 'tag-thread-list' tag.name '-last_post_date' %}">&nbsp;{{ tag.name }}&nbsp;</a>
                     {% endfor %}
                 </p>
-                <a class="btn btn-danger btn-sm" href="?page=1#post_20">Static scroll to post nmb 20 on page 1</a>
-                <!-- <a class="btn btn-danger btn-sm" href="?page={{ index_post.page }}#post_{{ index_post.id }}">Dynamic scroll - thread needs another field with a list of post.id & post.page that it is on</a> -->
             </div>
             <div class="col-1 thread-edit-panel">
                 {% if user.is_authenticated %}
@@ -90,8 +88,6 @@
                 </div>
             {% endif %}
 
-            <!--{{ posts_id }}-->
-
             {% for post_liked, post in posts %}
 
                 <div id="post_{{ post.id }}" class="row" style="margin: 0">
@@ -132,7 +128,6 @@
                                         <a class="btn btn-outline-info" href="{% url 'login' %}?next={{ request.path }}">Log
                                             in to like this post!</a><br>
                                     {% endif %}
-
                             </div>
                         </div>
                         <div class="row post-edit-row">
@@ -273,7 +268,6 @@
 
 
     <style>
-
         p {
             font-size: x-large;
             letter-spacing: 1px;
@@ -286,23 +280,10 @@
             color: #d1cfcb;
             border-bottom-color: rgba(255, 255, 255, 0);
         }
-
-
-
     </style>
 
     <script>
-
-        $(document).ready(function (){
-            $("#click").click(function (){
-                $('html, body').animate({
-                    scrollTop: $("#post_31").offset().top
-                }, 2000);
-            });
-        });
-
         CKEDITOR.replace('create_post');
         let flag = false;
-
     </script>
 {% endblock %}

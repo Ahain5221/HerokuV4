@@ -168,6 +168,7 @@ def add_books(request):
     return redirect('index')
 
 
+@stuff_or_superuser_required
 def add_categories(request):
     link = "polls/static/category.xls"
 
@@ -175,7 +176,6 @@ def add_categories(request):
     sheet = workbook.sheet_by_name('Sheet1')
 
     for row in range(1, sheet.nrows):
-
         name = str(sheet.cell(row, 0).value)
         summary = sheet.cell(row, 1).value
 
@@ -187,8 +187,16 @@ def add_categories(request):
             })
 
         category_pk = category_object.pk
-        thread_object = Thread(title='Q&A', tags='q&a', category_id=category_pk, creator=request.user.profile)
-        thread_object.save()
+        # thread_object = Thread(title='Q&A', tags='q&a', category_id=category_pk, creator=request.user.profile)
+
+        Thread.objects.update_or_create(
+            title='Q&A', category_id=category_pk,
+            defaults=
+            {
+                'creator': request.user.profile
+            })
+
+        # thread_object.save()
 
     return redirect('index')
 
@@ -920,6 +928,7 @@ class BookDelete(UserPassesTestMixin, DeleteView):
         return super().form_valid(form)
 
 
+@stuff_or_superuser_required
 def book_verification(request, pk):
     book_object = get_object_or_404(Book, id=pk)
     if book_object.Verified:
@@ -936,6 +945,7 @@ def book_verification(request, pk):
     return HttpResponseRedirect(reverse('book-detail', args=[str(pk)]))
 
 
+@stuff_or_superuser_required
 def book_verification_stuff_page(request):
     list_of_books = request.POST.getlist('books-select')
     if not list_of_books:
@@ -1011,31 +1021,37 @@ class UpdateBookReview(UserPassesTestMixin, UpdateView):
         return reverse('book-detail', kwargs={'pk': self.kwargs['book_pk']})
 
 
+@login_required(login_url='/polls/login/')
 def add_book_to_book_list(request, book_pk, user_pk, book_status):
-    profile = Profile.objects.filter(user=user_pk).first()
-    book = Book.objects.filter(pk=book_pk).first()
+    if request.user.is_superuser or request.user.is_staff or request.user.pk == user_pk:
 
-    exists_in_watchlist = BookList.objects.filter(profile=profile).filter(book=book).exists()
-    if exists_in_watchlist:
+        profile = Profile.objects.filter(user=user_pk).first()
+        book = Book.objects.filter(pk=book_pk).first()
+
+        exists_in_watchlist = BookList.objects.filter(profile=profile).filter(book=book).exists()
+        if exists_in_watchlist:
+            return HttpResponseRedirect(reverse('book-detail', args=[str(book_pk)]))
+
+        BookList.objects.create(
+            book_status=book_status,
+            book=book,
+            profile=profile
+        )
+
         return HttpResponseRedirect(reverse('book-detail', args=[str(book_pk)]))
-
-    BookList.objects.create(
-        book_status=book_status,
-        book=book,
-        profile=profile
-    )
-
-    return HttpResponseRedirect(reverse('book-detail', args=[str(book_pk)]))
+    return redirect('index')
 
 
+@login_required(login_url='/polls/login/')
 def remove_book_from_book_list(request, book_pk, user_pk):
-    profile_pk = Profile.objects.filter(user_id=user_pk).first().pk
-    review = BookReview.objects.filter(book=book_pk).filter(author=user_pk)
-    book_list = BookList.objects.filter(book=book_pk).filter(profile=profile_pk)
-    review.delete()
-    book_list.delete()
-
-    return HttpResponseRedirect(reverse('book-detail', args=[str(book_pk)]))
+    if request.user.is_superuser or request.user.is_staff or request.user.pk == user_pk:
+        profile_pk = Profile.objects.filter(user_id=user_pk).first().pk
+        review = BookReview.objects.filter(book=book_pk).filter(author=user_pk)
+        book_list = BookList.objects.filter(book=book_pk).filter(profile=profile_pk)
+        review.delete()
+        book_list.delete()
+        return HttpResponseRedirect(reverse('book-detail', args=[str(book_pk)]))
+    return redirect('index')
 
 
 class BookReviewDetail(generic.DetailView):
@@ -1094,12 +1110,15 @@ class ProfileBookList(generic.DetailView):
         return context
 
 
+@login_required(login_url='/polls/login/')
 def change_book_status(request, book_pk, profile_pk, status):
-    game_list_object = BookList.objects.filter(book_id=book_pk).filter(profile_id=profile_pk).first()
-    game_list_object.book_status = status
-    game_list_object.save(update_fields=['book_status'])
+    if request.user.is_superuser or request.user.is_staff or request.user.profile.pk == profile_pk:
+        game_list_object = BookList.objects.filter(book_id=book_pk).filter(profile_id=profile_pk).first()
+        game_list_object.book_status = status
+        game_list_object.save(update_fields=['book_status'])
 
-    return HttpResponseRedirect(reverse('profile-book-list', args=[request.user, 'all']))
+        return HttpResponseRedirect(reverse('profile-book-list', args=[request.user, 'all']))
+    return redirect('index')
 
 
 class GameCreate(CreateView):
@@ -1338,31 +1357,37 @@ class MovieReviewDelete(UserPassesTestMixin, DeleteView):
         return reverse('movie-detail', kwargs={'pk': self.kwargs['movie_pk']})
 
 
+@login_required(login_url='/polls/login/')
 def add_game_to_game_list(request, game_pk, user_pk, game_status):
-    profile = Profile.objects.filter(user=user_pk).first()
-    game = Game.objects.filter(pk=game_pk).first()
+    if request.user.is_superuser or request.user.is_staff or request.user.pk == user_pk:
 
-    exists_in_watchlist = GameList.objects.filter(profile=profile).filter(game=game).exists()
-    if exists_in_watchlist:
+        profile = Profile.objects.filter(user=user_pk).first()
+        game = Game.objects.filter(pk=game_pk).first()
+
+        exists_in_watchlist = GameList.objects.filter(profile=profile).filter(game=game).exists()
+        if exists_in_watchlist:
+            return HttpResponseRedirect(reverse('game-detail', args=[str(game_pk)]))
+
+        GameList.objects.create(
+            game_status=game_status,
+            game=game,
+            profile=profile
+        )
+
         return HttpResponseRedirect(reverse('game-detail', args=[str(game_pk)]))
-
-    GameList.objects.create(
-        game_status=game_status,
-        game=game,
-        profile=profile
-    )
-
-    return HttpResponseRedirect(reverse('game-detail', args=[str(game_pk)]))
+    return redirect('index')
 
 
+@login_required(login_url='/polls/login/')
 def remove_game_from_game_list(request, game_pk, user_pk):
-    profile_pk = Profile.objects.filter(user_id=user_pk).first().pk
-    review = GameReview.objects.filter(game=game_pk).filter(author=user_pk)
-    game_list = GameList.objects.filter(game=game_pk).filter(profile=profile_pk)
-    review.delete()
-    game_list.delete()
-
-    return HttpResponseRedirect(reverse('game-detail', args=[str(game_pk)]))
+    if request.user.is_superuser or request.user.is_staff or request.user.pk == user_pk:
+        profile_pk = Profile.objects.filter(user_id=user_pk).first().pk
+        review = GameReview.objects.filter(game=game_pk).filter(author=user_pk)
+        game_list = GameList.objects.filter(game=game_pk).filter(profile=profile_pk)
+        review.delete()
+        game_list.delete()
+        return HttpResponseRedirect(reverse('game-detail', args=[str(game_pk)]))
+    return redirect('index')
 
 
 class ProfileGameList(generic.DetailView):
@@ -1420,12 +1445,15 @@ class GameReviewDetail(generic.DetailView):
     template_name = "polls/Game/game_review_detail.html"
 
 
+@login_required(login_url='/polls/login/')
 def change_game_status(request, game_pk, profile_pk, status):
-    game_list_object = GameList.objects.filter(game_id=game_pk).filter(profile_id=profile_pk).first()
-    game_list_object.game_status = status
-    game_list_object.save(update_fields=['game_status'])
+    if request.user.is_superuser or request.user.is_staff or request.user.profile.pk == profile_pk:
+        game_list_object = GameList.objects.filter(game_id=game_pk).filter(profile_id=profile_pk).first()
+        game_list_object.game_status = status
+        game_list_object.save(update_fields=['game_status'])
 
-    return HttpResponseRedirect(reverse('profile-game-list', args=[request.user, 'all']))
+        return HttpResponseRedirect(reverse('profile-game-list', args=[request.user, 'all']))
+    return redirect('index')
 
 
 class GameUpdate(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
@@ -1636,22 +1664,10 @@ def password_change_success(request):
     return render(request, 'polls/Profile/password_success.html')
 
 
-class UserEditView(UserPassesTestMixin, generic.UpdateView):
-    form_class = EditUserForm
-    success_url = reverse_lazy("index")
-    template_name = "polls/Game/edit_user.html"
-
-    def get_object(self):
-        return self.request.user
-
-    def test_func(self):
-        return self.request.user.is_authenticated
-
-
 class UserProfileEditView(UserPassesTestMixin, generic.UpdateView):
     model = Profile
     form_class = UserProfileEditForm
-    template_name = "polls/Game/edit_profile.html"
+    template_name = "polls/Game/templates/polls/Profile/edit_profile.html"
 
     def get_object(self):
         return self.request.user.profile
@@ -1723,8 +1739,9 @@ def delete_friendship(request, pk):
         return redirect('profile-page', other_user)
 
 
-def friend_list(request, pk):
-    get_user = User.objects.get(id=pk)
+@login_required(login_url='/polls/login/')
+def friend_list(request):
+    get_user = User.objects.get(id=request.user.pk)
     friends = Friend.objects.friends(get_user)
     avatars = []
     for friend in friends:
@@ -1737,17 +1754,6 @@ def friend_list(request, pk):
         'avatars': avatars
     }
     return render(request, 'FriendList.html', context=context)
-
-
-def friend_request_list(request, pk):
-    get_user = User.objects.get(id=pk)
-    request_list = Friend.objects.unread_requests(get_user)
-
-    context = {
-        'friend_request_list': request_list
-    }
-
-    return render(request, 'FriendRequestList.html', context=context)
 
 
 class ProfilePageView(UserPassesTestMixin, generic.DetailView):
@@ -1872,7 +1878,6 @@ def game_verification(request, pk):
 
 @stuff_or_superuser_required
 def game_verification_stuff_page(request):
-
     list_of_games = request.POST.getlist('games-select')
     if not list_of_games:
         return redirect("stuff-verification")
@@ -1951,6 +1956,7 @@ class MovieListView(generic.ListView):
     template_name = "polls/movie/movie_list.html"
     # model = Movie
     paginate_by = 18
+
     # ordering = ["-imdb_votes"]
 
     def get_context_data(self, **kwargs):
@@ -2098,7 +2104,6 @@ def movie_verification(request, pk):
 
 @stuff_or_superuser_required
 def movie_verification_stuff_page(request):
-
     list_of_movies = request.POST.getlist('movies-select')
     if not list_of_movies:
         return redirect("stuff-verification")
@@ -2250,9 +2255,15 @@ class ProfileWatchlist(generic.DetailView):
         return context
 
 
-class MovieReviewDetail(generic.DetailView):
+class MovieReviewDetail(UserPassesTestMixin, generic.DetailView):
     model = MovieReview
     template_name = "polls/movie/movie_review_detail.html"
+
+    def test_func(self):
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        return redirect('login')
 
 
 def add_movie_to_watchlist(request, movie_pk, user_pk, movie_status):
@@ -2354,6 +2365,7 @@ class SeriesListView(generic.ListView):
     template_name = "polls/movie/series_list.html"
     # model = Series
     paginate_by = 18
+
     # ordering = ["-imdb_votes"]
 
     def get_context_data(self, **kwargs):
@@ -3411,10 +3423,10 @@ def create_episodes(series, series_imdb_id, start_seasons_number, end_seasons_nu
 
         season_object, created = Season.objects.update_or_create(
             series=series,
-            season_number=str(season),
+            season_number=season,
             defaults={
                 'series': series,
-                'season_number': str(season),
+                'season_number': season,
                 'number_of_episodes': episodes_number
             }
         )
@@ -3525,7 +3537,8 @@ def episodes_scraping(pk, api, start):
         current_seasons_number = int(Season.objects.filter(series=pk).count())
         if current_seasons_number == 0:
             current_seasons_number = 1
-        timeout = create_episodes(series, series_imdb_id, int(current_seasons_number), int(seasons_number), api, months, start)
+        timeout = create_episodes(series, series_imdb_id, int(current_seasons_number), int(seasons_number), api, months,
+                                  start)
 
     end = time()
     print(end - start)
@@ -3919,6 +3932,7 @@ class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
     model = Post
     form_class = PostForm
     paginate_by = 30
+
     # count_hit = True
 
     def test_func(self):
@@ -3931,7 +3945,6 @@ class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
         data = super().get_context_data(**kwargs)
         page_number = data['page_obj'].number
         pagi_by = PostListView.paginate_by
-
         category_slug = self.kwargs['slug_category']
         thread_slug = self.kwargs['slug']
 
@@ -3942,6 +3955,8 @@ class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
         thread.save()
 
         posts = Post.objects.filter(thread=thread).order_by('date')
+
+
         posts_id = posts.values_list('id', flat=True)
         data['posts_id'] = posts_id
         data['posts'] = posts
@@ -3994,9 +4009,13 @@ class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
     def form_view(self):
         return render(self.request, 'polls/Forum/post_list.html', {'form': PostListView()})
 
-    def get_success_url(self):
+    def get_success_url(self, **kwargs):
+        thread = Thread.objects.filter(slug=self.kwargs['slug']).first()
+        posts = Post.objects.filter(thread=thread).order_by('date')
+        pagi_num = Paginator(posts, self.paginate_by).num_pages
+
         return reverse('post-list', kwargs={'slug_category': self.kwargs['slug_category'],
-                                            'slug': self.kwargs['slug']})
+                                            'slug': self.kwargs['slug']})+'?page='+str(pagi_num)
 
     def post(self, request, *args, **kwargs):
         if self.request.method == 'POST':
@@ -4011,7 +4030,6 @@ class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
                 return HttpResponseRedirect(reverse('post-list',
                                                     args=[kwargs['slug_category'],
                                                           kwargs['slug']]))
-
 
     def form_valid(self, form):
         thread_slug = self.kwargs['slug']
@@ -4068,7 +4086,6 @@ class ThreadUpdate(UserPassesTestMixin, UpdateView):
         thread_slug = thread.slug
 
         return reverse('post-list', kwargs={'slug_category': category_slug, 'slug': thread_slug})
-
 
 def ThreadLike(request, pk):
     thread = get_object_or_404(Thread, id=request.POST.get('thread_id'))
@@ -4161,6 +4178,7 @@ class ThreadListView(UserPassesTestMixin, generic.ListView):
     template_name = "polls/Forum/thread_list.html"
     # model = Thread
     paginate_by = 20
+
     # ordering = 'date'
 
     def test_func(self):
@@ -4190,7 +4208,8 @@ class TaggedThreadListView(generic.ListView):
     model = Thread
     paginate_by = 20
     template_name = "polls/Forum/tag_thread_list.html"
-    #ordering = ["title"]
+
+    # ordering = ["title"]
 
     def get_queryset(self):
         try:
@@ -4389,8 +4408,8 @@ def tagged(request, slug):
 @stuff_or_superuser_required
 def test_books_scrap(request):
     isbn = '9781486219506'
-    direct_url = 'https://openlibrary.org/isbn/'+isbn
-    basic_url_api = 'https://openlibrary.org/api/books?bibkeys=ISBN:'+isbn+'&jscmd=data&format=json'
+    direct_url = 'https://openlibrary.org/isbn/' + isbn
+    basic_url_api = 'https://openlibrary.org/api/books?bibkeys=ISBN:' + isbn + '&jscmd=data&format=json'
 
     response = requests.get(basic_url_api)
     response2 = response
@@ -4465,3 +4484,7 @@ def tweet_list(request):
 def tweet_fetch(request):
     tweet_save_to_db()
     return redirect('tweet_list')
+
+
+def terms(request):
+    return render(request, 'help.html')

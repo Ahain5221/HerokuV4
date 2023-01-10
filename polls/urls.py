@@ -9,6 +9,7 @@ from .models import GameGenre, GameMode, MovieSeriesGenre, Language
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('about/', views.terms, name='about'),
     path("sections/<int:num>", views.news_sections, name="section"),
 
     path('sendmail', views.sendmail, name='send'),
@@ -116,7 +117,7 @@ urlpatterns = [
 
     path('signup/', views.signup, name='signup'),
     # path("signup/", SignUpView.as_view(), name="signup"), STARA REJESTRACJA. VIEW DO WYWALENIA?
-    path("edit_user/", UserEditView.as_view(), name="edit_user"),
+
     path("testcbv", cbv_view.as_view(), name="cbv-view"),
 
     path("edit_profile/", UserProfileEditView.as_view(), name="edit_profile"),
@@ -287,8 +288,7 @@ urlpatterns = [
     path("profile/friendship/cancel<int:pk>", cancel_friendship_request, name="cancel-friend"),
 
     path("profile/friendship/delete/<int:pk>", delete_friendship, name="delete-friend"),
-    path("profile/friendship/my_friends/<int:pk>", friend_list, name="friend-list"),
-    path("profile/friendship/friend_requests/<int:pk>", friend_request_list, name="friend-request-list"),
+    path("profile/friendship/my_friends/", friend_list, name="friend-list"),
 
     path("profile/root/management/<int:pk>", UserPageManagement.as_view(), name="user-page-management"),
     path("profile/root/management/delete_games/<int:pk>", delete_unverified_games, name="delete-unverified-games"),

@@ -18,6 +18,7 @@
             </p>
         </div>
     </div>
+    {% if object.author == user or user.is_staff or user.is_superuser%}
 
     <a href="{% url 'game-review-update' game_pk=object.game.pk pk=object.pk%}">
         <button class="btn btn-success btn-sm">Update review</button>
@@ -48,5 +49,6 @@
             </div>
         </div>
     </div>
+{% endif %}
 
 {% endblock %}

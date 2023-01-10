@@ -2,20 +2,27 @@
 
 {% block content %}
 
-    <h1>Request List</h1>
+    <h1 style="margin-bottom: 5em">Request List</h1>
     {% for request_object in requestpermission_list %}
         {% if request_object.status == "Sent" %}
+    <hr>
+            <p>Request from: <a href="{% url 'profile-page' request_object.FromUser %}">{{ request_object.FromUser.name }}</a></p>
+            <p>Content: {{ request_object.Request_Reason }}</p>
 
-
+        <div class="row">
+            <div class="col-2">
         <form action="{% url 'get-autocomplete-permission' request_object.FromUser.pk %}" method="POST">
         {% csrf_token %}
             <button type="submit" class="btn btn-info btn-sm">Give perm</button>
                 </form>
-
+            </div>
+            <div class="col-2">
         <form action="{% url 'reject-autocomplete-permission' request_object.FromUser.pk %}" method="POST">
         {% csrf_token %}
             <button type="submit" class="btn btn-danger btn-sm">Reject perm</button>
                 </form>
+            </div>
+        </div>
     <hr style="height:2px;border-width:0;color:purple;background-color:purple">
         {% endif %}
     {% endfor %}

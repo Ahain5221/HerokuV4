@@ -452,7 +452,7 @@ class KnownSteamAppID(models.Model):
 
 class Season(models.Model):
     series = models.ForeignKey('Series', on_delete=models.CASCADE)
-    season_number = models.CharField(max_length=2)
+    season_number = models.IntegerField()
     number_of_episodes = models.IntegerField(default=0)
 
     def __str__(self):
@@ -692,7 +692,7 @@ class Post(Forum):
     likes_number = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.title
+        return self.content
 
     def get_absolute_url(self):
         return reverse('post-detail', args=[str(self.id)])

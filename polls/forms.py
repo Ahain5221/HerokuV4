@@ -89,7 +89,7 @@ class UserProfileEditForm(forms.ModelForm):
         fields = ('profile_image_url', 'date_of_birth', 'profile_description', 'signature', 'gender')
         widgets = {
             'profile_image_url': forms.TextInput(attrs={'class': 'custom-form-control'}),
-            'date_of_birth': DateInput(attrs={'max': datetime.datetime.now().strftime("%Y-%m-%d")}),
+            'date_of_birth': DateInput(attrs={'min': datetime.datetime.strptime('1 Jan 1900', '%d %b %Y').strftime("%Y-%m-%d"),'max': datetime.datetime.now().strftime("%Y-%m-%d")}),
             'profile_description': forms.Textarea(attrs={'class': 'custom-form-control'}),
             'signature': forms.Textarea(attrs={'class': 'custom-form-control'}),
             'gender': forms.Select(attrs={'class': 'custom-form-control'})

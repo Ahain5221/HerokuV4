@@ -2,7 +2,7 @@
 
 {% block content %}
 
-    <article class="main container thread-list-box">
+    <article class="main container thread-list-box" style="margin-bottom: 5.5em">
         <span class="breadcrumb bg-dark" style="padding-left: 1em">
             <span class="breadcrumb-item" style="margin-right: 1em"><a href="{% url 'index' %}">Home</a></span>
             <span class="icon solid fa-greater-than" style="margin-right: 1em"><a href="{% url 'category' %}" style="margin-left: 1em">Forums</a></span>
@@ -165,5 +165,6 @@
         {% endif %}
 
     </article>
+
 
 {% endblock %}

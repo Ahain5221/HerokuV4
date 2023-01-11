@@ -2253,6 +2253,16 @@ input, select, textarea {
 			text-align: center;
 		}
 
+		#footer-span-style-sm {
+			font-size: 0.85vw;
+			margin-left: 1.5em;
+		}
+
+		#footer-span-style-lg {
+			font-size: 1.35vw;
+			margin-left: 1.85em;
+		}
+
 /* Copyright */
 
 	#copyright {
@@ -2698,6 +2708,7 @@ input, select, textarea {
 				#footer ul.icons {
 					margin-bottom: 0;
 				}
+
 
 		/* Copyright */
 

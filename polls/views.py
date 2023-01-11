@@ -1667,7 +1667,7 @@ def password_change_success(request):
 class UserProfileEditView(UserPassesTestMixin, generic.UpdateView):
     model = Profile
     form_class = UserProfileEditForm
-    template_name = "polls/Game/templates/polls/Profile/edit_profile.html"
+    template_name = "polls/Profile/edit_profile.html"
 
     def get_object(self):
         return self.request.user.profile

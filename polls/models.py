@@ -426,7 +426,7 @@ class KnownSteamAppID(models.Model):
     id = models.IntegerField(primary_key=True)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
 
 # class Favorite(models.Model):

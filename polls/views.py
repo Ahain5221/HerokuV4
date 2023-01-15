@@ -388,7 +388,7 @@ def password_reset_request(request):
                     email_template_name = "registration/password_reset_email_text.html"
                     c = {
                         "email": user.email,
-                        'domain': current_site.domain,
+                        'domain': 'https://my-pct.me',
                         'site_name': 'Website',
                         "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                         "user": user,

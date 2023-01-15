@@ -108,7 +108,6 @@
                     {% endif %}
                 </ul>
 
-            {% if user.is_superuser %}
              {% if game.added_by == user and not game.Verified%}
                  <div class="col">
                      <a href="{% url 'game-update' pk=game.id %}">
@@ -154,7 +153,6 @@
                     </div>
                 </div>
              {% endif %}
-            {% endif %}
             </ul>
         </div>
     </div>

@@ -37,7 +37,7 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapseBar" aria-controls="navbarCollapseBar" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarCollapseBar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <img class="image-spin" src="{% static 'img/kawisz.png' %}" alt="PCT Logo">
+                    <a href="{% url 'index' %}"><img class="image-spin" src="{% static 'img/kawisz.png' %}" alt="PCT Logo"></a>
                     <li class="nav-item dropdown nav-item-padding" style="margin-top: 0.75em">
                         <a class="icon solid fa-book navbar-icon-style" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Books</a>
                         <ul class="dropdown-menu drop-menu-style" aria-labelledby="navbarDropdown">
@@ -46,7 +46,6 @@
                             <!--
                             --bs-dropdown-link-active-bg: #b2b7bf;
                             -->
-
                         </ul>
                     </li>
                     <li class="nav-item dropdown nav-item-padding">

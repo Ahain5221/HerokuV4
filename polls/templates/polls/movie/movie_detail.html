@@ -125,7 +125,6 @@
                 {% else %}
                     <li>Added by API</li>
                 {% endif %}
-            {% if user.is_superuser %}
 
              {% if movie.added_by == user and not movie.Verified%}
                  <div class="col">
@@ -172,7 +171,6 @@
                     </div>
                 </div>
              {% endif %}
-            {% endif %}
             </ul>
         </div>
     </div>

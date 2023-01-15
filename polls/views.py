@@ -44,6 +44,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.edit import FormMixin
 from friendship.models import Friend, FriendshipRequest
 from taggit.models import Tag
+from polls.prohibited_words import reserved_words_signup
 
 from polls.decorators import *
 from .forms import *
@@ -284,6 +285,10 @@ def signup(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             try:
+                if form.cleaned_data.get('username') in reserved_words_signup:
+                    messages.error(request, 'You cannot use such a username.')
+                    return redirect('signup')
+
                 to_email = form.cleaned_data.get('email')
                 check_username = form.cleaned_data.get('username')
                 name_test = User.objects.filter(username__iexact=str(check_username)).exists()
@@ -296,6 +301,7 @@ def signup(request):
                 user.username = user.username.lower()
                 user.save()
 
+                # to get the domain of the current site
                 current_site = get_current_site(request)
                 mail_subject = 'Pop Culture Tracker - Activation link'
                 message = render_to_string('registration/Activate_account_with_email.html', {
@@ -3033,23 +3039,23 @@ def scrape_show(url, multi_search, type_of_show, api, update, months, start):
 
         genres = data['genre'].split(', ')
         for genre in genres:
-            exists_in_db = MovieSeriesGenre.objects.filter(name=genre).first()
+            exists_in_db = MovieSeriesGenre.objects.filter(name=genre.capitalize()).first()
             if exists_in_db:
                 genres_pk_list.append(exists_in_db.pk)
             else:
                 genre_instance = MovieSeriesGenre.objects.create(
-                    name=genre
+                    name=genre.capitalize()
                 )
                 genres_pk_list.append(genre_instance.pk)
 
         languages = data['language'].split(', ')
         for language in languages:
-            exists_in_db = Language.objects.filter(name=language).first()
+            exists_in_db = Language.objects.filter(name=language.capitalize()).first()
             if exists_in_db:
                 languages_pk_list.append(exists_in_db.pk)
             else:
                 language_instance = Language.objects.create(
-                    name=language
+                    name=language.capitalize()
                 )
                 languages_pk_list.append(language_instance.pk)
         imdb_votes = data['imdb_votes']

@@ -154,7 +154,6 @@
                 {% else %}
                     <li>Added by API</li>
                 {% endif %}
-            {% if user.is_superuser %}
 
              {% if series.added_by == user and not series.Verified%}
                  <div class="col">
@@ -201,7 +200,6 @@
                     </div>
                 </div>
              {% endif %}
-            {% endif %}
             </ul>
         </div>
     </div>

@@ -117,7 +117,6 @@
                         {% endif %}
                 </ul>
 
-                {% if user.is_superuser %}
                  {% if book.added_by == user and not book.Verified%}
                      <div class="col">
                          <a href="{% url 'book-update' pk=book.id %}">
@@ -163,7 +162,6 @@
                         </div>
                     </div>
                  {% endif %}
-                {% endif %}
             </div>
         </div>
     </div>

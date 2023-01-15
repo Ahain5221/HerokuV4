@@ -377,6 +377,7 @@ def password_reset_request(request):
     if request.method == "POST":
         password_reset_form = PasswordResetForm(request.POST)
         if password_reset_form.is_valid():
+            current_site = get_current_site(request)
             data = password_reset_form.cleaned_data['email']
             associated_users = User.objects.filter(Q(email__iexact=data))
             if associated_users.exists():
@@ -387,7 +388,7 @@ def password_reset_request(request):
                     email_template_name = "registration/password_reset_email_text.html"
                     c = {
                         "email": user.email,
-                        'domain': '127.0.0.1:8000',
+                        'domain': current_site.domain,
                         'site_name': 'Website',
                         "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                         "user": user,

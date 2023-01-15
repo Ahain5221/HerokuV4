@@ -1,13 +1,7 @@
-from django.contrib.auth.models import User
-from polls.models import Game
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_out, user_logged_in
-from django.utils.text import slugify
-
-from .models import Profile
-
 from polls.models import *
 
 
@@ -15,7 +9,8 @@ from polls.models import *
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         get_name = instance
-        Profile.objects.create(user=instance, name=get_name.username)
+        Profile.objects.create(user=instance, name=get_name.username, profile_image_url="https://cdn-icons-png"
+                                                                                        ".flaticon.com/512/3442/3442087.png")
 
 
 @receiver(post_save, sender=User)

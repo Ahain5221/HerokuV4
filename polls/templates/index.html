@@ -4,7 +4,7 @@
 
     <div class="my-grid-container" style="display:flex;">
         <div class="new-banner-column" style="float: left">
-            <p style="max-width: 50%; font-weight: bold">Newest additions:</p><br/>
+            <p style="color: #d0d0d0; max-width: 50%; font-weight: bold">Newest additions:</p><br/>
 
             <div class="last-serie" style="max-width: 70%">
                 <a href="{{ last_series.get_absolute_url }}">
@@ -37,10 +37,10 @@
 
         <!-- TODO refresh tweets-->
         <div class="twitter-table" style="float: right; width: 40em">
-            <p style="max-width: 50%; font-weight: bold">Twitter news flash:</p><br/>
+            <p style="color: #d0d0d0; max-width: 50%; font-weight: bold">Twitter news flash:</p><br/>
             <table class="table table-hover table-dark">
                 <thead style="color: white">
-                <tr>
+                <tr data-href="https://twitter.com/PopCultureTrack">
                     <th scope="col" style="color: white">tweet</th>
                     <th scope="col" style="color: white">date</th>
                 </tr>

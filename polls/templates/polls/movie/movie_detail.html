@@ -179,14 +179,14 @@
     </div>
 
     <h1 class="review_title">
-        {% if series_reviews.count > 0 %}
+        {% if movie_reviews.count > 0 %}
             Reviews
         {% endif %}
 
         {% if user.is_authenticated%}
-            {% if series_watched_watching %}
-                {% if not series_has_user_review%}
-                    <a href="{% url 'create-series-review' series_pk=series.pk%}">
+            {% if movie_watched %}
+                {% if not movie_has_user_review%}
+                    <a href="{% url 'create-movie-review' movie_pk=movie.pk%}">
                         <button class="btn btn-success btn-sm" style="margin-left: 8em">Write review</button>
                     </a>
                 {% endif %}

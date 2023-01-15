@@ -94,7 +94,7 @@
                     <div class="col-1 bg-dark user-box">
                         <a href="{{ post.creator.get_absolute_url }}"><img src="{{ post.creator.profile_image_url }}"
                                                                            class="card-img avatar-style" height="140" width="140"></a>
-                        <p class="user-additional-info" style="font-size: medium; margin-bottom: 1em"><a
+                        <p class="user-additional-info" style="text-align: center; font-size: medium; margin-bottom: 1em; margin-right: 1em"><a
                                 href="{{ post.creator.get_absolute_url }}"> {{ post.creator }} </a></p>
                         <p class="user-additional-info"> Joined: {{ post.creator.user.date_joined.date }} </p>
                         <p class="user-additional-info"> Posts: {{ post.number_of_posts }} </p>

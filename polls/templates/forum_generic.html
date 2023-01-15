@@ -12,6 +12,7 @@
 
     <!-- Add additional CSS in static file -->
     {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'css/all.min.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'css/main.css' %}" >
     <script src="{% static main.js %}"></script>
@@ -36,6 +37,7 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapseBar" aria-controls="navbarCollapseBar" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarCollapseBar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <img class="image-spin" src="{% static 'img/kawisz.png' %}" alt="PCT Logo">
                     <li class="nav-item dropdown nav-item-padding" style="margin-top: 0.75em">
                         <a class="icon solid fa-book navbar-icon-style" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Books</a>
                         <ul class="dropdown-menu drop-menu-style" aria-labelledby="navbarDropdown">
@@ -117,7 +119,7 @@
                          <a href="https://steamcommunity.com/groups/my-pct" target="_blank" rel="noopener noreferrer"> <i class="fa-brands fa-steam"></i> </a>
                     </span>
                     <span id="footer-span-style-sm">
-                         <a href="https://twitter.com/PopCultureTrack" target="_blank" rel="noopener noreferrer"> <i class="fa-brands fa-twitter"></i> </a>
+                         <a href="https://twitter.com/PopCultureTrack" target="_blank" rel="noopener noreferrer"> <i class="fa-brands fa-twitter"></i></a>
                     </span>
          </section>
     </div>

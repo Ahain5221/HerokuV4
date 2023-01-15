@@ -2,17 +2,13 @@ import datetime  # for checking renewal date range.
 from django import forms
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm, UserCreationForm
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
 from dal import autocomplete
 from captcha.fields import CaptchaField
-from .models import Game, Profile, RequestPermission
-from .models import Movie, Series, Actor, Director, MovieReview, \
-    MovieWatchlist, SeriesWatchlist, SeriesReview, GameReview, Book, Author, BookReview
+from .models import RequestPermission
+from .models import MovieReview, MovieWatchlist, SeriesWatchlist, SeriesReview, GameReview, Book, Author, BookReview
 from .models import Game, Profile
 from .models import Movie, Series, Actor, Director
 from .models import ForumCategory, Post, Thread
-# from tinymce.widgets import TinyMCE
 
 
 class SignUpForm(UserCreationForm):
@@ -32,38 +28,49 @@ class SignUpForm(UserCreationForm):
 class DateInput(forms.DateInput):
     input_type = 'date'
 
+
 class SearchForm_User(forms.Form):
     searched = forms.CharField(label='Search for:', max_length=100, required=False)
 
 
 class SearchForm(forms.Form):
     searched = forms.CharField(label='Game title', max_length=100, required=False)
-    genres = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='game_genre-autocomplete'), required=False)
+    genres = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='game_genre-autocomplete'),
+                                       required=False)
     modes = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='game_mode-autocomplete'), required=False)
-    fromYear = forms.IntegerField(label="Min year", required=False,min_value=1900, max_value=datetime.datetime.now().year)
-    toYear = forms.IntegerField(label="Max year", required=False, min_value=1900, max_value=datetime.datetime.now().year)
+    fromYear = forms.IntegerField(label="Min year", required=False, min_value=1900,
+                                  max_value=datetime.datetime.now().year)
+    toYear = forms.IntegerField(label="Max year", required=False, min_value=1900,
+                                max_value=datetime.datetime.now().year)
 
 
 class SearchForm_Movie(forms.Form):
     searched = forms.CharField(label='Movie title', max_length=100, required=False)
-    genres = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='movie_series_genre-autocomplete'), required=False)
-    fromYear = forms.IntegerField(label="Min year", required=False,min_value=1900, max_value=datetime.datetime.now().year)
-    toYear = forms.IntegerField(label="Max year", required=False,min_value=1900, max_value=datetime.datetime.now().year)
+    genres = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='movie_series_genre-autocomplete'),
+                                       required=False)
+    fromYear = forms.IntegerField(label="Min year", required=False, min_value=1900,
+                                  max_value=datetime.datetime.now().year)
+    toYear = forms.IntegerField(label="Max year", required=False, min_value=1900,
+                                max_value=datetime.datetime.now().year)
     running_time = forms.IntegerField(label="Minimum running time", required=False, min_value=0, max_value=654321)
 
 
 class SearchForm_Series(forms.Form):
     searched = forms.CharField(label='Series title', max_length=100, required=False)
-    genres = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='movie_series_genre-autocomplete'), required=False)
+    genres = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='movie_series_genre-autocomplete'),
+                                       required=False)
     in_production = forms.ChoiceField(label="Series status", choices=(("", ''), (False, 'Finished'), (True, 'Ongoing')),
                                       required=False)
-    fromYear = forms.IntegerField(label="Min year", required=False,min_value=1900, max_value=datetime.datetime.now().year)
-    toYear = forms.IntegerField(label="Max year", required=False, min_value=1900, max_value=datetime.datetime.now().year)
+    fromYear = forms.IntegerField(label="Min year", required=False, min_value=1900,
+                                  max_value=datetime.datetime.now().year)
+    toYear = forms.IntegerField(label="Max year", required=False, min_value=1900,
+                                max_value=datetime.datetime.now().year)
 
 
 class SearchForm_Book(forms.Form):
     searched = forms.CharField(label='Book title', max_length=100, required=False)
-    genres = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='movie_series_genre-autocomplete'), required=False)
+    genres = forms.MultipleChoiceField(widget=autocomplete.Select2Multiple(url='movie_series_genre-autocomplete'),
+                                       required=False)
     isbn = forms.CharField(label='ISBN', max_length=13, required=False)
 
 
@@ -73,9 +80,6 @@ class EditUserForm(UserChangeForm):
     last_name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'custom-form-control'}))
     username = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'custom-form-control'}))
     last_login = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'custom-form-control'}))
-    # is_superuser = forms.CharField(max_length= 100, widget=forms.CheckboxInput(attrs={'class': 'form-check'}))
-    # is_staff = forms.CharField(max_length= 100, widget=forms.CheckboxInput(attrs={'class': 'form-check'}))
-    # is_active = forms.CharField(max_length= 100, widget=forms.CheckboxInput(attrs={'class': 'form-check'}))
     date_joined = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'custom-form-control'}))
 
     class Meta:
@@ -89,7 +93,9 @@ class UserProfileEditForm(forms.ModelForm):
         fields = ('profile_image_url', 'date_of_birth', 'profile_description', 'signature', 'gender')
         widgets = {
             'profile_image_url': forms.TextInput(attrs={'class': 'custom-form-control'}),
-            'date_of_birth': DateInput(attrs={'min': datetime.datetime.strptime('1 Jan 1900', '%d %b %Y').strftime("%Y-%m-%d"),'max': datetime.datetime.now().strftime("%Y-%m-%d")}),
+            'date_of_birth': DateInput(
+                attrs={'min': datetime.datetime.strptime('1 Jan 1900', '%d %b %Y').strftime("%Y-%m-%d"),
+                       'max': datetime.datetime.now().strftime("%Y-%m-%d")}),
             'profile_description': forms.Textarea(attrs={'class': 'custom-form-control'}),
             'signature': forms.Textarea(attrs={'class': 'custom-form-control'}),
             'gender': forms.Select(attrs={'class': 'custom-form-control'})
@@ -100,29 +106,24 @@ class GameForm(forms.ModelForm):
     class Meta:
         model = Game
         fields = ('title', 'developer', 'date_of_release', 'genre', 'mode', 'summary')
-        # fields = ('title','developer','date_of_release','genre','mode','summary','game_image')
-
-        # fields = ('title','developer','date_of_release')
-
         widgets = {'title': forms.TextInput(attrs={'placeholder': 'Title'}),
                    'developer': autocomplete.ModelSelect2Multiple(url='developer-autocomplete'),
-
                    'date_of_release': DateInput(),
                    'genre': autocomplete.ModelSelect2Multiple(url='game_genre-autocomplete'),
-                   # 'genre': forms.SelectMultiple(attrs={'class': 'form-control'}),
                    'mode': autocomplete.ModelSelect2Multiple(url='game_mode-autocomplete'),
-                   # 'mode': forms.SelectMultiple(attrs={'class': 'form-control'}),
-
                    'summary': forms.Textarea(attrs={}),
                    }
 
 
 class PasswordChangingForm(PasswordChangeForm):
-    old_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'custom-form-control', 'type': 'password'}))
+    old_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'custom-form-control', 'type': 'password'}))
     new_password1 = forms.CharField(max_length=100,
-                                    widget=forms.PasswordInput(attrs={'class': 'custom-form-control', 'type': 'password'}))
+                                    widget=forms.PasswordInput(
+                                        attrs={'class': 'custom-form-control', 'type': 'password'}))
     new_password2 = forms.CharField(max_length=100,
-                                    widget=forms.PasswordInput(attrs={'class': 'custom-form-control', 'type': 'password'}))
+                                    widget=forms.PasswordInput(
+                                        attrs={'class': 'custom-form-control', 'type': 'password'}))
 
     class Meta:
         model = User
@@ -135,20 +136,13 @@ class MovieForm(forms.ModelForm):
         fields = ('title', 'actors', 'director', 'date_of_release', 'language', 'genre', 'running_time', 'summary')
         widgets = {
             'title': forms.TextInput(attrs={'class': 'custom-form-control', 'placeholder': 'title'}),
-            # 'actors': forms.SelectMultiple(attrs={'class': 'form-control'}),
             'actors': autocomplete.ModelSelect2Multiple(url='actor-autocomplete'),
             'director': autocomplete.ModelSelect2Multiple(url='director-autocomplete'),
-
-            # 'director': forms.SelectMultiple(attrs={'class': 'form-control'}),
             'date_of_release': DateInput(),
             'language': autocomplete.ModelSelect2Multiple(url='language-autocomplete'),
-            # 'language': forms.SelectMultiple(attrs={'class': 'form-control'}),
-
             'genre': autocomplete.ModelSelect2Multiple(url='movie_series_genre-autocomplete'),
-            # 'genre': forms.SelectMultiple(attrs={'class': 'form-control'}),
             'running_time': forms.NumberInput(
                 attrs={'class': 'custom-form-control', 'placeholder': 'Movie length in minutes'}),
-            # 'type_of_show': forms.Select(attrs={'class': 'custom-form-control'}),
             'summary': forms.Textarea(attrs={'class': 'custom-form-control', 'placeholder': 'Description'}),
         }
 
@@ -170,16 +164,11 @@ class BookForm(forms.ModelForm):
 class AuthorForm(forms.ModelForm):
     class Meta:
         model = Author
-        # fields = '__all__'
         fields = ('first_last_name', 'date_of_birth', 'date_of_death')
         widgets = {
-            # 'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'first name'}),
-            # 'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'last name'}),
             'first_last_name': forms.TextInput(attrs={'class': 'custom-form-control', 'placeholder': 'first name'}),
             'date_of_birth': DateInput(),
             'date_of_death': DateInput(),
-            # 'specialisation': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'specialisation'}),
-            # 'specialisation': forms.MultipleChoiceField(choices=CHOICES, widget=forms.CheckboxSelectMultiple())
         }
 
 
@@ -266,7 +255,6 @@ class MovieWatchlistForm(forms.ModelForm):
 
 class SeriesWatchlistForm(forms.ModelForm):
     class Meta:
-
         CHOICES = [
             ('watched', 'watched'),
             ('watching', 'watching'),
@@ -292,8 +280,8 @@ class SeriesForm(forms.ModelForm):
             'date_of_release': DateInput(),
             'language': autocomplete.ModelSelect2Multiple(url='language-autocomplete'),
             'genre': autocomplete.ModelSelect2Multiple(url='movie_series_genre-autocomplete'),
-            'number_of_seasons': forms.NumberInput(attrs={'class': 'custom-form-control', 'placeholder': 'number of seasons'}),
-            # 'type_of_show': forms.Select(attrs={'class': 'custom-form-control'}),
+            'number_of_seasons': forms.NumberInput(
+                attrs={'class': 'custom-form-control', 'placeholder': 'number of seasons'}),
             'summary': forms.Textarea(attrs={'class': 'custom-form-control', 'placeholder': 'Description'})
         }
 
@@ -301,31 +289,22 @@ class SeriesForm(forms.ModelForm):
 class ActorForm(forms.ModelForm):
     class Meta:
         model = Actor
-        # fields = '__all__'
         fields = ('full_name', 'date_of_birth', 'date_of_death')
         widgets = {
-            # 'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'first name'}),
-            # 'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'last name'}),
             'full_name': forms.TextInput(attrs={'class': 'custom-form-control', 'placeholder': 'full name'}),
             'date_of_birth': DateInput(),
             'date_of_death': DateInput(),
-            # 'specialisation': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'specialisation'}),
-            # 'specialisation': forms.MultipleChoiceField(choices=CHOICES, widget=forms.CheckboxSelectMultiple())
         }
 
 
 class DirectorForm(forms.ModelForm):
     class Meta:
         model = Director
-        # fields = '__all__'
         fields = ('full_name', 'date_of_birth', 'date_of_death')
         widgets = {
-            # 'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'first name'}),
-            # 'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'last name'}),
             'full_name': forms.TextInput(attrs={'class': 'custom-form-control', 'placeholder': 'full name'}),
             'date_of_birth': DateInput(),
             'date_of_death': DateInput(),
-            # 'amount_of_films': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
 
@@ -355,8 +334,6 @@ class OmdbApiForm(forms.Form):
                       ('sci_fi', 'sci_fi'),
                       ('romance', 'romance'),
                       ('war', 'war'))
-
-    # genres = ['romance', 'war', 'history', 'mystery_and_thriller']
 
     critics_CHOICES = (('fresh', 'fresh'),
                        ('rotten', 'rotten'))

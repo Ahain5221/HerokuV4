@@ -22,16 +22,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-xqwoaf7+!07)c+ruf3gd8l9i67ua-2&2&y32$0k*#(cnl4abco'
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '#**+m)#z@l6^z+)ivz8u+36%=i41jdad9c#h16p)@ghe0zik5@')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
 # Potem można niepotrzebne wywalić, dla mojej wygody dodaje teraz
-ALLOWED_HOSTS = ['young-falls-06895.herokuapp.com', 'amd2-django.herokuapp.com', '127.0.0.1', 'my-pct.me',
-                 'pop-culture-tracker.herokuapp.com']
+ALLOWED_HOSTS = ['amd2-django.herokuapp.com', '127.0.0.1', 'my-pct.me', 'www.my-pct.me']
 CSRF_TRUSTED_ORIGINS = ['https://my-pct.me']
 # Application definition
 
@@ -178,12 +175,6 @@ MESSAGE_TAGS = {
 }
 
 PASSWORD_RESET_TIMEOUT = 604800
-
-# GRAPH_MODELS = {
-#   'all_applications': True,
-#  'group_models': True,
-# 'app_labels': ["polls"]
-# }
 
 CKEDITOR_CONFIGS = {
     'default': {

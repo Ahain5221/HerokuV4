@@ -1,21 +1,13 @@
-import uuid  # Required for unique book instances
-from datetime import date
 from datetime import datetime, timezone, timedelta
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse  # Used to generate URLs by reversing the URL patterns
 from django.core.validators import MaxValueValidator, MinValueValidator
 from isbn_field import ISBNField
-# from tinymce.models import HTMLField
-from django.shortcuts import get_object_or_404
 from ckeditor.fields import RichTextField
-from django.contrib.contenttypes.fields import GenericRelation
 from taggit.managers import TaggableManager
 from django.utils.text import slugify
-# from django.shortcuts import get_object_or_404
 
-
-# Create your models here.
 
 class Genre(models.Model):
     name = models.CharField(max_length=200, help_text='Enter a book genre (e.g. Science Fiction)')
@@ -67,15 +59,12 @@ class Game(models.Model):
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=200)
     developer = models.ManyToManyField('Developer', blank=True)
-    # developer = models.ForeignKey('Developer', on_delete=models.SET_NULL, null=True)
     date_of_release = models.DateField(null=True, blank=True)
-    # game_image = models.ImageField(null = True, blank=True, upload_to="images/")
     game_image = models.TextField(max_length=100, null=True, blank=True,
                                   default="https://pbs.twimg.com/profile_images/1510045751803404288/W-AAI2EH_400x400"
                                           ".jpg")
     genre = models.ManyToManyField(GameGenre, help_text='Select a genre for this game')
     mode = models.ManyToManyField(GameMode, help_text='Select which game mode is available')
-    # language = models.ForeignKey('Language', on_delete=models.SET_NULL, null=True)
     summary = models.TextField(max_length=1000, help_text='Enter a brief description of the game')
     Verified = models.BooleanField(default=False)
 
@@ -107,7 +96,6 @@ class Game(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=200)
     authors = models.ManyToManyField('Author')
-
 
     summary = models.TextField(max_length=2000, help_text='Enter a brief description of the book')
     isbn = ISBNField('ISBN', unique=True,
@@ -219,9 +207,6 @@ class Profile(models.Model):
     favorite_books = models.ManyToManyField('Book')
     registration_completed = models.BooleanField(default=False)
     name = models.CharField(max_length=200, blank=True)
-
-    # movie_watchlist = models.ForeignKey('MovieWatchlist', on_delete=models.CASCADE, null=True)
-    # movie_watchlist = models.ManyToManyField('MovieWatchlist')
 
     def WhenJoined(self):
         return self.user.date_joined
@@ -556,11 +541,9 @@ class GameReview(models.Model):
 
 
 class RequestPermission(models.Model):
-    # FromUser = models.ForeignKey(Profile, on_delete=models.CASCADE, unique=True)
     FromUser = models.OneToOneField(Profile, on_delete=models.CASCADE)
 
     Request_Reason = models.TextField(max_length=1000)
-    # status = models.BooleanField(default=False)
 
     Choice_Status = (
         ('Sent', 'Sent'),
@@ -672,9 +655,6 @@ class Thread(Forum):
     def get_absolute_url(self):
         return reverse('thread-list', args=[str(self.slug_category), str(self.slug)])
 
-    # def number_of_posts(self):
-        # return Post.objects.filter(thread=self).all().count()
-
     def number_of_likes(self):
         return self.likes.all().count()
 
@@ -710,7 +690,6 @@ class Post(Forum):
             check = post.likes.all().count()
             count += check
         return count
-            #check = all_likes.filter(post_id=post.pk)
 
 
 class Like(models.Model):

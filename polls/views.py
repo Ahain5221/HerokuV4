@@ -1,101 +1,60 @@
+import ast
 import os
 import random
-import ast
 from datetime import datetime
-from time import time, sleep
-from django.contrib.admin.views.decorators import staff_member_required
-from .models import RequestPermission
+from time import time
+
 import omdb
 # third-party imports
 import requests
+# twitter imports
+import tweepy
+import xlrd
 from bs4 import BeautifulSoup, SoupStrainer
-from dal import autocomplete
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.forms import PasswordResetForm
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.sessions.models import Session
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage
 from django.core.mail import send_mail, BadHeaderError
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models.query_utils import Q
-from django.http import HttpResponse, HttpResponseForbidden, Http404
+from django.http import Http404
+from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.template.loader import render_to_string
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseRedirect, HttpResponse, Http404
-
-from django.http import HttpResponseRedirect, HttpResponseForbidden
-from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.urls import reverse_lazy
-from django.utils.encoding import force_bytes
-from django.utils.encoding import force_str
-from django.utils.http import urlsafe_base64_decode
-from django.utils.http import urlsafe_base64_encode
-from django.views import generic
-from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormMixin
-from polls.models import Author
-from .forms import *
-from .models import Book
-from .models import Game, Developer, Profile, GameGenre, GameMode, KnownSteamAppID
-from .models import Movie, Series, Actor, Director, Language, MovieSeriesGenre, Season, Episode, MovieReview, \
-    MovieWatchlist, SeriesWatchlist, SeriesReview, GameReview, GameList, BookReview, BookList
-from .models import Movie, Series, Actor, Director, Language, MovieSeriesGenre, Season, Episode, MovieReview, \
-    MovieWatchlist, SeriesWatchlist, SeriesReview, GameReview, GameList
-from .models import Movie, Series, Actor, Director, Language, MovieSeriesGenre
-
-from .models import Post, Thread
-from .forms import PostForm, ForumCategory, ThreadCategoryForm, ThreadForm
-from django.views.generic.edit import FormMixin
-from taggit.models import Tag
-
-# standard library imports
-import csv
-import datetime as dt
-import json
-import os
-import statistics
-# import time
-
-# third-party imports
-import requests
-
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
-from .forms import SignUpForm
-from django.contrib.sites.shortcuts import get_current_site
+from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.template.loader import render_to_string
-from .token import account_activation_token
-from django.views import View
-# from .models import *
-from friendship.models import Friend, Follow, Block, FriendshipRequest
-from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
-import random
-from polls.decorators import *
-import xlrd
-from django.contrib.sessions.models import Session
-from django.utils import timezone
+from django.views import generic
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import FormMixin
+from friendship.models import Friend, FriendshipRequest
+from taggit.models import Tag
 
-# twitter imports
-import tweepy
-from tweepy.auth import OAuthHandler
+from polls.decorators import *
+from .forms import *
+from .forms import PostForm, ForumCategory, ThreadCategoryForm, ThreadForm, SignUpForm
+from .models import Book, BookReview, BookList
+from .models import Game, Developer, Profile, GameGenre, GameMode, KnownSteamAppID, GameReview, GameList
+from .models import Movie, Series, Actor, Director, Language, MovieSeriesGenre
+from .models import Post, Thread
+from .models import Season, Episode, MovieReview, MovieWatchlist, SeriesWatchlist, SeriesReview
 from .models import Tweet
+from .token import account_activation_token
 
 
 def add_books(request):
@@ -187,7 +146,6 @@ def add_categories(request):
             })
 
         category_pk = category_object.pk
-        # thread_object = Thread(title='Q&A', tags='q&a', category_id=category_pk, creator=request.user.profile)
 
         Thread.objects.update_or_create(
             title='Q&A', category_id=category_pk,
@@ -195,8 +153,6 @@ def add_categories(request):
             {
                 'creator': request.user.profile
             })
-
-        # thread_object.save()
 
     return redirect('index')
 
@@ -232,7 +188,6 @@ def get_autocomplete_permission(request, pk):
         messages.error(request, 'Check if the request still exists')
         return redirect('profile-page', user_object.username)
     return redirect('request-list')
-    # return redirect('profile-page',pk)
 
 
 @stuff_or_superuser_required
@@ -241,7 +196,6 @@ def reject_autocomplete_permission(request, pk):
     request_object.status = "Rejected"
     request_object.save(update_fields=['status'])
     return redirect('request-list')
-    # return redirect('profile-page',pk)
 
 
 class DeveloperAutocomplete(autocomplete.Select2QuerySetView):
@@ -266,7 +220,6 @@ class DeveloperAutocomplete(autocomplete.Select2QuerySetView):
 
 class ActorAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated:
             return Actor.objects.none()
 
@@ -287,7 +240,6 @@ class ActorAutocomplete(autocomplete.Select2QuerySetView):
 
 class DirectorAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated:
             return Director.objects.none()
 
@@ -308,7 +260,6 @@ class DirectorAutocomplete(autocomplete.Select2QuerySetView):
 
 class AuthorAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated:
             return Author.objects.none()
 
@@ -345,7 +296,6 @@ def signup(request):
                 user.username = user.username.lower()
                 user.save()
 
-                # to get the domain of the current site
                 current_site = get_current_site(request)
                 mail_subject = 'Pop Culture Tracker - Activation link'
                 message = render_to_string('registration/Activate_account_with_email.html', {
@@ -366,7 +316,6 @@ def signup(request):
             messages.success(request, 'Please confirm your email address to complete the registration!')
 
             return redirect('index')
-            # return HttpResponse('Please confirm your email address to complete the registration')
     else:
         form = SignUpForm()
     return render(request, 'registration/signup.html', {'form': form})
@@ -421,7 +370,6 @@ def activate(request, uidb64, token):
         user.save()
         messages.success(request, 'Thank you for your email confirmation. Now you can login into your account!')
         return redirect('index')
-        # return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
     else:
         return HttpResponse('Activation link is invalid!')
 
@@ -439,18 +387,15 @@ def sendmail(request):
 
 def index(request):
     if request.user.is_authenticated:
-        # num_visits = request.session.get('num_visits', 0)
-        # last_book = Book.objects.filter(Verified=True).last()
-        last_game = Game.objects.filter(Verified=True).last()
-        last_series = Series.objects.filter(Verified=True).last()
-        last_movie = Movie.objects.filter(Verified=True).last()
+        last_book = Book.objects.filter(Verified=True).order_by("pk").last()
+        last_game = Game.objects.filter(Verified=True).order_by("pk").last()
+        last_series = Series.objects.filter(Verified=True).order_by("pk").last()
+        last_movie = Movie.objects.filter(Verified=True).order_by("pk").last()
 
         tweets = Tweet.objects.order_by('-published_date')[:10]
 
-        # request.session['num_visits'] = num_visits + 1
-
         index_context = {
-            # 'last_book': last_book,
+            'last_book': last_book,
             'last_game': last_game,
             'last_series': last_series,
             'last_movie': last_movie,
@@ -741,7 +686,6 @@ def search_result_series(request):
 
 @stuff_or_superuser_required
 def stuff_verification(request):
-    # searched = request.POST['searched']
     games_to_verify = Game.objects.filter(Verified=False)
     movies_to_verify = Movie.objects.filter(Verified=False)
     series_to_verify = Series.objects.filter(Verified=False)
@@ -782,7 +726,6 @@ def login_user(request):
 
 
 def signup_view(request):
-    # form_class = SignUpForm
     form = SignUpForm(request.POST)
     if form.is_valid():
         form.save()
@@ -796,7 +739,6 @@ def signup_view(request):
     return render(request, 'registration/signup2.html', {'form': form})
 
 
-# @method_decorator(login_required, name='dispatch')
 class AuthorListView(generic.ListView):
     model = Author
     template_name = "polls/Book/author_list.html"
@@ -811,8 +753,6 @@ class AuthorDetailView(generic.DetailView):
 class AuthorCreate(CreateView):
     model = Author
     template_name = "polls/Book/author_form.html"
-    # fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death']
-    # initial = {'date_of_death': '11/06/2020'}
     form_class = AuthorForm
 
 
@@ -820,7 +760,6 @@ class AuthorUpdate(UpdateView):
     model = Author
     template_name = "polls/Book/author_form.html"
     form_class = AuthorForm
-    # fields = '__all__'
 
 
 class AuthorDelete(DeleteView):
@@ -901,7 +840,6 @@ class BookUpdate(UpdateView):
     model = Book
     template_name = "polls/Book/book_form.html"
     form_class = BookForm
-    # fields = ['title', 'author', 'summary', 'isbn', 'genre', 'language']
 
 
 class BookDelete(UserPassesTestMixin, DeleteView):
@@ -1125,8 +1063,6 @@ def change_book_status(request, book_pk, profile_pk, status):
 class GameCreate(CreateView):
     model = Game
     form_class = GameForm
-    # fields = ['title', 'developer', 'date_of_release', 'genre', 'mode', 'summary',]
-    # fields = ['title', 'developer', 'date_of_release', 'genre', 'mode', 'summary']
     template_name = "polls/Game/game_form.html"
 
     def form_valid(self, form):
@@ -1475,10 +1411,6 @@ class GameUpdate(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
         return redirect('index')
 
 
-# success_url = reverse_lazy('games')
-#  template_name = "polls/Game/game_confirm_delete.html"
-
-
 class GameDelete(UserPassesTestMixin, DeleteView):
     model = Game
     success_url = reverse_lazy('games')
@@ -1655,8 +1587,7 @@ class DeveloperListView(generic.ListView):
 
 
 class PasswordsChangeView(PasswordChangeView):
-    # form_class = PasswordChangeForm #domyślne
-    form_class = PasswordChangingForm  # Nowe z forms.py
+    form_class = PasswordChangingForm
     template_name = 'polls/Profile/change_password.html'
     success_url = reverse_lazy('password_success')
 
@@ -1806,7 +1737,6 @@ class ProfilePageView(UserPassesTestMixin, generic.DetailView):
         return redirect('index')
 
     def get_context_data(self, *args, **kwargs):
-        # users = Profile.objects.all()
         context = super(ProfilePageView, self).get_context_data(**kwargs)
         name_lower = self.kwargs['name'].lower()
         get_pk = get_object_or_404(Profile, name=name_lower).pk
@@ -1955,10 +1885,7 @@ def add_favorite_series(request, pk):
 
 class MovieListView(generic.ListView):
     template_name = "polls/movie/movie_list.html"
-    # model = Movie
     paginate_by = 18
-
-    # ordering = ["-imdb_votes"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -2047,8 +1974,6 @@ class MovieCreate(UserPassesTestMixin, CreateView):
     template_name = "polls/movie/movie_create.html"
     form_class = MovieForm
 
-    # fields = ['title', 'actors', 'director', 'date_of_release', 'language', 'genre', 'running_time']
-
     def test_func(self):
         return self.request.user.is_authenticated
 
@@ -2066,8 +1991,6 @@ class MovieUpdate(UserPassesTestMixin, UpdateView):
     model = Movie
     template_name = "polls/movie/movie_create.html"
     form_class = MovieForm
-
-    # fields = ['title', 'actors', 'director', 'date_of_release', 'language', 'genre', 'running_time']
 
     def form_valid(self, form):
         messages.success(self.request, "The movie has been successfully updated!")
@@ -2364,10 +2287,7 @@ class MovieWatchlistView(generic.ListView):
 
 class SeriesListView(generic.ListView):
     template_name = "polls/movie/series_list.html"
-    # model = Series
     paginate_by = 18
-
-    # ordering = ["-imdb_votes"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -2560,8 +2480,6 @@ class SeriesCreate(UserPassesTestMixin, CreateView):
     form_class = SeriesForm
     template_name = "polls/movie/series_create.html"
 
-    # fields = ['title', 'actors', 'director', 'date_of_release', 'language', 'genre', 'number_of_seasons']
-
     def test_func(self):
         return self.request.user.is_authenticated
 
@@ -2579,8 +2497,6 @@ class SeriesUpdate(UserPassesTestMixin, UpdateView):
     model = Series
     template_name = "polls/movie/series_create.html"
     form_class = SeriesForm
-
-    # fields = ['title', 'actors', 'director', 'date_of_release', 'language', 'genre', 'running_time']
 
     def test_func(self):
         return self.request.user.is_superuser
@@ -2666,8 +2582,6 @@ class ActorDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        # context['movies_list'] = Movie.objects.all
-        # context['series_list'] = Series.objects.all
         context['movies_list'] = Movie.objects.filter(actors__full_name__contains=self.object)
         context['series_list'] = Series.objects.filter(actors__full_name__contains=self.object)
 
@@ -2678,8 +2592,6 @@ class ActorDelete(UserPassesTestMixin, DeleteView):
     model = Actor
     template_name = "polls/movie/actor_delete.html"
     success_url = reverse_lazy('actors')
-
-    # login_url = reverse_lazy('index')
 
     def test_func(self):
         return self.request.user.is_superuser
@@ -2693,8 +2605,6 @@ class ActorCreate(UserPassesTestMixin, CreateView):
     form_class = ActorForm
     template_name = "polls/movie/actor_create.html"
 
-    # fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death', 'specialisation']
-
     def test_func(self):
         return self.request.user.is_authenticated
 
@@ -2706,8 +2616,6 @@ class ActorUpdate(UserPassesTestMixin, UpdateView):
     model = Actor
     template_name = "polls/movie/actor_create.html"
     form_class = ActorForm
-
-    # fields = ['title', 'actors', 'director', 'date_of_release', 'language', 'genre', 'running_time']
 
     def test_func(self):
         return self.request.user.is_superuser
@@ -2758,8 +2666,6 @@ class DirectorCreate(UserPassesTestMixin, CreateView):
     form_class = DirectorForm
     template_name = "polls/movie/director_create.html"
 
-    # fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death', 'amount_of_films']
-
     def test_func(self):
         return self.request.user.is_authenticated
 
@@ -2771,8 +2677,6 @@ class DirectorUpdate(UserPassesTestMixin, UpdateView):
     model = Director
     template_name = "polls/movie/director_create.html"
     form_class = DirectorForm
-
-    # fields = ['title', 'actors', 'director', 'date_of_release', 'language', 'genre', 'running_time']
 
     def test_func(self):
         return self.request.user.is_superuser
@@ -2843,7 +2747,6 @@ def scrape_games(request):
                   "Aug,": "08", "Sep,": "09", "Oct,": "10", "Nov,": "11", "Dec,": "12"}
 
     added_games = 0
-    # error_counter = 0
 
     for i in range(1, 20):
         steams_ids, end = scrape_steam_ids(i, start)
@@ -2854,7 +2757,6 @@ def scrape_games(request):
             if time() - start > 25:
                 return render(request, "polls/Game/scrape_games.html", {'addedGames': added_games})
             if check_app_id(steam_app_id):
-                # print("To ID jest znane już!")
                 continue
             url2 = "https://store.steampowered.com/api/appdetails?appids=" + str(steam_app_id)
             response2 = requests.get(url2)
@@ -2864,11 +2766,7 @@ def scrape_games(request):
                     continue
             except TypeError:
                 print("Type error dla ID:", steam_app_id)
-                # error_counter += 1
-                # if error_counter == 5:
                 break
-                # sleep(1)
-                # continue
             else:
                 type_app = jsoned_data_from_response_app_details[str(steam_app_id)]['data']['type']
                 if type_app == 'game':
@@ -2998,9 +2896,7 @@ def compare_titles(shows):
 def get_imdb_id(shows, multi_search, type_of_show, api):
     imdb_ids = []
     if multi_search:
-        # api = omdb.OMDBClient(apikey=apikey)
         for show in shows:
-            # counter = 0
             if type_of_show == 'tv_series_browse':
                 data = api.search_series(show)
             else:
@@ -3010,7 +2906,6 @@ def get_imdb_id(shows, multi_search, type_of_show, api):
                 for record in data:
                     imdb_ids.append(record['imdb_id'])
     else:
-        # api = GetMovie(api_key=apikey)
         for show in shows:
             data = api.get(title=show)
             if data:
@@ -3194,7 +3089,6 @@ def scrape_show(url, multi_search, type_of_show, api, update, months, start):
                     type_of_show=type_of_show,
                     poster=poster,
                     Verified=True,
-                    # 'added_by': User.objects.get(pk=1),
                     imdb_rating=imdb_rating,
                     imdb_votes=imdb_votes
                 )
@@ -3262,7 +3156,6 @@ def scrape_show(url, multi_search, type_of_show, api, update, months, start):
                     poster=poster,
                     Verified=True,
                     imdb_votes=imdb_votes,
-                    # 'added_by': User.objects.get(pk=1),
                     imdb_rating=imdb_rating,
                 )
                 series_object.director.set(directors_pk_list)
@@ -3577,7 +3470,6 @@ def episodes_scraping_script(request):
 
 
 def episode_scraping(series, episode_imdb_id, season_object, months, api, action, episodes, episode_number):
-    # omdb.set_default('apikey', api_key)
     episode = api.imdbid(episode_imdb_id)
     if episode:
         title = episode['title']
@@ -3615,7 +3507,6 @@ def episode_scraping(series, episode_imdb_id, season_object, months, api, action
         imdb_rating = None
         poster = series.poster
         imdb_id = episode_imdb_id
-        #
 
     episode = Episode.objects.filter(imdb_id=imdb_id).first()
 
@@ -3737,7 +3628,7 @@ def delete_unverified_users(request):
         else:
             continue
 
-    return redirect('index')  # W skryPCTie zastąpić jako exit()
+    return redirect('index')
 
 
 class UserPageManagement(UserPassesTestMixin, generic.DetailView):
@@ -3807,85 +3698,6 @@ def delete_unverified_all(request, pk):
     return redirect('user-page-management', pk)
 
 
-# TESTING STUF
-def test(request):
-    authors = []
-    start = time()
-    update_or_create = []
-    bulk_update = []
-    for j in range(30):
-        for i in range(1, 10):
-            author = Author.objects.filter(id=i).first()
-            author.first_last_name = 'firstnamev3' + str(i)
-            authors.append(author)
-        Author.objects.bulk_update(authors, ['first_last_name'])
-        bulk_update.append(time() - start)
-
-        start = time()
-        for i in range(1, 10):
-            Author.objects.update_or_create(
-                id=i,
-                defaults={
-                    'first_last_name': 'firstnamev2' + str(i),
-                }
-            )
-        update_or_create.append(time() - start)
-    print('update or create', sum(update_or_create) / len(update_or_create))
-    print(update_or_create)
-    print('bulk update', sum(bulk_update) / len(bulk_update))
-    print(bulk_update)
-    return render(request, 'index.html')
-
-
-# TESTING STUF
-def test1(request):
-    pk_list = [1]
-    movies = []
-    for i in range(1, 10):
-        movie = Movie(title='title' + str(i), date_of_release='2022-11-21', summary=str(i),
-                      poster=str(i), type_of_show='movie', running_time=i)
-        movie.actors.through()
-        movie.director.set(pk_list)
-        movie.language.set(pk_list)
-        movie.genre.set(pk_list)
-        movies.append(movie)
-
-    Author.objects.bulk_create(movies)
-
-    return render(request, 'index.html')
-
-
-# TESTING STUF
-def bulk_create(request):
-    authors = []
-    update_or_create = []
-    bulk_update = []
-
-    start = time()
-    for i in range(1, 100):
-        Author.objects.create(
-
-            first_name='firstnamev2' + str(i) + str(random.randint(0, 100000)),
-            last_name='lastnamev2' + str(i) + str(random.randint(0, 100000))
-
-        )
-    update_or_create.append(time() - start)
-
-    start = time()
-    for i in range(1, 100):
-        author = Author(first_name='firstnamev3' + str(i) + str(random.randint(0, 100000)),
-                        last_name='firstnamev3' + str(i) + str(random.randint(0, 100000)))
-        authors.append(author)
-    Author.objects.bulk_create(authors)
-    bulk_update.append(time() - start)
-
-    print('normal create', sum(update_or_create) / len(update_or_create))
-    print(update_or_create)
-    print('bulk create', sum(bulk_update) / len(bulk_update))
-    print(bulk_update)
-    return render(request, 'index.html')
-
-
 def search_result_user(request):
     if request.method == "POST":
         searched = request.POST['searched']
@@ -3934,8 +3746,6 @@ class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
     form_class = PostForm
     paginate_by = 30
 
-    # count_hit = True
-
     def test_func(self):
         return self.request.user.is_authenticated
 
@@ -3957,7 +3767,6 @@ class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
 
         posts = Post.objects.filter(thread=thread).order_by('date')
 
-
         posts_id = posts.values_list('id', flat=True)
         data['posts_id'] = posts_id
         data['posts'] = posts
@@ -3977,14 +3786,11 @@ class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
             except EmptyPage:
                 paginator_posts = paginator_posts.page(paginator_posts.num_pages)
 
-            # posts_pk = list(posts.values_list('id', flat=True))
             for post in paginator_posts.object_list:
-                # test1111 = profile.post_like.values_list('id', flat=True)
                 if profile.post_like.filter(id=post.pk).exists():
                     posts_liked.append(True)
                 else:
                     posts_liked.append(False)
-                test123 = post.likes.all()
 
             paginator_like = Paginator(posts_liked, pagi_by)
             try:
@@ -4016,15 +3822,11 @@ class PostListView(UserPassesTestMixin, FormMixin, generic.ListView):
         pagi_num = Paginator(posts, self.paginate_by).num_pages
 
         return reverse('post-list', kwargs={'slug_category': self.kwargs['slug_category'],
-                                            'slug': self.kwargs['slug']})+'?page='+str(pagi_num)
+                                            'slug': self.kwargs['slug']}) + '?page=' + str(pagi_num)
 
     def post(self, request, *args, **kwargs):
         if self.request.method == 'POST':
-            # thread_slug = self.kwargs['slug']
-            # thread = Thread.objects.filter(slug=thread_slug).first()
-            # self.object = thread
             form = self.get_form()
-            tt = kwargs['slug_category']
             if form.is_valid():
                 return self.form_valid(form)
             else:
@@ -4087,6 +3889,7 @@ class ThreadUpdate(UserPassesTestMixin, UpdateView):
         thread_slug = thread.slug
 
         return reverse('post-list', kwargs={'slug_category': category_slug, 'slug': thread_slug})
+
 
 def ThreadLike(request, pk):
     thread = get_object_or_404(Thread, id=request.POST.get('thread_id'))
@@ -4177,11 +3980,7 @@ class CategoryListView(UserPassesTestMixin, generic.ListView):
 
 class ThreadListView(UserPassesTestMixin, generic.ListView):
     template_name = "polls/Forum/thread_list.html"
-    # model = Thread
     paginate_by = 20
-
-    # ordering = 'date'
-
     def test_func(self):
         return self.request.user.is_authenticated
 
@@ -4209,9 +4008,6 @@ class TaggedThreadListView(generic.ListView):
     model = Thread
     paginate_by = 20
     template_name = "polls/Forum/tag_thread_list.html"
-
-    # ordering = ["title"]
-
     def get_queryset(self):
         try:
             tag_id = Tag.objects.get(name=self.kwargs['tag']).pk
@@ -4362,7 +4158,6 @@ class ThreadCategoryDelete(UserPassesTestMixin, DeleteView):
 class PostDelete(UserPassesTestMixin, DeleteView):
     model = Post
     template_name = "polls/Forum/post_delete.html"
-    # success_url = reverse_lazy('post')
     login_url = reverse_lazy('index')
 
     def test_func(self):
@@ -4404,56 +4199,6 @@ def tagged(request, slug):
         'threads': threads,
     }
     return render(request, 'index.html', context)
-
-
-@stuff_or_superuser_required
-def test_books_scrap(request):
-    isbn = '9781486219506'
-    direct_url = 'https://openlibrary.org/isbn/' + isbn
-    basic_url_api = 'https://openlibrary.org/api/books?bibkeys=ISBN:' + isbn + '&jscmd=data&format=json'
-
-    response = requests.get(basic_url_api)
-    response2 = response
-    jsoned_data_from_response = response2.json()
-
-    # Getting title
-    title = jsoned_data_from_response['ISBN:9781486219506']['title']
-
-    # Getting authors
-    authors = []
-
-    author = jsoned_data_from_response['ISBN:9781486219506']['authors']
-    for auth in author:
-        author_name = auth['name']
-        authors.append(author_name)
-
-    # Getting poster
-
-    poster_url = jsoned_data_from_response['ISBN:9781486219506']['cover']['large']
-
-    # Getting genres if possible - Not really possible : D
-
-    genres = jsoned_data_from_response['ISBN:9781486219506']['subjects']
-    get_all_genres = MovieSeriesGenre.objects.all()
-    for genre in get_all_genres:
-        texx = genre
-    for genre in genres:
-        test = genre['name'].lower()
-        test2 = MovieSeriesGenre.objects.filter(name__iexact=test)
-        if test2:
-            print("OKKK")
-        else:
-            print("meh")
-    # Getting description
-    response = requests.get(direct_url)
-
-    only_item_cells = SoupStrainer("div", attrs={'class': 'book-description'})
-    table = BeautifulSoup(response.content, 'lxml', parse_only=only_item_cells)
-    games = table.find_all("p")
-    description = games[0]
-    test = description.next
-    final_description = str(test)
-    return redirect('index')
 
 
 def api_user_tweets():

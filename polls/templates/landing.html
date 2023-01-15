@@ -6,6 +6,7 @@
 
     <!-- Web page CSS -->
     {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'css/landing.css' %}">
     <link rel="stylesheet" href="{% static 'css/popup-style.css' %}">
 
@@ -28,7 +29,7 @@
 <nav>
     <a href="#" class="logo">
         <h1>
-            <span class="logo-graphic">&#x1F4DA;</span>
+            <span class="logo-graphic"><img class="image-spin" src="{% static 'img/kawisz.png' %}" alt="PCT Logo 1"></span>
             <span class="logo-p">P</span><span class="logo-c">C</span><span class="logo-t">T</span>
         </h1>
     </a>
@@ -58,7 +59,7 @@
             <span class="boast">Your whole digital pop culture</span> <br/>
             <span class="boast">In one place</span>
         </h1>
-        <a class="btn red" onclick='scrollToStats()'>Learn More</a>
+        <a class="btn red" style="cursor: help" onclick='scrollToStats()'>Learn More</a>
     </div>
 </section>
 
@@ -74,7 +75,7 @@
 
   <div class="mySlides fade">
       <img src="{% static 'img/slideshow2.png' %}" style="width:100%">
-      <div class="text-caption">Browse database</div>
+      <div class="text-caption">Browse vast selection of media</div>
   </div>
 
   <div class="mySlides fade">

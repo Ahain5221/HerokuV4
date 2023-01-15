@@ -1,9 +1,6 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, re_path
-from django.urls import path, include
-
 from . import views
-
 from .views import *
 from .models import GameGenre, GameMode, MovieSeriesGenre, Language
 
@@ -26,17 +23,8 @@ urlpatterns = [
          auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'),
          name='password_reset_complete'),
     path('logout', auth_views.LogoutView.as_view(), name='logout'),
-
-    # re_path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/',
-    #    views.activate, name='activate'),
-    # path("sections/<int:num>", views.news_section, name="section"),
-    # path("sections/<int:num>", views.newsSections(), name="section"),
-
     path('sendmail', views.sendmail, name='send'),
     path('activate/<slug:uidb64>/<slug:token>/', views.activate, name='activate'),
-
-    # re_path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/',
-    #    views.activate, name='activate'),
     path('authors/', views.AuthorListView.as_view(), name='authors'),
     path('author/<int:pk>', views.AuthorDetailView.as_view(), name='author-detail'),
     path('author/create/', views.AuthorCreate.as_view(), name='author-create'),
@@ -64,14 +52,6 @@ urlpatterns = [
     path('change_book_status/<int:book_pk>/<int:profile_pk>/<status>', views.change_book_status,
          name='change-book-status'),
 
-    # re_path(r'^developer-autocomplete/$', autocomplete.Select2QuerySetView.as_view(
-    # model = Developer, model_field_name="company_name", create_field='company_name'), name='developer-autocomplete'),
-    # re_path(r'^developer-autocomplete/$', autocomplete.Select2QuerySetView.as_view(
-    # model = Developer, model_field_name="company_name", create_field='company_name'), name='developer-autocomplete'),
-
-    # re_path(r'^developer-autocomplete/$', autocomplete.Select2QuerySetView.as_view(model = Developer, model_field_name="company_name", create_field='company_name'), name='developer-autocomplete'),
-
-    # re_path(r'^developer-autocomplete/$', autocomplete.Select2QuerySetView.as_view(model = Developer, model_field_name="company_name", create_field='company_name'), name='developer-autocomplete'),
     re_path(r'^developer-autocomplete/$', DeveloperAutocomplete.as_view(create_field='company_name'),
             name='developer-autocomplete'),
 
@@ -116,32 +96,15 @@ urlpatterns = [
     path('stuff_verification/', views.stuff_verification, name="stuff-verification"),
 
     path('signup/', views.signup, name='signup'),
-    # path("signup/", SignUpView.as_view(), name="signup"), STARA REJESTRACJA. VIEW DO WYWALENIA?
 
     path("testcbv", cbv_view.as_view(), name="cbv-view"),
 
     path("edit_profile/", UserProfileEditView.as_view(), name="edit_profile"),
-    #re_path(r'^profile/username/(?P<slug>[\w.@+-]+)/$', ProfilePageView.as_view(), name="profile-page"),
-    #re_path(r'^(?P<name>[\w-]+)/profile/$', ProfilePageView.as_view(), name="profile-page"),
     re_path(r'^profile/(?P<name>[\w-]+)/$(?i)', ProfilePageView.as_view(), name="profile-page"),
-
-    #path("profile/<slug:name>", ProfilePageView.as_view(), name="profile-page"),
-    #path("profile/<slug:name>/gosc", ProfilePageView_Gosc.as_view(), name="profile-page-gosc"),
-
-    #path("profile/<slug:name>/my_favorites", MyFavorites.as_view(), name="my-favorites"),
-    # re_path(r'^profile/(?P<name>[\w-]+)/my_favorites$(?i)', MyFavorites.as_view(), name="my-favorites"),
-
-    #path("profile/<slug:name>/watchlist", ProfileWatchlist.as_view(), name="profile-watchlist"),
-    # re_path(r'^profile/(?P<name>[\w-]+)/watchlist$(?i)',ProfileWatchlist.as_view(), name="profile-watchlist"),
-
-
     path("profile/<slug:name>/my_favorites/<type>", MyFavorites.as_view(), name="my-favorites"),
     path("profile/<slug:name>/watchlist/<type_of_show>/<status>", ProfileWatchlist.as_view(), name="profile-watchlist"),
     path("profile/<slug:name>/game_list/<status>", ProfileGameList.as_view(), name="profile-game-list"),
     path("profile/<slug:name>/book_list/<status>", ProfileBookList.as_view(), name="profile-book-list"),
-    # path("profile/<slug:name>/game_list", ProfileGameList.as_view(), name="profile-game-list"),
-    # re_path(r'^profile/(?P<name>[\w-]+)/game_list$(?i)', ProfileGameList.as_view(), name="profile-game-list"),
-    # KOMENTARZ DLA DAWIDA
 
     path("like/<int:pk>", like_view, name="like_profile"),
 
@@ -155,16 +118,9 @@ urlpatterns = [
     path("addverf/<int:pk>", game_verification, name="add_verf"),
     path("addverf-stuff/", game_verification_stuff_page, name="add_verf_stuff"),
 
-    # path('games/', views.GameListView.as_view(), name='games'),
     re_path(r'^games/$(?i)', views.GameListView.as_view(), name='games'),
-
-    # path('game/<int:pk>', views.GameDetailView.as_view(), name='game-detail'),
     re_path(r'^game/(?P<pk>\d+)/$(?i)', views.GameDetailView.as_view(), name='game-detail'),
-
-    #path('game/<int:pk>/update/', views.GameUpdate.as_view(), name='game-update'),
     re_path(r'^game/(?P<pk>\d+)/update/$(?i)', views.GameUpdate.as_view(), name='game-update'),
-
-    #path('game/<int:pk>/delete/', views.GameDelete.as_view(), name='game-delete'),
     re_path(r'^game/(?P<pk>\d+)/delete/$(?i)', views.GameDelete.as_view(), name='game-delete'),
 
     path('game/create/', views.GameCreate.as_view(), name='game-create'),
@@ -248,9 +204,7 @@ urlpatterns = [
          name='scrape-episodes'),
     path('episodes_scarping_in_progress/<int:pk>', views.episode_scraping_in_progress,
          name='episodes-scraping-in-progress'),
-    # path('scrape_episodes_of_all_series/<api_key>', views.enter_api_key, name='scrape-all-series'),
     path('seriesList', views.series_to_scrape, name='series-to-scrape'),
-    # path('scrapeEpisodes', views.enter_api_key, name='enter-api-key'),
     path('scrape_movies/<type_of_show>/<update>', views.scraping_shows_script, name='scrape-shows-script'),
     path('scrape_episodes_script', views.episodes_scraping_script, name='scrape-episodes-script'),
 
@@ -298,11 +252,8 @@ urlpatterns = [
     path("profile/root/management/delete_all/<int:pk>", delete_unverified_all, name="delete-unverified-everything"),
     path("profile/root/management/delete_user/<int:pk>", delete_user, name="delete-user"),
 
-    path('test/', views.test, name='test'),
-    path('test1/', views.bulk_create, name='test1'),
     path('carnage/', delete_unverified_users, name='carnage'),
 
-    # path('forum/thread/', views.ThreadListView.as_view(), name='thread'),
     path('forum/thread/create/<int:category_pk>', views.ThreadCreate.as_view(), name='thread-create'),
     path('forum/thread/<int:pk>/delete', views.ThreadDelete.as_view(), name='thread-delete'),
     path('forum/thread/<int:pk>/update/<category_slug>', views.ThreadUpdate.as_view(), name='thread-update'),
@@ -312,19 +263,13 @@ urlpatterns = [
 
     path('forum/', views.CategoryListView.as_view(), name='category'),
     path('forum/category/create', views.CategoryCreate.as_view(), name='category-create'),
-    # path('forum/category/<int:pk>/delete', views.ThreadCategoryDelete.as_view(), name='thread-category-delete'),
     path('forum/category/<int:pk>/update', views.ThreadCategoryUpdate.as_view(), name='category-update'),
 
-    # Trzymać je na dole, bo narobią zamętu...
     path('forum/category/<slug:slug>/<order_by>', views.ThreadListView.as_view(), name='thread-list'),
     path('forum/<slug:slug_category>/<slug:slug>', views.PostListView.as_view(), name='post-list'),
     path('forum/thread/tag/<tag>/<order_by>', views.TaggedThreadListView.as_view(), name='tag-thread-list'),
 
-    # Ruszę to najwyżej jeśli będzie to miało jakikolwiek sens
     path('post/', views.PostListView.as_view(), name='post'),
-    # path('post/create', views.PostCreate.as_view(), name='post-create'),
-    # path('post/<int:pk>', views.PostDetailView.as_view(), name='post-detail'),
-    # Te dwa niby trzeba ruszyć, eh.
 
     path('forum/post/update/<int:pk>/<thread_pk>', views.PostUpdate.as_view(), name='post-update'),
     path('forum/post/delete/<int:pk>/<thread_pk>', views.PostDelete.as_view(), name='post-delete'),
@@ -332,7 +277,6 @@ urlpatterns = [
     path("postlike/<int:pk>/<int:thread_pk>", post_like_view, name="like_post"),
 
     path('add_books/', add_books, name='add-books'),
-    path('book_test/', test_books_scrap, name='test'),
     path('add_categories/', add_categories, name='add-categories'),
 
     path('tweet_list/', views.tweet_list, name='tweet_list')

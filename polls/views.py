@@ -2754,7 +2754,7 @@ def scrape_games(request):
 
     added_games = 0
 
-    for i in range(1, 20):
+    for i in range(1, 45):
         steams_ids, end = scrape_steam_ids(i, start)
         if end:
             return render(request, "polls/Game/scrape_games.html", {'addedGames': added_games})

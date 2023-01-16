@@ -163,8 +163,7 @@ STATIC_URL = 'static/'
 # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Z tym poniżej wszystko działa dobrze
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-WHITENOISE_MAX_AGE = 3600
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-secondary',

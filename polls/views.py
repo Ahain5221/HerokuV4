@@ -390,7 +390,10 @@ def sendmail(request):
     )
     return render(request, 'sendmail.html')
 
+from django.views.decorators.cache import cache_page
 
+
+@cache_page(60 * 60 * 60)
 def index(request):
     if request.user.is_authenticated:
         last_book = Book.objects.filter(Verified=True).order_by("pk").last()

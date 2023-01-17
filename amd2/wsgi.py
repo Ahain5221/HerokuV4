@@ -12,6 +12,4 @@ from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'amd2.settings')
 
-from whitenoise import WhiteNoise
-
-application = WhiteNoise(get_wsgi_application())
+application = get_wsgi_application()

@@ -390,10 +390,9 @@ def sendmail(request):
     )
     return render(request, 'sendmail.html')
 
-from django.views.decorators.cache import cache_page, cache_control
+from django.utils.cache import patch_cache_control
 
 
-@cache_control(max_age=56000)
 def index(request):
     if request.user.is_authenticated:
         last_book = Book.objects.filter(Verified=True).order_by("pk").last()
@@ -433,8 +432,9 @@ def index(request):
             'num_books': num_books
 
         }
-
-        return render(request, 'landing.html', context=landing_context)
+        resp = render(request, 'landing.html', context=landing_context)
+        patch_cache_control(resp, max_age=max_age)
+        return resp
 
 
 def news_sections(request, num):

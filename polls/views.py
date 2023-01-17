@@ -433,7 +433,7 @@ def index(request):
 
         }
         resp = render(request, 'landing.html', context=landing_context)
-        patch_cache_control(resp, max_age=max_age)
+        patch_cache_control(resp, max_age=55555)
         return resp
 
 

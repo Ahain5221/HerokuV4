@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'whitenoise',
+
     'fontawesomefree',
     'polls.apps.UsersConfig',
     # 'django_extensions',
@@ -50,6 +52,9 @@ INSTALLED_APPS = [
     'taggit'
 
 ]
+
+WHITENOISE_MAX_AGE = 6666
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

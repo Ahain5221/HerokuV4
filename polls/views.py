@@ -390,7 +390,6 @@ def sendmail(request):
     )
     return render(request, 'sendmail.html')
 
-from django.utils.cache import patch_cache_control
 
 
 def index(request):
@@ -432,9 +431,8 @@ def index(request):
             'num_books': num_books
 
         }
-        resp = render(request, 'landing.html', context=landing_context)
-        patch_cache_control(resp, max_age=55555)
-        return resp
+
+        return render(request, 'landing.html', context=landing_context)
 
 
 def news_sections(request, num):

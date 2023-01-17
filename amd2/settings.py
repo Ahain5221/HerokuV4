@@ -17,6 +17,7 @@ from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -40,8 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'whitenoise',
-
     'fontawesomefree',
     'polls.apps.UsersConfig',
     # 'django_extensions',
@@ -52,9 +51,6 @@ INSTALLED_APPS = [
     'taggit'
 
 ]
-
-WHITENOISE_MAX_AGE = 6666
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -168,8 +164,7 @@ STATIC_URL = 'static/'
 # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Z tym poniżej wszystko działa dobrze
-#STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-secondary',

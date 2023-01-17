@@ -393,7 +393,7 @@ def sendmail(request):
 from django.views.decorators.cache import cache_page, cache_control
 
 
-@cache_control(max_age=36000, must-revalidate)
+@cache_control(max_age=56000)
 def index(request):
     if request.user.is_authenticated:
         last_book = Book.objects.filter(Verified=True).order_by("pk").last()

@@ -23,19 +23,34 @@
 
         {% block pagination %}
             {% if is_paginated %}
-                <div class="pagination">
-                    <span class="page-links" style="margin-top: 2.5em">
+                <ul class="pagination" style="margin: 0">
+                        <li style="margin-top: 1em;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
                         {% if page_obj.has_previous %}
-                            <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}" style="margin-right: 2px">Previous</a>
+                          <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number }}">Previous</a></li>
                         {% endif %}
-                        <span class="page-current">
-                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                        </span>
+                            {% if page_obj.number|add:-3 > 0 %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:-3 }}">{{ page_obj.number|add:-3 }}</a></li>
+                            {% endif %}
+                            {% if page_obj.number|add:-2 > 0 %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:-2 }}">{{ page_obj.number|add:-2 }}</a></li>
+                            {% endif %}
+                            {% if page_obj.number|add:-1 > 0 %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:-1 }}">{{ page_obj.number|add:-1 }}</a></li>
+                            {% endif %}
+                            <li class="page-item active pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number }}">{{ page_obj.number }}</a></li>
+                            {% if page_obj.number|add:1 <= page_obj.paginator.num_pages %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:1 }}">{{ page_obj.number|add:1 }}</a></li>
+                            {% endif %}
+                            {% if page_obj.number|add:2 <= page_obj.paginator.num_pages %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:2 }}">{{ page_obj.number|add:2 }}</a></li>
+                            {% endif %}
+                            {% if page_obj.number|add:3 <= page_obj.paginator.num_pages %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:3 }}">{{ page_obj.number|add:3 }}</a></li>
+                            {% endif %}
                         {% if page_obj.has_next %}
-                            <a href="{{ request.path }}?page={{ page_obj.next_page_number }}" style="margin-left: 2px">Next</a>
+                          <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number }}">Next</a></li>
                         {% endif %}
-                    </span>
-                </div>
+                        </ul>
             {% endif %}
 
 
@@ -131,36 +146,41 @@
             </ol>
 
             {% if is_paginated %}
-                <div class="pagination">
-                    <span class="page-links" style="margin-top: 2.5em">
+                <ul class="pagination">
+                        <li style="margin-top: 1em;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
+
                         {% if page_obj.has_previous %}
-                            <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}" style="margin-right: 2px">Previous</a>
+                          <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number }}">Previous</a></li>
                         {% endif %}
-                        <span class="page-current">
-                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                        </span>
+                            {% if page_obj.number|add:-3 > 0 %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:-3 }}">{{ page_obj.number|add:-3 }}</a></li>
+                            {% endif %}
+                            {% if page_obj.number|add:-2 > 0 %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:-2 }}">{{ page_obj.number|add:-2 }}</a></li>
+                            {% endif %}
+                            {% if page_obj.number|add:-1 > 0 %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:-1 }}">{{ page_obj.number|add:-1 }}</a></li>
+                            {% endif %}
+                            <li class="page-item active pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number }}">{{ page_obj.number }}</a></li>
+                            {% if page_obj.number|add:1 <= page_obj.paginator.num_pages %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:1 }}">{{ page_obj.number|add:1 }}</a></li>
+                            {% endif %}
+                            {% if page_obj.number|add:2 <= page_obj.paginator.num_pages %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:2 }}">{{ page_obj.number|add:2 }}</a></li>
+                            {% endif %}
+                            {% if page_obj.number|add:3 <= page_obj.paginator.num_pages %}
+                                <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.number|add:3 }}">{{ page_obj.number|add:3 }}</a></li>
+                            {% endif %}
                         {% if page_obj.has_next %}
-                            <a href="{{ request.path }}?page={{ page_obj.next_page_number }}" style="margin-left: 2px">Next</a>
+                          <li class="page-item pagination-sm"><a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number }}">Next</a></li>
                         {% endif %}
-                    </span>
-                </div>
+                        </ul>
             {% endif %}
         {% endblock %}
 
-
-            <ul>
-                {% for forum_category in forumcategory_list %}
-                        <li>
-                            <a href="{{ forum_category.get_absolute_url }}">{{ forum_category.title }}</a>
-                            <strong class="text-secondary"> Thread's: {{ forum_category.number_of_threads }} </strong>
-                            <strong class="text-secondary"> Post's: {{ forum_category.number_of_posts}} </strong>
-                        </li>
-                {% endfor %}
-            </ul>
-
-        {% if user.is_superuser  %}
+        {% if user.is_superuser %}
             <a href="{% url 'category-update' pk=category.id %}">
-                <button>Edit Category</button>
+                <button style="margin-top: 1em">Edit Category</button>
             </a>
         {% endif %}
 

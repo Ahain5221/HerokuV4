@@ -90,9 +90,9 @@
                 {% for season in series.season_set.all|dictsort:"season_number" %}
                     <a href="{% url 'season-detail' pk=season.id %}">
                         <button class="btn btn-secondary btn-sm" style="font-size: smaller">Season
-                            {% if season.season_number|length < 2 %}
+                            {% if season.season_number < 10 %}
                                 0{{ season.season_number }}
-                                {% else %}
+                            {% else %}
                                 {{ season.season_number }}
                             {% endif %}
                         </button>

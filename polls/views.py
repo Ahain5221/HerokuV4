@@ -391,7 +391,6 @@ def sendmail(request):
     return render(request, 'sendmail.html')
 
 
-
 def index(request):
     if request.user.is_authenticated:
         last_book = Book.objects.filter(Verified=True).order_by("pk").last()
@@ -2755,7 +2754,7 @@ def scrape_games(request):
 
     added_games = 0
 
-    for i in range(1, 45):
+    for i in range(1, 20):
         steams_ids, end = scrape_steam_ids(i, start)
         if end:
             return render(request, "polls/Game/scrape_games.html", {'addedGames': added_games})

@@ -39,7 +39,11 @@ def login_set_name(sender, request, user, **kwargs):
 @receiver(post_save, sender=Thread)
 def add_id_to_thread(sender, instance, created, **kwargs):
     if created:
-        instance.slug = slugify(instance.title) + "-" + str(instance.pk)
+        if len(instance.title) >= 40:
+            instance.slug = slugify(instance.title[0:40]) + "-" + str(instance.pk)
+        else:
+            instance.slug = slugify(instance.title) + "-" + str(instance.pk)
+
         get_category_object = ForumCategory.objects.get(pk=instance.category_id)
         instance.slug_category = get_category_object.slug
         instance.save()

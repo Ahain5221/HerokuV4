@@ -64,6 +64,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'amd2.urls'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

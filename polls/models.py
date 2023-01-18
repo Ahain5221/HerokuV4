@@ -349,7 +349,12 @@ class MovieSeriesBase(models.Model):
     def users_rating(self):
         rate_sum = 0
         counter = 0
-        reviews = MovieReview.objects.filter(movie=self.pk)
+
+        if self.type_of_show == 'movie':
+            reviews = MovieReview.objects.filter(movie=self.pk)
+        else:
+            reviews = SeriesReview.objects.filter(series=self.pk)
+
         for review in reviews:
             if review.rate:
                 rate_sum += review.rate
@@ -577,7 +582,7 @@ class Forum(models.Model):
 
 
 class ForumCategory(Forum):
-    slug = models.SlugField(unique=True, null=True)
+    slug = models.SlugField(unique=True, null=True, max_length=100)
 
     class Meta:
         verbose_name_plural = "category"
@@ -641,12 +646,12 @@ class ForumCategory(Forum):
 class Thread(Forum):
     category = models.ForeignKey(ForumCategory, on_delete=models.SET_NULL, related_name='categories', null=True)
     likes = models.ManyToManyField(Profile, related_name='thread_like')
-    slug = models.SlugField(unique=True, null=True)
+    slug = models.SlugField(unique=True, null=True, max_length=100)
     tags = TaggableManager()
     views = models.IntegerField(default=0)
     last_post_date = models.DateTimeField(null=True)
     number_of_posts = models.IntegerField(default=0)
-    slug_category = models.SlugField(null=True)
+    slug_category = models.SlugField(null=True, max_length=100)
     is_thread_active = models.BooleanField(default=True)
 
     def __str__(self):

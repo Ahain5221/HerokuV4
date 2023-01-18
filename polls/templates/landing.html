@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
+    <!--<meta name="viewport" content="width=1920, initial-scale=1.0">-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Pop Culture Tracker is a website where users can create personalized watchlists and gamelists, write reviews and join discussions in the forum section.
+                    Users can also discover new movies and games, rate them and share their thoughts and insights on recent releases and classics. It's a one-stop destination for pop culture enthusiasts.">
+    <meta name="keywords" content="PCT, Game, Movie, Series, Watchlist, Gamelist, Booklist, Forum, Reviews">
 
     <!-- Web page CSS -->
     {% load static %}
@@ -10,7 +14,7 @@
     <link rel="stylesheet" href="{% static 'css/landing.css' %}">
     <link rel="stylesheet" href="{% static 'css/popup-style.css' %}">
 
-    <title>Welcome to PCT</title>
+    <title>Pop Culture Tracker - one-stop destination for movie, games & books fans</title>
 
 </head>
 <body>
@@ -74,17 +78,17 @@
 {#  </div>#}
 
   <div class="mySlides fade">
-      <img src="{% static 'img/slideshow2.png' %}" style="width:100%">
+      <img src="{% static 'img/slideshow2.png' %}" style="width:100%" alt="movie-database">
       <div class="text-caption">Browse vast selection of media</div>
   </div>
 
   <div class="mySlides fade">
-      <img src="{% static 'img/slideshow3.png' %}" style="width:100%">
+      <img src="{% static 'img/slideshow3.png' %}" style="width:100%" alt="game-details">
       <div class="text-caption">Write reviews</div>
   </div>
 
   <div class="mySlides fade">
-      <img src="{% static 'img/slideshow4.png' %}" style="width:100%">
+      <img src="{% static 'img/slideshow4.png' %}" style="width:100%" alt="forum">
       <div class="text-caption">Join discussion in forum</div>
   </div>
 
@@ -114,7 +118,7 @@
 
     <h3>Search for new, rediscover the old</h3>
     <p>
-        Our database contains newest items as well as classics you love
+        Our database contains the newest items as well as classics you love
     </p>
 </section>
 
@@ -215,9 +219,9 @@
 <!-- Scroll to top button -->
 
 <!-- Web page scripts-->
-<script src="{% static 'js/jquery.min.js' %}"></script>
-<script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
-<script src="{% static 'js/jquery.countup.js' %}"></script>
+<script src="{% static 'js/jquery.min.js' %}" defer></script>
+<script src="{% static 'js/jquery.waypoints.min.js' %}" defer></script>
+<script src="{% static 'js/jquery.countup.js' %}" defer></script>
 <script>
     $('.counter').countUp({
         delay: 10,
@@ -225,7 +229,7 @@
     });
 </script>
 
-<script src="{% static 'js/slideshow.js' %}"></script>
+<script src="{% static 'js/slideshow.js' %}" defer></script>
 
 <!-- message show and hide script -->
 <script>

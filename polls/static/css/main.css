@@ -3110,3 +3110,20 @@ input, select, textarea {
 			transform:rotate(360deg);
 		}
 	}
+
+	.pagination-style {
+		--bs-pagination-bg: rgb(36, 39, 40);
+		--bs-pagination-color: rgb(243, 238, 238);
+    	--bs-pagination-border-width: 1px;
+    	--bs-pagination-border-color: rgb(54, 58, 61);
+    	--bs-pagination-border-radius: 0.375rem;
+    	--bs-pagination-hover-color: #dabb1f;
+    	--bs-pagination-hover-bg: rgb(77, 74, 74);
+    	--bs-pagination-hover-border-color: #323334;
+    	--bs-pagination-focus-color: #dabb1f;
+    	--bs-pagination-focus-bg: rgb(77, 74, 74);
+    	--bs-pagination-focus-box-shadow: rgb(0 0 0 / 20%) 0px 0px 0px 1px inset;
+    	--bs-pagination-active-color: rgb(243, 238, 238);
+    	--bs-pagination-active-bg: rgba(65, 63, 63, 0.71);
+    	--bs-pagination-active-border-color: rgb(87, 84, 84);
+	}

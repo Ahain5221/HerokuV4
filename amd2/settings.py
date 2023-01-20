@@ -156,7 +156,7 @@ STATIC_ROOT = BASE_DIR / 'polls/static'
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 # STATIC_URL = 'static/'
 # The URL to use when referring to static files (where they will be served from)
-STATIC_HOST = "https://d4663kmspf1sqa.cloudfront.net" if not DEBUG else ""
+STATIC_HOST = "https://daww88w7vtwk4.cloudfront.net" if not DEBUG else ""
 STATIC_URL = STATIC_HOST + "/static/"
 
 # Simplified static file serving.

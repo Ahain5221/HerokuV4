@@ -25,7 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
+#DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
+DEBUG = False
 
 # Potem można niepotrzebne wywalić, dla mojej wygody dodaje teraz
 ALLOWED_HOSTS = ['amd2-django.herokuapp.com', '127.0.0.1', 'my-pct.me', 'www.my-pct.me']
@@ -161,10 +162,10 @@ STATIC_URL = 'static/'
 # https://pypi.org/project/whitenoise/
 
 # Ten zakomentowany wywala ciągle błąd po ustawieniu Debug na False
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Z tym poniżej wszystko działa dobrze
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+#STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-secondary',

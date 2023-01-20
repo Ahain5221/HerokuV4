@@ -32,7 +32,7 @@
         <ul>
             {% for friend in friend_request_list %}
                 <li>
-                    <a href="{% url 'profile-page' friend.from_user.pk %}"> {{ friend.from_user }} </a>
+                    <a href="{% url 'profile-page' friend.from_user %}"> {{ friend.from_user }} </a>
                     <form action="{% url 'accept-friend' friend.from_user.pk %}" method="POST">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-info btn-sm">Accept as friend</button>

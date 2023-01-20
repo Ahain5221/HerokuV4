@@ -25,8 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
-DEBUG = False
+DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
 # Potem można niepotrzebne wywalić, dla mojej wygody dodaje teraz
 ALLOWED_HOSTS = ['amd2-django.herokuapp.com', '127.0.0.1', 'my-pct.me', 'www.my-pct.me']
@@ -156,17 +155,18 @@ STATIC_ROOT = BASE_DIR / 'polls/static'
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 # STATIC_URL = 'static/'
 # The URL to use when referring to static files (where they will be served from)
-STATIC_HOST = "https://daww88w7vtwk4.cloudfront.net" if not DEBUG else ""
+STATIC_HOST = os.environ.get("DJANGO_STATIC_HOST", "")
 STATIC_URL = STATIC_HOST + "/static/"
 
 # Simplified static file serving.
 # https://pypi.org/project/whitenoise/
 
 # Ten zakomentowany wywala ciągle błąd po ustawieniu Debug na False
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Z tym poniżej wszystko działa dobrze
+# Z tymi poniżej wszystko działa dobrze
 #STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-secondary',

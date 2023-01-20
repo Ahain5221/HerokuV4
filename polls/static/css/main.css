@@ -1940,7 +1940,7 @@ input, select, textarea {
 		}
 
 		#header h1 {
-			font-family: 'Arvo';
+			font-family: 'Arvo', serif;
 			font-weight: 700;
 			color: #4990F8FF;
 			text-shadow: 0.05em 0.075em 0 rgba(0, 0, 0, 0.1);
@@ -2728,7 +2728,7 @@ input, select, textarea {
 	/* Main page */
 
 	.navbar-icon-style {
-		font-size:1.5vw;
+		font-size:2rem;
 		font-weight: bolder;
 	}
 

@@ -788,7 +788,7 @@ def author_verification(request, pk):
 class BookListView(generic.ListView):
     model = Book
     template_name = "polls/Book/book_list.html"
-    paginate_by = 10
+    paginate_by = 12
 
 
 class BookDetailView(generic.DetailView):

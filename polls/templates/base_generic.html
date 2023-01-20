@@ -3,7 +3,7 @@
 <head>
     <title>Pop Culture Tracker - one-stop destination for movie, games & books fans</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=1920, initial-scale=1.0">
+    <meta name="viewport" content="width=1920, initial-scale=1.0, user-scalable=no">
     <meta name="description" content="Pop Culture Tracker is a website where users can create personalized watchlists and gamelists, write reviews and join discussions in the forum section.
                     Users can also discover new movies and games, rate them and share their thoughts and insights on recent releases and classics. It's a one-stop destination for pop culture enthusiasts.">
     <meta name="keywords" content="PCT, Game, Movie, Series, Watchlist, Gamelist, Booklist, Reviews">
@@ -57,25 +57,21 @@
                 <a href="{% url 'index' %}"><img class="image-spin" src="{% static 'img/kawisz.png' %}" alt="PCT Logo"></a>
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item dropdown nav-item-padding" style="margin-top: 0.75em">
-                        <a class="icon solid fa-book navbar-icon-style" href="#" id="Books" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Books</a>
+                        <a class="icon solid fa-book navbar-icon-style" id="Books" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Books</a>
                         <ul class="dropdown-menu drop-menu-style" aria-labelledby="navbarDropdown">
                             <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'books' %}">Books</a></li>
                             <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'authors' %}">Authors</a></li>
-                            <!--
-                            --bs-dropdown-link-active-bg: #b2b7bf;
-                            -->
-
                         </ul>
                     </li>
                     <li class="nav-item dropdown nav-item-padding">
-                        <a class="icon solid fa-gamepad navbar-icon-style" href="#" id="Games" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Games</a>
+                        <a class="icon solid fa-gamepad navbar-icon-style" id="Games" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Games</a>
                         <ul class="dropdown-menu drop-menu-style" aria-labelledby="navbarDropdown">
                             <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'games' %}">Games</a></li>
                             <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'developers' %}">Developers</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown nav-item-padding">
-                        <a class="icon solid fa-film navbar-icon-style" href="#" id="Movies&TVs" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Movies&TVs</a>
+                        <a class="icon solid fa-film navbar-icon-style" id="Movies&TVs" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Movies&TVs</a>
                         <ul class="dropdown-menu drop-menu-style" aria-labelledby="navbarDropdown">
                             <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'movies' '-imdb_votes' %}"> Movies</a></li>
                             <li class="list-padding"><a class="dropdown-item navbar-text-style" href="{% url 'series' '-imdb_votes' %}"> TV Series</a></li>
@@ -88,21 +84,21 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav" style="margin-right: 2em">
-                            <li class="nav-item dropdown" style="margin-top: 0.75em">
-                                <a class="icon solid fa-user fw-bolder" href="#" id="Profile" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 1.15vw"> Profile</a>
-                                <ul class="dropdown-menu dropdown-menu-end drop-menu-style" aria-labelledby="navbarDropdown" style="margin-top: 18px">
-                                    {% if user.is_authenticated %}
-                                        <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'profile-page' user.username %}">Your Profile Page</a></li>
-                                        <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'edit_profile' %}">Account Settings</a></li>
-                                        <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'create_record' %}">Add record</a></li>
-                                        <li class="list-padding"><hr class="dropdown-divider"></li>
-                                        <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'logout' %}">Log Out</a></li>
-                                    {% else %}
-                                    <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'login' %}"> Login </a></li>
-                                    <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'signup' %}"> Register </a></li>
-                                    {% endif %}
-                                </ul>
-                            </li>
+                    <li class="nav-item dropdown" style="margin-top: 0.75em">
+                        <a class="icon solid fa-user fw-bolder" id="Profile" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 1.15vw"> Profile</a>
+                        <ul class="dropdown-menu dropdown-menu-end drop-menu-style" aria-labelledby="navbarDropdown" style="margin-top: 18px">
+                            {% if user.is_authenticated %}
+                                <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'profile-page' user.username %}">Your Profile Page</a></li>
+                                <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'edit_profile' %}">Account Settings</a></li>
+                                <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'create_record' %}">Add record</a></li>
+                                <li class="list-padding"><hr class="dropdown-divider"></li>
+                                <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'logout' %}">Log Out</a></li>
+                            {% else %}
+                                <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'login' %}"> Login </a></li>
+                                <li class="list-padding"><a class="dropdown-item profile-text-style" href="{% url 'signup' %}"> Register </a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -127,7 +123,7 @@
                 {% block content %}{% endblock %}
                 {% block pagination %}
                     {% if is_paginated %}
-                        <ul class="pagination">
+                        <ul class="pagination" style="margin-top: 1em">
                         <li style="margin-top: 1em;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
 
                         {% if page_obj.has_previous %}

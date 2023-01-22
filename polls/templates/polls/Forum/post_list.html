@@ -128,7 +128,7 @@
                             <div class="col-6">
                                     {% if user.is_authenticated %}
                                         <form action="{% url 'like_post' post.pk thread.pk %}" method="POST"
-                                            style="margin-left: 52em; margin-top: 1.4em">
+                                              style="margin-left: 52em; margin-top: 1.4em">
                                             {% csrf_token %}
                                             {% if post_liked %}
                                                 <button type="submit" name="profile_id" value="{{ post.id }}" class="post-like-button">Unlike</button>

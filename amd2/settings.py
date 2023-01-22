@@ -25,8 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
-DEBUG = False
+DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
+
 # Potem można niepotrzebne wywalić, dla mojej wygody dodaje teraz
 ALLOWED_HOSTS = ['amd2-django.herokuapp.com', '127.0.0.1', 'my-pct.me', 'www.my-pct.me']
 CSRF_TRUSTED_ORIGINS = ['https://my-pct.me', 'https://www.my-pct.me']

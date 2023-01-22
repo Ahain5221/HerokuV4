@@ -403,7 +403,7 @@ def index(request):
         last_series = Series.objects.filter(Verified=True).order_by("pk").last()
         last_movie = Movie.objects.filter(Verified=True).order_by("pk").last()
 
-        tweets = Tweet.objects.order_by('-published_date')[:10]
+        tweets = Tweet.objects.order_by('-published_date')[:6]
 
         index_context = {
             'last_book': last_book,

@@ -168,6 +168,11 @@ def custom_handler_404(request, exception):
     return render(request, 'error_404.html', context=context)
 
 
+def custom_handler_500(request):
+    context = {'domain': get_current_site(request)}
+    return render(request, 'error_500.html', context=context)
+
+
 @stuff_or_superuser_required
 def get_autocomplete_permission(request, pk):
     autocomplete_group, created = Group.objects.get_or_create(name='autocomplete_group')

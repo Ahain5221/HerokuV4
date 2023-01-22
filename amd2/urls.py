@@ -22,7 +22,7 @@ from django.conf.urls.static import static
 from django.contrib.admin.views.decorators import staff_member_required
 admin.site.login = staff_member_required(admin.site.login, login_url='index')
 handler404 = 'polls.views.custom_handler_404'
-
+handler500 = 'polls.views.custom_handler_500'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('friendship/', include('friendship.urls')),

@@ -127,7 +127,6 @@ input, select, textarea {
 		font-size: 1.25em;
 		letter-spacing: 1px;
 		margin: 0 0 0.5em 0;
-
 	}
 
 	a {
@@ -3085,7 +3084,6 @@ input, select, textarea {
 	.post-like-button:hover {
 		color: #dabb1f;
 	}
-
 
 	.image-spin {
 		height: 3em;

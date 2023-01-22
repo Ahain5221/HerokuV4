@@ -123,7 +123,7 @@
                 {% if  movie.added_by%}
                     <li>Added by <a href="{% url 'profile-page' name=movie.added_by.profile.name %}">{{ movie.added_by }}</a></li>
                 {% else %}
-                    <li>Added by API</li>
+                    <li>Added by <a href="https://www.omdbapi.com" target="_blank" rel="noopener noreferrer">API</a></li>
                 {% endif %}
 
              {% if movie.added_by == user and not movie.Verified%}
@@ -221,7 +221,7 @@
                                             </div>
 
                                             <div class="modal-footer">
-                                                <input type="submit" value="DELETE">
+                                                <button class="btn btn-danger" value="DELETE" type="submit">DELETE</button>
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                             </div>
                                         </form>

@@ -61,7 +61,7 @@
     <script>
         $(document).ready(function () {
             $('table tr').click(function () {
-                window.location = $(this).data('href');
+                window.open($(this).data('href'), '_blank').focus();
                 return false;
             });
         });

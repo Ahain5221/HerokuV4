@@ -404,14 +404,28 @@ body {
     grid-template-columns: repeat(3, 1fr);
     place-items: center;
     gap: 0.5rem;
+    margin-bottom: 5rem;
 }
 
 .persons-sec2 {
     margin-top: 1rem;
+    margin-bottom: 1rem;
     display: grid;
     grid-template-columns: 1fr 1fr;
     place-items: center;
     gap: 0.5rem;
+}
+
+.person {
+    width: 10em;
+    height: 10em;
+    text-align: center;
+}
+
+.person img{
+    height: auto;
+    width: 7em;
+    overflow: hidden;
 }
 
 .name {

@@ -61,10 +61,11 @@
                                 </div>
                             </div>
                         </div>
-
-                        <a href="{% url 'thread-update' pk=thread.id  category_slug=category.slug  %}" style="margin: 1em">
-                            <button class="btn btn-dark btn-sm" style="margin: 0.5em">Edit Thread</button>
-                        </a>
+                        {% if user.is_superuser %}
+                            <a href="{% url 'thread-update' pk=thread.id  category_slug=category.slug  %}" style="margin: 1em">
+                                <button class="btn btn-dark btn-sm" style="margin: 0.5em">Edit Thread</button>
+                            </a>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             </div>

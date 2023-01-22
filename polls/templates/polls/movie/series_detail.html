@@ -87,17 +87,35 @@
             {% if series.number_of_seasons != None %}
             <h3> Seasons: </h3>
             {% if series.season_set.all %}
-                {% for season in series.season_set.all|dictsort:"season_number" %}
-                    <a href="{% url 'season-detail' pk=season.id %}">
-                        <button class="btn btn-secondary btn-sm" style="font-size: smaller">Season
-                            {% if season.season_number < 10 %}
-                                0{{ season.season_number }}
-                            {% else %}
-                                {{ season.season_number }}
-                            {% endif %}
-                        </button>
-                    </a>
-                {% endfor %}
+                <div class="row">
+                    {% for season in series.season_set.all|dictsort:"season_number" %}
+                        {% if season.season_number < 7 %}
+                            <div class="col-2">
+                                <a href="{% url 'season-detail' pk=season.id %}">
+                                    <button class="btn btn-secondary btn-sm" style="font-size: smaller">Season
+                                        {% if season.season_number < 10 %}
+                                            0{{ season.season_number }}
+                                        {% else %}
+                                            {{ season.season_number }}
+                                        {% endif %}
+                                    </button>
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="col-2" style="margin-top: 1em">
+                                <a href="{% url 'season-detail' pk=season.id %}">
+                                    <button class="btn btn-secondary btn-sm" style="font-size: smaller">Season
+                                        {% if season.season_number < 10 %}
+                                            0{{ season.season_number }}
+                                        {% else %}
+                                            {{ season.season_number }}
+                                        {% endif %}
+                                    </button>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
             {% else %}
                 {{ series }} has no seasons on our website
             {% endif %}
@@ -152,7 +170,7 @@
                 {% if  series.added_by%}
                     <li>Added by <a href="{% url 'profile-page' name=series.added_by.profile.name %}">{{ series.added_by }}</a></li>
                 {% else %}
-                    <li>Added by API</li>
+                    <li>Added by <a href="https://www.omdbapi.com" target="_blank" rel="noopener noreferrer">API</a></li>
                 {% endif %}
 
              {% if series.added_by == user and not series.Verified%}
@@ -250,7 +268,7 @@
                                             </div>
 
                                             <div class="modal-footer">
-                                                <input type="submit" value="DELETE">
+                                                <button class="btn btn-danger" value="DELETE" type="submit">DELETE</button>
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                             </div>
                                         </form>

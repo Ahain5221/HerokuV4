@@ -109,9 +109,6 @@
             <div class="container">
                 <h1 id="logo"><a href="{% url 'index' %}">Pop Culture Tracker</a></h1>
                 <p>Welcome to Pop Culture Tracker, a website developed by <em>A(MD)^2 Team</em>!</p>
-                {% if user.is_authenticated %}
-                    <h3> If you have found any issues please post them <a href="{% url 'thread-list' 'suggestions-bugs' '-last_post_date' %}" style="color: red"><u>here</u></a></h3>
-                {% endif %}
             </div>
         </section>
     </div>

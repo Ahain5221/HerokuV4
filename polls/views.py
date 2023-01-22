@@ -1957,7 +1957,7 @@ class MovieDetailView(UserPassesTestMixin, generic.DetailView):
 class MovieDelete(UserPassesTestMixin, DeleteView):
     model = Movie
     template_name = "polls/movie/movie_delete.html"
-    success_url = reverse_lazy('movies')
+    # success_url = reverse_lazy('movies')
     login_url = reverse_lazy('index')
 
     def test_func(self):
@@ -1973,6 +1973,9 @@ class MovieDelete(UserPassesTestMixin, DeleteView):
 
     def handle_no_permission(self):
         return redirect('index')
+
+    def get_success_url(self):
+        return reverse('movies', kwargs={'order_by': '-imdb_votes'})
 
 
 class MovieCreate(UserPassesTestMixin, CreateView):
@@ -2463,7 +2466,7 @@ class SeriesReviewDetail(generic.DetailView):
 class SeriesDelete(UserPassesTestMixin, DeleteView):
     model = Series
     template_name = "polls/movie/series_delete.html"
-    success_url = reverse_lazy('series')
+    # success_url = reverse_lazy('series')
     login_url = reverse_lazy('index')
 
     def test_func(self):
@@ -2479,6 +2482,9 @@ class SeriesDelete(UserPassesTestMixin, DeleteView):
 
     def handle_no_permission(self):
         return redirect('index')
+
+    def get_success_url(self):
+        return reverse('series', kwargs={'order_by': '-imdb_votes'})
 
 
 class SeriesCreate(UserPassesTestMixin, CreateView):

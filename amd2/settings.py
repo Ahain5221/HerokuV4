@@ -28,7 +28,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
 # Potem można niepotrzebne wywalić, dla mojej wygody dodaje teraz
-ALLOWED_HOSTS = ['amd2-django.herokuapp.com', '127.0.0.1', 'my-pct.me', 'www.my-pct.me']
+ALLOWED_HOSTS = ['amd2-django.herokuapp.com', 'localhost', '127.0.0.1', 'my-pct.me', 'www.my-pct.me']
 CSRF_TRUSTED_ORIGINS = ['https://my-pct.me', 'https://www.my-pct.me']
 # Application definition
 
